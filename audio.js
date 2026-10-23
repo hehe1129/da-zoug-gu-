@@ -137,13 +137,31 @@ class RhythmAudio {
     this.lastClockError=target-this.visualClock.value;
     this.lastGameRead=Math.max(this.lastGameRead??this.visualClock.value,this.visualClock.value);return this.lastGameRead;
   }
+  inputTime(eventStamp) {
+    const current=this.gameTime();
+    if(current===null)return null;
+    const wall=performance.now();let stamp=Number(eventStamp);
+    // Modern PointerEvent timestamps use performance.timeOrigin. A few embedded
+    // browsers use epoch milliseconds; normalize only that explicit format.
+    if(stamp>1e12)stamp-=performance.timeOrigin||(Date.now()-wall);
+    const age=wall-stamp;
+    const delay=Number.isFinite(stamp)&&stamp>0&&age>=0&&age<=250?age/1000:0;
+    // Use the SAME continuous audible-clock mapping as the falling tiles, but
+    // evaluate it at hardware input time, rather than handler dispatch time.
+    // Do not rewind the rendering clock or add latency compensation twice.
+    this.lastInputSample={dispatchDelayMs:delay*1000,eventWall:wall-delay*1000};
+    return current-delay;
+  }
   ensureSong(gameTime) {
     if(this.song||!this.buffers.ensemble||!this.bg||this.ctx.state!=='running')return;
-    const position=Math.max(0,gameTime-RECORDING_SCORE.leadIn),delay=Math.max(0,RECORDING_SCORE.leadIn-gameTime);
+    const contextNow=this.ctx.currentTime;
+    const transport=this.clock?this.clock.game+contextNow-this.clock.context:gameTime;
+    const position=Math.max(0,transport-RECORDING_SCORE.leadIn);
+    const when=this.clock?Math.max(contextNow,this.clock.context+RECORDING_SCORE.leadIn-this.clock.game):contextNow+Math.max(0,RECORDING_SCORE.leadIn-gameTime);
     if(position>=this.buffers.ensemble.duration)return;
     const s=this.ctx.createBufferSource();s.buffer=this.buffers.ensemble;
     s.connect(this.bg);s.connect(this.melodyFilter);
-    this.track(s);this.song=s;s.start(this.ctx.currentTime+delay,position);
+    this.track(s);this.song=s;s.start(when,position);
     s.onended=()=>{this.nodes.delete(s);s.disconnect();/* song remains a sentinel until transport reset. */};
   }
   track(node) {this.nodes.add(node);node.onended=()=>{this.nodes.delete(node);node.disconnect();};}

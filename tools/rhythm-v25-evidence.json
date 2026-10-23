@@ -1,0 +1,2500 @@
+{
+  "sourceSha256": "729ac6fdc8846a51aa1969950b58ca70a0ed422b3404504cac3d5328ebe777cc",
+  "librosa": "0.11.0",
+  "sampleRate": 22050,
+  "hop": 64,
+  "resolutionMs": 2.9024943310657596,
+  "total": 445,
+  "changes": [
+    {
+      "kind": "drum",
+      "from": 1.0283,
+      "time": 1.0188,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 1.0188,
+        "peak": 1.0275,
+        "salience": 48.12,
+        "rise": 0.1751225358326723,
+        "prominence": 0.1751225358326723,
+        "flux": 3.0160388946533203,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 4.5666,
+      "time": 4.5598,
+      "deltaMs": -6.8,
+      "groupSize": 1,
+      "evidence": {
+        "time": 4.5598,
+        "peak": 4.5656,
+        "salience": 14.812,
+        "rise": 0.010597617848700717,
+        "prominence": 0.010591067269327,
+        "flux": 1.5830453634262085,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 5.1672,
+      "time": 5.1577,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 5.1577,
+        "peak": 5.1635,
+        "salience": 12.428,
+        "rise": 0.05352514341753605,
+        "prominence": 0.05352514341753605,
+        "flux": 1.1381168365478516,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 5.6607,
+      "time": 5.6279,
+      "deltaMs": -32.8,
+      "groupSize": 1,
+      "evidence": {
+        "time": 5.6279,
+        "peak": 5.6366,
+        "salience": 10.136,
+        "rise": 0.05269534942950227,
+        "prominence": 0.05269196409817477,
+        "flux": 2.566530227661133,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 6.0931,
+      "time": 6.0865,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 6.0865,
+        "peak": 6.0952,
+        "salience": 59.949,
+        "rise": 0.1732931860861598,
+        "prominence": 0.1732931860861598,
+        "flux": 1.6163158416748047,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 7.7993,
+      "time": 7.7932,
+      "deltaMs": -6.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 7.7932,
+        "peak": 7.8019,
+        "salience": 56.312,
+        "rise": 0.177881804099197,
+        "prominence": 0.177881804099197,
+        "flux": 1.9916114807128906,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 13.1421,
+      "time": 13.1338,
+      "deltaMs": -8.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 13.1338,
+        "peak": 13.1425,
+        "salience": 52.506,
+        "rise": 0.15177798879064042,
+        "prominence": 0.15177798879064042,
+        "flux": 3.309676170349121,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 14.6217,
+      "time": 14.6083,
+      "deltaMs": -13.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 14.6083,
+        "peak": 14.6257,
+        "salience": 12.287,
+        "rise": 0.008471009327131147,
+        "prominence": 0.008470998505565293,
+        "flux": 2.754864454269409,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 15.1983,
+      "time": 15.1888,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 15.1888,
+        "peak": 15.2062,
+        "salience": 9.212,
+        "rise": 0.047056692222963464,
+        "prominence": 0.04705516829246557,
+        "flux": 2.7482950687408447,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 16.1303,
+      "time": 16.1205,
+      "deltaMs": -9.8,
+      "groupSize": 1,
+      "evidence": {
+        "time": 16.1205,
+        "peak": 16.1263,
+        "salience": 20.262,
+        "rise": 0.04369911576144464,
+        "prominence": 0.04369911576144464,
+        "flux": 3.4518914222717285,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 17.021,
+      "time": 17.0144,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 17.0144,
+        "peak": 17.0202,
+        "salience": 23.232,
+        "rise": 0.1100110306549077,
+        "prominence": 0.1100110306549077,
+        "flux": 5.483654022216797,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 17.3171,
+      "time": 17.3105,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 17.3105,
+        "peak": 17.3163,
+        "salience": 35.12,
+        "rise": 0.08541777966724445,
+        "prominence": 0.08541777966724445,
+        "flux": 2.4070699214935303,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 18.4026,
+      "time": 18.3757,
+      "deltaMs": -26.9,
+      "groupSize": 1,
+      "evidence": {
+        "time": 18.3757,
+        "peak": 18.3815,
+        "salience": 4.755,
+        "rise": 0.020747135750164902,
+        "prominence": 0.02068050069717814,
+        "flux": 1.3361380100250244,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 18.8092,
+      "time": 18.7966,
+      "deltaMs": -12.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 18.7966,
+        "peak": 18.8111,
+        "salience": 14.183,
+        "rise": 0.012649308496096887,
+        "prominence": 0.012646799949661204,
+        "flux": 3.904416799545288,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 22.7852,
+      "time": 22.7788,
+      "deltaMs": -6.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 22.7788,
+        "peak": 22.7875,
+        "salience": 38.467,
+        "rise": 0.11119702834850734,
+        "prominence": 0.11119702834850734,
+        "flux": 3.393463611602783,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 27.3423,
+      "time": 27.3357,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 27.3357,
+        "peak": 27.3473,
+        "salience": 29.959,
+        "rise": 0.021918742242091768,
+        "prominence": 0.021918742242091768,
+        "flux": 4.949769973754883,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 27.6267,
+      "time": 27.6114,
+      "deltaMs": -15.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 27.6114,
+        "peak": 27.6172,
+        "salience": 18.64,
+        "rise": 0.03905383213366717,
+        "prominence": 0.03905375617776722,
+        "flux": 3.6684818267822266,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 28.6618,
+      "time": 28.6505,
+      "deltaMs": -11.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 28.6505,
+        "peak": 28.6592,
+        "salience": 14.992,
+        "rise": 0.014999951002077438,
+        "prominence": 0.014999951002077438,
+        "flux": 1.0091705322265625,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 30.0939,
+      "time": 30.0873,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 30.0873,
+        "peak": 30.096,
+        "salience": 23.764,
+        "rise": 0.10188011592480908,
+        "prominence": 0.1018797369113014,
+        "flux": 2.721135377883911,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 31.847,
+      "time": 31.8346,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 31.8346,
+        "peak": 31.8433,
+        "salience": 76.969,
+        "rise": 0.22249184687961285,
+        "prominence": 0.22249184687961285,
+        "flux": 3.2452733516693115,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 32.6079,
+      "time": 32.6008,
+      "deltaMs": -7.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 32.6008,
+        "peak": 32.6095,
+        "salience": 9.22,
+        "rise": 0.03979465168140865,
+        "prominence": 0.03979374022301221,
+        "flux": 1.2793558835983276,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 33.0196,
+      "time": 33.0101,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 33.0101,
+        "peak": 33.0159,
+        "salience": 47.253,
+        "rise": 0.14771352616991415,
+        "prominence": 0.14771352616991415,
+        "flux": 1.8771510124206543,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 38.5227,
+      "time": 38.5132,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 38.5132,
+        "peak": 38.519,
+        "salience": 27.189,
+        "rise": 0.09415331891989295,
+        "prominence": 0.09415331891989295,
+        "flux": 2.5907046794891357,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 39.7167,
+      "time": 39.709,
+      "deltaMs": -7.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 39.709,
+        "peak": 39.7177,
+        "salience": 33.406,
+        "rise": 0.139502169300974,
+        "prominence": 0.139502169300974,
+        "flux": 2.3241915702819824,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 44.8676,
+      "time": 44.858,
+      "deltaMs": -9.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 44.858,
+        "peak": 44.8639,
+        "salience": 41.161,
+        "rise": 0.11898337522563587,
+        "prominence": 0.11898337522563587,
+        "flux": 1.8835394382476807,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 45.1643,
+      "time": 45.1556,
+      "deltaMs": -8.7,
+      "groupSize": 2,
+      "evidence": {
+        "time": 45.1512,
+        "peak": 45.157,
+        "salience": 13.311,
+        "rise": 0.04073605439183245,
+        "prominence": 0.04073605439183245,
+        "flux": 3.837350606918335,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 45.1643,
+      "time": 45.1556,
+      "deltaMs": -8.7,
+      "groupSize": 2,
+      "evidence": {
+        "time": 45.1599,
+        "peak": 45.1657,
+        "salience": 12.52,
+        "rise": 0.010191737533703367,
+        "prominence": 0.010190871044086341,
+        "flux": 3.837350606918335,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 45.7848,
+      "time": 45.7752,
+      "deltaMs": -9.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 45.7752,
+        "peak": 45.781,
+        "salience": 10.365,
+        "rise": 0.038035047974738626,
+        "prominence": 0.03803444274342503,
+        "flux": 2.2042076587677,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 46.4265,
+      "time": 46.4196,
+      "deltaMs": -6.9,
+      "groupSize": 1,
+      "evidence": {
+        "time": 46.4196,
+        "peak": 46.4283,
+        "salience": 24.85,
+        "rise": 0.09684352895370657,
+        "prominence": 0.09684352895370657,
+        "flux": 1.2866355180740356,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 46.7158,
+      "time": 46.704,
+      "deltaMs": -11.8,
+      "groupSize": 1,
+      "evidence": {
+        "time": 46.704,
+        "peak": 46.7215,
+        "salience": 16.199,
+        "rise": 0.06929006176812001,
+        "prominence": 0.06929006176812001,
+        "flux": 2.4849061965942383,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 47.6017,
+      "time": 47.5907,
+      "deltaMs": -11.0,
+      "groupSize": 2,
+      "evidence": {
+        "time": 47.5806,
+        "peak": 47.5893,
+        "salience": 20.643,
+        "rise": 0.04325009860657891,
+        "prominence": 0.04325009860657891,
+        "flux": 2.3122403621673584,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 47.6017,
+      "time": 47.5907,
+      "deltaMs": -11.0,
+      "groupSize": 2,
+      "evidence": {
+        "time": 47.6009,
+        "peak": 47.6067,
+        "salience": 16.086,
+        "rise": 0.014151375891047552,
+        "prominence": 0.014151248850694017,
+        "flux": 2.3122403621673584,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 49.0569,
+      "time": 49.0493,
+      "deltaMs": -7.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 49.0493,
+        "peak": 49.0609,
+        "salience": 15.692,
+        "rise": 0.007968543267240419,
+        "prominence": 0.007968543267240419,
+        "flux": 2.7703022956848145,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 50.2977,
+      "time": 50.2915,
+      "deltaMs": -6.2,
+      "groupSize": 1,
+      "evidence": {
+        "time": 50.2915,
+        "peak": 50.3031,
+        "salience": 31.19,
+        "rise": 0.12255308578917884,
+        "prominence": 0.12255308578917884,
+        "flux": 1.9203771352767944,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 54.8579,
+      "time": 54.831,
+      "deltaMs": -26.9,
+      "groupSize": 1,
+      "evidence": {
+        "time": 54.831,
+        "peak": 54.8397,
+        "salience": 7.451,
+        "rise": 0.029623088499715712,
+        "prominence": 0.02956062056796611,
+        "flux": 2.4052932262420654,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 55.5023,
+      "time": 55.4899,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 55.4899,
+        "peak": 55.4986,
+        "salience": 24.907,
+        "rise": 0.08884812296765032,
+        "prominence": 0.08884812296765032,
+        "flux": 2.721848726272583,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 56.3905,
+      "time": 56.381,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 56.381,
+        "peak": 56.3868,
+        "salience": 41.997,
+        "rise": 0.12139895837788747,
+        "prominence": 0.12139895837788747,
+        "flux": 2.3889760971069336,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 56.6482,
+      "time": 56.6654,
+      "deltaMs": 17.2,
+      "groupSize": 1,
+      "evidence": {
+        "time": 56.6654,
+        "peak": 56.6712,
+        "salience": 11.243,
+        "rise": 0.041702448524728694,
+        "prominence": 0.041702448524728694,
+        "flux": 3.8087124824523926,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 57.5921,
+      "time": 57.5768,
+      "deltaMs": -15.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 57.5768,
+        "peak": 57.5942,
+        "salience": 21.346,
+        "rise": 0.01467914514035061,
+        "prominence": 0.01467878743198114,
+        "flux": 3.816467761993408,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 58.3943,
+      "time": 58.3866,
+      "deltaMs": -7.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 58.3866,
+        "peak": 58.3982,
+        "salience": 24.999,
+        "rise": 0.10042759366376074,
+        "prominence": 0.10042759366376074,
+        "flux": 1.8308124542236328,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 58.7086,
+      "time": 58.7,
+      "deltaMs": -8.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 58.7,
+        "peak": 58.7117,
+        "salience": 20.033,
+        "rise": 0.09867939652010152,
+        "prominence": 0.09867939652010152,
+        "flux": 1.4356063604354858,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 60.6223,
+      "time": 60.6157,
+      "deltaMs": -6.6,
+      "groupSize": 2,
+      "evidence": {
+        "time": 60.6157,
+        "peak": 60.6244,
+        "salience": 31.142,
+        "rise": 0.025213949247144603,
+        "prominence": 0.025213949247144603,
+        "flux": 3.0670862197875977,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 60.6223,
+      "time": 60.6157,
+      "deltaMs": -6.6,
+      "groupSize": 2,
+      "evidence": {
+        "time": 60.6157,
+        "peak": 60.6244,
+        "salience": 31.204,
+        "rise": 0.08200957927320504,
+        "prominence": 0.08200957927320504,
+        "flux": 3.0670862197875977,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 61.2777,
+      "time": 61.2717,
+      "deltaMs": -6.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 61.2717,
+        "peak": 61.2804,
+        "salience": 42.53,
+        "rise": 0.12293941995976301,
+        "prominence": 0.12293941995976301,
+        "flux": 1.7145051956176758,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 61.8239,
+      "time": 61.8173,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 61.8173,
+        "peak": 61.8231,
+        "salience": 41.858,
+        "rise": 0.045364891289134374,
+        "prominence": 0.045364891289134374,
+        "flux": 4.8152995109558105,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 62.4973,
+      "time": 62.4878,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 62.4878,
+        "peak": 62.4965,
+        "salience": 25.158,
+        "rise": 0.11183940344762507,
+        "prominence": 0.11183940344762507,
+        "flux": 2.028932571411133,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 62.7843,
+      "time": 62.7766,
+      "deltaMs": -7.7,
+      "groupSize": 2,
+      "evidence": {
+        "time": 62.778,
+        "peak": 62.7868,
+        "salience": 24.814,
+        "rise": 0.09142950577012063,
+        "prominence": 0.09142950577012063,
+        "flux": 2.731297254562378,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 62.7843,
+      "time": 62.7766,
+      "deltaMs": -7.7,
+      "groupSize": 2,
+      "evidence": {
+        "time": 62.7751,
+        "peak": 62.781,
+        "salience": 52.671,
+        "rise": 0.037765619546904966,
+        "prominence": 0.03776528881324395,
+        "flux": 2.832383632659912,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 63.6757,
+      "time": 63.6517,
+      "deltaMs": -24.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 63.6517,
+        "peak": 63.6575,
+        "salience": 36.956,
+        "rise": 0.03125696200194417,
+        "prominence": 0.03125497656581201,
+        "flux": 3.9555158615112305,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 65.2138,
+      "time": 65.1871,
+      "deltaMs": -26.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 65.1871,
+        "peak": 65.1929,
+        "salience": 16.343,
+        "rise": 0.05316775179765122,
+        "prominence": 0.05316775179765122,
+        "flux": 3.49157977104187,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 65.553,
+      "time": 65.547,
+      "deltaMs": -6.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 65.547,
+        "peak": 65.5557,
+        "salience": 25.417,
+        "rise": 0.12408750148219362,
+        "prominence": 0.12408750148219362,
+        "flux": 1.602049708366394,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 67.1529,
+      "time": 67.1405,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 67.1405,
+        "peak": 67.1492,
+        "salience": 58.163,
+        "rise": 0.16812905369143888,
+        "prominence": 0.16812905369143888,
+        "flux": 1.6854348182678223,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 74.2756,
+      "time": 74.2661,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 74.2661,
+        "peak": 74.2719,
+        "salience": 38.19,
+        "rise": 0.12986452304200746,
+        "prominence": 0.12986452304200746,
+        "flux": 1.3183916807174683,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 74.7226,
+      "time": 74.7102,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 74.7102,
+        "peak": 74.7189,
+        "salience": 28.277,
+        "rise": 0.08173946749059748,
+        "prominence": 0.08173946749059748,
+        "flux": 1.5624116659164429,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 74.9915,
+      "time": 75.0005,
+      "deltaMs": 9.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 75.0005,
+        "peak": 75.0063,
+        "salience": 17.492,
+        "rise": 0.009822620516264436,
+        "prominence": 0.009822620516264436,
+        "flux": 2.1760761737823486,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 75.5992,
+      "time": 75.5926,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 75.5926,
+        "peak": 75.5984,
+        "salience": 48.818,
+        "rise": 0.10228216760827458,
+        "prominence": 0.10228216760827458,
+        "flux": 3.2420384883880615,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 76.2145,
+      "time": 76.2079,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 76.2079,
+        "peak": 76.2166,
+        "salience": 21.187,
+        "rise": 0.07966432523401565,
+        "prominence": 0.07966432523401565,
+        "flux": 2.9170331954956055,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 76.8523,
+      "time": 76.8421,
+      "deltaMs": -10.2,
+      "groupSize": 2,
+      "evidence": {
+        "time": 76.8464,
+        "peak": 76.8551,
+        "salience": 36.665,
+        "rise": 0.12274486554700635,
+        "prominence": 0.12274486554700635,
+        "flux": 3.5928900241851807,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 76.8523,
+      "time": 76.8421,
+      "deltaMs": -10.2,
+      "groupSize": 2,
+      "evidence": {
+        "time": 76.8377,
+        "peak": 76.8493,
+        "salience": 21.509,
+        "rise": 0.01712848671279605,
+        "prominence": 0.01712848671279605,
+        "flux": 3.5928900241851807,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 77.9154,
+      "time": 77.9,
+      "deltaMs": -15.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 77.9,
+        "peak": 77.9088,
+        "salience": 15.91,
+        "rise": 0.0913083377626421,
+        "prominence": 0.0913083377626421,
+        "flux": 1.2437500953674316,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 78.5934,
+      "time": 78.5763,
+      "deltaMs": -17.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 78.5763,
+        "peak": 78.5908,
+        "salience": 10.524,
+        "rise": 0.031264008732431334,
+        "prominence": 0.0304177735733541,
+        "flux": 2.578354835510254,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 82.2351,
+      "time": 82.2132,
+      "deltaMs": -21.9,
+      "groupSize": 1,
+      "evidence": {
+        "time": 82.2132,
+        "peak": 82.2161,
+        "salience": 7.429,
+        "rise": 0.006332160075873378,
+        "prominence": 0.0063313608339325145,
+        "flux": 2.898324966430664,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 82.5244,
+      "time": 82.5324,
+      "deltaMs": 8.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 82.5324,
+        "peak": 82.5353,
+        "salience": 15.893,
+        "rise": 0.04255688115127251,
+        "prominence": 0.04255378437554491,
+        "flux": 1.7177835702896118,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 86.5453,
+      "time": 86.5205,
+      "deltaMs": -24.8,
+      "groupSize": 1,
+      "evidence": {
+        "time": 86.5205,
+        "peak": 86.5263,
+        "salience": 15.188,
+        "rise": 0.05844163175067498,
+        "prominence": 0.05844136434971912,
+        "flux": 3.2944650650024414,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 86.8667,
+      "time": 86.8571,
+      "deltaMs": -9.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 86.8571,
+        "peak": 86.8659,
+        "salience": 41.281,
+        "rise": 0.13315978644124332,
+        "prominence": 0.13315978644124332,
+        "flux": 2.7646353244781494,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 87.5929,
+      "time": 87.6234,
+      "deltaMs": 30.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 87.6234,
+        "peak": 87.6321,
+        "salience": 15.788,
+        "rise": 0.0687913860941,
+        "prominence": 0.0687913860941,
+        "flux": 1.629255771636963,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 88.1117,
+      "time": 88.1052,
+      "deltaMs": -6.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 88.1052,
+        "peak": 88.1139,
+        "salience": 39.391,
+        "rise": 0.12238818572261936,
+        "prominence": 0.12238818572261936,
+        "flux": 2.6981942653656006,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 88.4456,
+      "time": 88.4332,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 88.4332,
+        "peak": 88.4419,
+        "salience": 52.075,
+        "rise": 0.15053221437581696,
+        "prominence": 0.15053221437581696,
+        "flux": 3.1490485668182373,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 90.8895,
+      "time": 90.9032,
+      "deltaMs": 13.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 90.9032,
+        "peak": 90.909,
+        "salience": 20.548,
+        "rise": 0.0672674321075293,
+        "prominence": 0.0672674321075293,
+        "flux": 4.572824001312256,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 91.4791,
+      "time": 91.504,
+      "deltaMs": 24.9,
+      "groupSize": 1,
+      "evidence": {
+        "time": 91.504,
+        "peak": 91.5069,
+        "salience": 21.54,
+        "rise": 0.01448284548473537,
+        "prominence": 0.01448284548473537,
+        "flux": 2.6842195987701416,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 92.4859,
+      "time": 92.4764,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 92.4764,
+        "peak": 92.4822,
+        "salience": 46.759,
+        "rise": 0.13516535490487944,
+        "prominence": 0.13516535490487944,
+        "flux": 1.4089175462722778,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 94.2738,
+      "time": 94.2991,
+      "deltaMs": 25.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 94.2991,
+        "peak": 94.3078,
+        "salience": 13.546,
+        "rise": 0.01137277665899174,
+        "prominence": 0.011372605425849796,
+        "flux": 4.1716156005859375,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 94.6511,
+      "time": 94.6416,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 94.6416,
+        "peak": 94.6503,
+        "salience": 41.265,
+        "rise": 0.11928294113775656,
+        "prominence": 0.11928294113775656,
+        "flux": 1.9717553853988647,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 96.2033,
+      "time": 96.1945,
+      "deltaMs": -8.8,
+      "groupSize": 1,
+      "evidence": {
+        "time": 96.1945,
+        "peak": 96.2032,
+        "salience": 11.066,
+        "rise": 0.06696272671755998,
+        "prominence": 0.06696272671755998,
+        "flux": 2.2374162673950195,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 96.5276,
+      "time": 96.5166,
+      "deltaMs": -11.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 96.5166,
+        "peak": 96.5224,
+        "salience": 14.253,
+        "rise": 0.041619270653241836,
+        "prominence": 0.041610912437293236,
+        "flux": 3.8785722255706787,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 96.8219,
+      "time": 96.8156,
+      "deltaMs": -6.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 96.8156,
+        "peak": 96.8272,
+        "salience": 34.137,
+        "rise": 0.09867917358516558,
+        "prominence": 0.09867917358516558,
+        "flux": 2.266608953475952,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 97.7346,
+      "time": 97.7212,
+      "deltaMs": -13.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 97.7212,
+        "peak": 97.7357,
+        "salience": 11.635,
+        "rise": 0.014537281952214043,
+        "prominence": 0.014536625245670773,
+        "flux": 2.39410400390625,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 98.4534,
+      "time": 98.4439,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 98.4439,
+        "peak": 98.4526,
+        "salience": 49.599,
+        "rise": 0.14337497085439588,
+        "prominence": 0.14337497085439588,
+        "flux": 2.354012966156006,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 101.5013,
+      "time": 101.4857,
+      "deltaMs": -15.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 101.4857,
+        "peak": 101.4973,
+        "salience": 17.335,
+        "rise": 0.0363193152375716,
+        "prominence": 0.0363193152375716,
+        "flux": 3.0500974655151367,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 105.148,
+      "time": 105.1283,
+      "deltaMs": -19.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 105.1283,
+        "peak": 105.1341,
+        "salience": 5.317,
+        "rise": 0.005028625000482048,
+        "prominence": 0.002831472443896403,
+        "flux": 1.3791168928146362,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 105.7038,
+      "time": 105.6914,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 105.6914,
+        "peak": 105.7001,
+        "salience": 62.787,
+        "rise": 0.1814960065985489,
+        "prominence": 0.1814960065985489,
+        "flux": 1.0686120986938477,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 106.3353,
+      "time": 106.301,
+      "deltaMs": -34.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 106.301,
+        "peak": 106.3039,
+        "salience": 3.627,
+        "rise": 0.00384170627034689,
+        "prominence": 0.003827560940160953,
+        "flux": 1.5833964347839355,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 107.4279,
+      "time": 107.4213,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 107.4213,
+        "peak": 107.4271,
+        "salience": 14.931,
+        "rise": 0.04316160664198662,
+        "prominence": 0.04316160664198662,
+        "flux": 4.266331672668457,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 109.5779,
+      "time": 109.5692,
+      "deltaMs": -8.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 109.5692,
+        "peak": 109.575,
+        "salience": 10.178,
+        "rise": 0.007335635631972141,
+        "prominence": 0.007335622129120528,
+        "flux": 2.2314553260803223,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 112.0081,
+      "time": 112.0305,
+      "deltaMs": 22.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 112.0305,
+        "peak": 112.0392,
+        "salience": 3.068,
+        "rise": 0.006428140992236188,
+        "prominence": 0.006269976763427802,
+        "flux": 2.9662177562713623,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 112.3167,
+      "time": 112.3047,
+      "deltaMs": -12.0,
+      "groupSize": 2,
+      "evidence": {
+        "time": 112.312,
+        "peak": 112.3178,
+        "salience": 36.643,
+        "rise": 0.1059233348284096,
+        "prominence": 0.1059233348284096,
+        "flux": 2.7165679931640625,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 112.3167,
+      "time": 112.3047,
+      "deltaMs": -12.0,
+      "groupSize": 2,
+      "evidence": {
+        "time": 112.2975,
+        "peak": 112.3004,
+        "salience": 26.775,
+        "rise": 0.013750450909182775,
+        "prominence": 0.013750450909182775,
+        "flux": 2.7165679931640625,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 113.8582,
+      "time": 113.8474,
+      "deltaMs": -10.8,
+      "groupSize": 2,
+      "evidence": {
+        "time": 113.8561,
+        "peak": 113.8649,
+        "salience": 23.724,
+        "rise": 0.11136232250189732,
+        "prominence": 0.11136232250189732,
+        "flux": 2.0957272052764893,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 113.8582,
+      "time": 113.8474,
+      "deltaMs": -10.8,
+      "groupSize": 2,
+      "evidence": {
+        "time": 113.8387,
+        "peak": 113.8445,
+        "salience": 14.146,
+        "rise": 0.05085706135430719,
+        "prominence": 0.05085706135430719,
+        "flux": 2.0957272052764893,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 114.4269,
+      "time": 114.4105,
+      "deltaMs": -16.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 114.4105,
+        "peak": 114.4192,
+        "salience": 6.568,
+        "rise": 0.022870915046130678,
+        "prominence": 0.022864165491645855,
+        "flux": 2.881514310836792,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 118.0936,
+      "time": 118.0851,
+      "deltaMs": -8.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 118.0851,
+        "peak": 118.0909,
+        "salience": 17.233,
+        "rise": 0.045052947076021935,
+        "prominence": 0.04505253909294746,
+        "flux": 1.8883506059646606,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 118.3587,
+      "time": 118.3521,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 118.3521,
+        "peak": 118.3637,
+        "salience": 5.609,
+        "rise": 0.027574018353877683,
+        "prominence": 0.023155147006229195,
+        "flux": 4.0207390785217285,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 118.5974,
+      "time": 118.5901,
+      "deltaMs": -7.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 118.5901,
+        "peak": 118.6017,
+        "salience": 17.685,
+        "rise": 0.09344819994808641,
+        "prominence": 0.09344819994808641,
+        "flux": 1.280082106590271,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 119.3058,
+      "time": 119.2896,
+      "deltaMs": -16.2,
+      "groupSize": 1,
+      "evidence": {
+        "time": 119.2896,
+        "peak": 119.3012,
+        "salience": 9.439,
+        "rise": 0.04092423186355178,
+        "prominence": 0.04091867496735437,
+        "flux": 2.622093677520752,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 120.3092,
+      "time": 120.2997,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 120.2997,
+        "peak": 120.3084,
+        "salience": 30.992,
+        "rise": 0.13230385040163323,
+        "prominence": 0.13230385040163323,
+        "flux": 2.04624080657959,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 120.5646,
+      "time": 120.5435,
+      "deltaMs": -21.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 120.5435,
+        "peak": 120.5522,
+        "salience": 19.878,
+        "rise": 0.05803669768049326,
+        "prominence": 0.05803669768049326,
+        "flux": 2.9965553283691406,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 121.8272,
+      "time": 121.7945,
+      "deltaMs": -32.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 121.7945,
+        "peak": 121.8003,
+        "salience": 11.787,
+        "rise": 0.02899478434078579,
+        "prominence": 0.02899478434078579,
+        "flux": 4.035746097564697,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 122.2691,
+      "time": 122.2618,
+      "deltaMs": -7.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 122.2618,
+        "peak": 122.2705,
+        "salience": 32.143,
+        "rise": 0.11275268071266772,
+        "prominence": 0.11275268071266772,
+        "flux": 1.3605061769485474,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 123.0423,
+      "time": 123.0309,
+      "deltaMs": -11.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 123.0309,
+        "peak": 123.0396,
+        "salience": 13.352,
+        "rise": 0.033911952287885905,
+        "prominence": 0.033911952287885905,
+        "flux": 3.2124507427215576,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 125.0112,
+      "time": 125.0017,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 125.0017,
+        "peak": 125.0075,
+        "salience": 33.495,
+        "rise": 0.09682236221505176,
+        "prominence": 0.09682236221505176,
+        "flux": 1.6643009185791016,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 125.6215,
+      "time": 125.6084,
+      "deltaMs": -13.1,
+      "groupSize": 2,
+      "evidence": {
+        "time": 125.62,
+        "peak": 125.6287,
+        "salience": 30.482,
+        "rise": 0.08811417449218821,
+        "prominence": 0.08811417449218821,
+        "flux": 1.6067852973937988,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 125.6215,
+      "time": 125.6084,
+      "deltaMs": -13.1,
+      "groupSize": 2,
+      "evidence": {
+        "time": 125.5967,
+        "peak": 125.5996,
+        "salience": 10.535,
+        "rise": 0.044835728055374904,
+        "prominence": 0.0448246439435426,
+        "flux": 1.5823149681091309,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 125.9308,
+      "time": 125.9247,
+      "deltaMs": -6.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 125.9247,
+        "peak": 125.9334,
+        "salience": 23.494,
+        "rise": 0.08235819884503094,
+        "prominence": 0.08235819884503094,
+        "flux": 1.3213920593261719,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 126.26,
+      "time": 126.2527,
+      "deltaMs": -7.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 126.2527,
+        "peak": 126.2614,
+        "salience": 33.757,
+        "rise": 0.09758113593969603,
+        "prominence": 0.09758113593969603,
+        "flux": 1.681316614151001,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 126.5693,
+      "time": 126.5633,
+      "deltaMs": -6.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 126.5633,
+        "peak": 126.572,
+        "salience": 44.999,
+        "rise": 0.1300776023044325,
+        "prominence": 0.1300776023044325,
+        "flux": 1.3909170627593994,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 128.1111,
+      "time": 128.1045,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 128.1045,
+        "peak": 128.1132,
+        "salience": 32.951,
+        "rise": 0.03439483037048917,
+        "prominence": 0.03439483037048917,
+        "flux": 3.598918914794922,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 131.533,
+      "time": 131.5265,
+      "deltaMs": -6.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 131.5265,
+        "peak": 131.5381,
+        "salience": 28.97,
+        "rise": 0.019139678145453046,
+        "prominence": 0.019139678145453046,
+        "flux": 2.6831276416778564,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 131.8922,
+      "time": 131.8748,
+      "deltaMs": -17.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 131.8748,
+        "peak": 131.8806,
+        "salience": 21.119,
+        "rise": 0.04932485388188452,
+        "prominence": 0.04932357821320937,
+        "flux": 2.0307297706604004,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 132.5457,
+      "time": 132.5395,
+      "deltaMs": -6.2,
+      "groupSize": 1,
+      "evidence": {
+        "time": 132.5395,
+        "peak": 132.5511,
+        "salience": 22.757,
+        "rise": 0.07689693800231295,
+        "prominence": 0.07689693800231295,
+        "flux": 1.6512051820755005,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 132.8101,
+      "time": 132.7891,
+      "deltaMs": -21.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 132.7891,
+        "peak": 132.7978,
+        "salience": 9.345,
+        "rise": 0.010513952566494792,
+        "prominence": 0.010508022667725074,
+        "flux": 3.38826322555542,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 133.2079,
+      "time": 133.1984,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 133.1984,
+        "peak": 133.2071,
+        "salience": 40.875,
+        "rise": 0.12647235594322032,
+        "prominence": 0.12647235594322032,
+        "flux": 2.1591148376464844,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 137.0455,
+      "time": 137.0384,
+      "deltaMs": -7.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 137.0384,
+        "peak": 137.0471,
+        "salience": 55.417,
+        "rise": 0.16019246562921147,
+        "prominence": 0.16019246562921147,
+        "flux": 1.6562259197235107,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 137.6023,
+      "time": 137.5782,
+      "deltaMs": -24.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 137.5782,
+        "peak": 137.584,
+        "salience": 17.544,
+        "rise": 0.04845813475588541,
+        "prominence": 0.04845813475588541,
+        "flux": 3.4504008293151855,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 139.5469,
+      "time": 139.5374,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 139.5374,
+        "peak": 139.5461,
+        "salience": 33.813,
+        "rise": 0.09774183623800581,
+        "prominence": 0.09774183623800581,
+        "flux": 1.6006580591201782,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 140.7521,
+      "time": 140.7449,
+      "deltaMs": -7.2,
+      "groupSize": 1,
+      "evidence": {
+        "time": 140.7449,
+        "peak": 140.7594,
+        "salience": 9.176,
+        "rise": 0.007965685930303992,
+        "prominence": 0.007965685930303992,
+        "flux": 2.050881862640381,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 141.4161,
+      "time": 141.4095,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 141.4095,
+        "peak": 141.4211,
+        "salience": 16.205,
+        "rise": 0.05483868266252381,
+        "prominence": 0.05483868266252381,
+        "flux": 2.04158616065979,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 141.9502,
+      "time": 141.9276,
+      "deltaMs": -22.6,
+      "groupSize": 2,
+      "evidence": {
+        "time": 141.9378,
+        "peak": 141.9465,
+        "salience": 58.284,
+        "rise": 0.16847910304661234,
+        "prominence": 0.16847910304661234,
+        "flux": 2.7882800102233887,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 141.9502,
+      "time": 141.9276,
+      "deltaMs": -22.6,
+      "groupSize": 2,
+      "evidence": {
+        "time": 141.9175,
+        "peak": 141.932,
+        "salience": 7.237,
+        "rise": 0.00509284651153618,
+        "prominence": 0.00509284651153618,
+        "flux": 2.3554985523223877,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 142.3884,
+      "time": 142.3819,
+      "deltaMs": -6.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 142.3819,
+        "peak": 142.3906,
+        "salience": 22.141,
+        "rise": 0.1126244506726373,
+        "prominence": 0.1126244506726373,
+        "flux": 1.7381702661514282,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 143.175,
+      "time": 143.1626,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 143.1626,
+        "peak": 143.1713,
+        "salience": 59.907,
+        "rise": 0.1731708487186533,
+        "prominence": 0.1731708487186533,
+        "flux": 1.6660254001617432,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 147.0528,
+      "time": 147.0259,
+      "deltaMs": -26.9,
+      "groupSize": 1,
+      "evidence": {
+        "time": 147.0259,
+        "peak": 147.0317,
+        "salience": 23.517,
+        "rise": 0.07485651148544822,
+        "prominence": 0.07485651148544822,
+        "flux": 5.011045932769775,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 147.3072,
+      "time": 147.3161,
+      "deltaMs": 8.9,
+      "groupSize": 1,
+      "evidence": {
+        "time": 147.3161,
+        "peak": 147.3219,
+        "salience": 10.001,
+        "rise": 0.05061002288966255,
+        "prominence": 0.05061002288966255,
+        "flux": 1.3206275701522827,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 148.2999,
+      "time": 148.2913,
+      "deltaMs": -8.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 148.2913,
+        "peak": 148.2971,
+        "salience": 19.904,
+        "rise": 0.07927121197590054,
+        "prominence": 0.07927121197590054,
+        "flux": 3.1043787002563477,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 149.5321,
+      "time": 149.5104,
+      "deltaMs": -21.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 149.5104,
+        "peak": 149.5249,
+        "salience": 9.18,
+        "rise": 0.033663379047857975,
+        "prominence": 0.033653063420521524,
+        "flux": 3.0686867237091064,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 150.1358,
+      "time": 150.1605,
+      "deltaMs": 24.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 150.1605,
+        "peak": 150.1663,
+        "salience": 14.041,
+        "rise": 0.045713947296682184,
+        "prominence": 0.045713947296682184,
+        "flux": 2.613398790359497,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 151.7122,
+      "time": 151.7018,
+      "deltaMs": -10.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 151.7018,
+        "peak": 151.7192,
+        "salience": 9.956,
+        "rise": 0.05816764233184177,
+        "prominence": 0.05816764233184177,
+        "flux": 2.680713415145874,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 152.0265,
+      "time": 152.0181,
+      "deltaMs": -8.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 152.0181,
+        "peak": 152.0298,
+        "salience": 18.543,
+        "rise": 0.038851799812710475,
+        "prominence": 0.03885139293574319,
+        "flux": 3.0558226108551025,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 152.672,
+      "time": 152.6567,
+      "deltaMs": -15.3,
+      "groupSize": 2,
+      "evidence": {
+        "time": 152.6625,
+        "peak": 152.6712,
+        "salience": 25.195,
+        "rise": 0.10814497260147188,
+        "prominence": 0.10814497260147188,
+        "flux": 5.818366527557373,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 152.672,
+      "time": 152.6567,
+      "deltaMs": -15.3,
+      "groupSize": 2,
+      "evidence": {
+        "time": 152.6509,
+        "peak": 152.6596,
+        "salience": 22.8,
+        "rise": 0.08862429975610034,
+        "prominence": 0.08862429975610034,
+        "flux": 5.818366527557373,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 153.2736,
+      "time": 153.2633,
+      "deltaMs": -10.3,
+      "groupSize": 1,
+      "evidence": {
+        "time": 153.2633,
+        "peak": 153.2749,
+        "salience": 10.933,
+        "rise": 0.0686302450176932,
+        "prominence": 0.0686302450176932,
+        "flux": 2.5189871788024902,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 154.7831,
+      "time": 154.7726,
+      "deltaMs": -10.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 154.7726,
+        "peak": 154.7871,
+        "salience": 11.35,
+        "rise": 0.009542424413537464,
+        "prominence": 0.009542327372578409,
+        "flux": 3.7023816108703613,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 155.4237,
+      "time": 155.4112,
+      "deltaMs": -12.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 155.4112,
+        "peak": 155.4199,
+        "salience": 11.594,
+        "rise": 0.06202153661723752,
+        "prominence": 0.06202153661723752,
+        "flux": 2.7761619091033936,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 156.0124,
+      "time": 156.0033,
+      "deltaMs": -9.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 156.0033,
+        "peak": 156.0207,
+        "salience": 6.694,
+        "rise": 0.049738531285398006,
+        "prominence": 0.049738531285398006,
+        "flux": 2.7447597980499268,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 156.3217,
+      "time": 156.3283,
+      "deltaMs": 6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 156.3283,
+        "peak": 156.3341,
+        "salience": 22.96,
+        "rise": 0.012155326879357834,
+        "prominence": 0.012155326879357834,
+        "flux": 3.0367352962493896,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "cymbal",
+      "from": 156.6061,
+      "time": 156.6128,
+      "deltaMs": 6.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 156.6128,
+        "peak": 156.6215,
+        "salience": 9.005,
+        "rise": 0.006919221871479158,
+        "prominence": 0.00691482978593666,
+        "flux": 1.410171627998352,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 158.6163,
+      "time": 158.6068,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 158.6068,
+        "peak": 158.6155,
+        "salience": 19.006,
+        "rise": 0.10961736077512638,
+        "prominence": 0.10961736077512638,
+        "flux": 1.360064148902893,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 159.0865,
+      "time": 159.0741,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 159.0741,
+        "peak": 159.0828,
+        "salience": 14.749,
+        "rise": 0.1028599476288552,
+        "prominence": 0.1028599476288552,
+        "flux": 1.750727891921997,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 159.7018,
+      "time": 159.6923,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 159.6923,
+        "peak": 159.701,
+        "salience": 21.549,
+        "rise": 0.11013078758419145,
+        "prominence": 0.11013078758419145,
+        "flux": 1.5491665601730347,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 160.9911,
+      "time": 160.9839,
+      "deltaMs": -7.2,
+      "groupSize": 1,
+      "evidence": {
+        "time": 160.9839,
+        "peak": 160.9985,
+        "salience": 16.891,
+        "rise": 0.0953750518227509,
+        "prominence": 0.0953750518227509,
+        "flux": 3.343205213546753,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 166.5866,
+      "time": 166.5771,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 166.5771,
+        "peak": 166.5858,
+        "salience": 17.966,
+        "rise": 0.11457611989670506,
+        "prominence": 0.11457611989670506,
+        "flux": 5.1189751625061035,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 167.2019,
+      "time": 167.1895,
+      "deltaMs": -12.4,
+      "groupSize": 1,
+      "evidence": {
+        "time": 167.1895,
+        "peak": 167.1953,
+        "salience": 14.257,
+        "rise": 0.07350924196756567,
+        "prominence": 0.07350924196756567,
+        "flux": 1.8309531211853027,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 169.2074,
+      "time": 169.2009,
+      "deltaMs": -6.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 169.2009,
+        "peak": 169.2096,
+        "salience": 12.493,
+        "rise": 0.06459219906005728,
+        "prominence": 0.06459219906005728,
+        "flux": 1.6045743227005005,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 169.5866,
+      "time": 169.555,
+      "deltaMs": -31.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 169.555,
+        "peak": 169.5608,
+        "salience": 4.661,
+        "rise": 0.027696767895558756,
+        "prominence": 0.027182026998972084,
+        "flux": 1.4715232849121094,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 170.1802,
+      "time": 170.1732,
+      "deltaMs": -7.0,
+      "groupSize": 1,
+      "evidence": {
+        "time": 170.1732,
+        "peak": 170.1849,
+        "salience": 22.96,
+        "rise": 0.10001001837479054,
+        "prominence": 0.10001001837479054,
+        "flux": 1.6181533336639404,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 170.6841,
+      "time": 170.6754,
+      "deltaMs": -8.7,
+      "groupSize": 1,
+      "evidence": {
+        "time": 170.6754,
+        "peak": 170.6812,
+        "salience": 13.7,
+        "rise": 0.02870382559954136,
+        "prominence": 0.02870382559954136,
+        "flux": 2.407072067260742,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 171.9097,
+      "time": 171.9002,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 171.9002,
+        "peak": 171.9089,
+        "salience": 31.624,
+        "rise": 0.1215579055618054,
+        "prominence": 0.1215579055618054,
+        "flux": 1.8077425956726074,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "gong",
+      "from": 173.181,
+      "time": 173.1599,
+      "deltaMs": -21.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 173.1599,
+        "peak": 173.1657,
+        "salience": 26.827,
+        "rise": 0.05689895893579985,
+        "prominence": 0.05689895893579985,
+        "flux": 2.352292776107788,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "wood",
+      "from": 173.4655,
+      "time": 173.4589,
+      "deltaMs": -6.6,
+      "groupSize": 1,
+      "evidence": {
+        "time": 173.4589,
+        "peak": 173.4676,
+        "salience": 9.436,
+        "rise": 0.035621932542689694,
+        "prominence": 0.035621932542689694,
+        "flux": 1.6525486707687378,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 175.0735,
+      "time": 175.061,
+      "deltaMs": -12.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 175.061,
+        "peak": 175.0698,
+        "salience": 44.132,
+        "rise": 0.1275724055854654,
+        "prominence": 0.1275724055854654,
+        "flux": 2.4813027381896973,
+        "corroborated": true
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 178.8525,
+      "time": 178.843,
+      "deltaMs": -9.5,
+      "groupSize": 1,
+      "evidence": {
+        "time": 178.843,
+        "peak": 178.8488,
+        "salience": 60.318,
+        "rise": 0.1743584573261994,
+        "prominence": 0.1743584573261994,
+        "flux": 2.848055601119995,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 179.1249,
+      "time": 179.1361,
+      "deltaMs": 11.2,
+      "groupSize": 1,
+      "evidence": {
+        "time": 179.1361,
+        "peak": 179.1507,
+        "salience": 15.247,
+        "rise": 0.04532015537936695,
+        "prominence": 0.04532015537936695,
+        "flux": 1.363951563835144,
+        "corroborated": false
+      }
+    },
+    {
+      "kind": "drum",
+      "from": 181.3598,
+      "time": 181.3537,
+      "deltaMs": -6.1,
+      "groupSize": 1,
+      "evidence": {
+        "time": 181.3537,
+        "peak": 181.3624,
+        "salience": 70.644,
+        "rise": 0.20420938025954208,
+        "prominence": 0.20420938025954208,
+        "flux": 2.6884493827819824,
+        "corroborated": false
+      }
+    }
+  ],
+  "perKind": {
+    "drum": 76,
+    "gong": 34,
+    "cymbal": 31,
+    "wood": 11
+  },
+  "maxShiftMs": 34.3,
+  "medianShiftMs": -9.5,
+  "unchangedHolds": [
+    {
+      "time": 11.269,
+      "duration": 1.25
+    },
+    {
+      "time": 23.661,
+      "duration": 1.25
+    },
+    {
+      "time": 40.912,
+      "duration": 1.4
+    },
+    {
+      "time": 52.406,
+      "duration": 1.4
+    },
+    {
+      "time": 71.373,
+      "duration": 1.5
+    },
+    {
+      "time": 84.054,
+      "duration": 1.5
+    },
+    {
+      "time": 102.771,
+      "duration": 1.6
+    },
+    {
+      "time": 115.582,
+      "duration": 1.6
+    },
+    {
+      "time": 134.07,
+      "duration": 1.7
+    },
+    {
+      "time": 144.497,
+      "duration": 1.7
+    },
+    {
+      "time": 163.114,
+      "duration": 1.8
+    },
+    {
+      "time": 175.945,
+      "duration": 1.8
+    }
+  ]
+}

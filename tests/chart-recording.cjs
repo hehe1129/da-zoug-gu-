@@ -2,6 +2,10 @@ const fs=require('fs'),vm=require('node:vm'),assert=require('node:assert/strict'
 const score=vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../score.js'),'utf8')+';RECORDING_SCORE');
 assert.equal(score.sections.length,7);assert.equal(score.sections[0],0);assert.equal(score.sections.at(-1),score.duration);
 const held=score.notes.filter(n=>n.kind==='suona');
+assert.ok(score.chartId&&score.revision&&score.recordingSha256,'Chart identity and revision are required for calibration evidence');
+assert.equal(new Set(score.notes.map(n=>n.eventId)).size,score.notes.length,'Every source note needs a stable unique event identity');
+const digest=require('node:crypto').createHash('sha256').update(fs.readFileSync(require('node:path').join(__dirname,'../assets/audio/ensemble.mp3'))).digest('hex');
+assert.equal(digest,score.recordingSha256,'Chart timings must refer to exactly the analyzed recording');
 for(let i=0;i<score.notes.length;i++){
  const n=score.notes[i];assert.ok(Number.isFinite(n.time)&&n.time>=0&&n.time+n.duration<=score.duration+.01);assert.ok(['drum','gong','wood','cymbal','suona'].includes(n.kind));
  assert.equal(n.stage,Math.min(5,score.sections.slice(1).filter(t=>n.time>=t).length));

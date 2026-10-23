@@ -24,7 +24,9 @@ document.addEventListener('click',e=>{
   if(origin && origin.button!==button) { e.preventDefault(); e.stopImmediatePropagation(); }
 },true);
 const SONG_LEAD = RECORDING_SCORE.leadIn;
-const PERFECT_WINDOW=.070; // seconds around the recorded head attack
+const TIMING_RULES=Object.freeze({revision:'recorded-head-v1',perfect:.070,inputClock:'audible-wall-map-v2',calibrationMs:0});
+const PERFECT_WINDOW=TIMING_RULES.perfect; // retain the existing ±70-ms window
+const judgementHistory=[]; // bounded diagnostics, never an extra render surface
 const stages = [
   {name:'开锣',travel:2.65,shell:'#1959be',field:'#1855af',lane:'#164fa6',ink:'#fffbed',accent:'#ffdc4c',accentInk:'#153e83',motif:'rings'},
   {name:'起势',travel:2.50,shell:'#cd638e',field:'#8f3e70',lane:'#984b7a',ink:'#153e83',accent:'#185ac6',accentInk:'#fffbed',motif:'ribbons'},
@@ -181,6 +183,12 @@ function stopVoices() { for (const n of notes) { n.voice?.(); n.voice = null; } 
 function stopAllSound() { stopVoices(); audio.stopTransport(); }
 function clearPointers() { for (const id of holds.keys()) { try { if(canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id); } catch {} } holds.clear(); }
 function finishNote(n) { n.done = true; n.voice?.(); n.voice = null; if (n.pointer !== undefined) holds.delete(n.pointer); }
+function recordJudgement(n,grade) {
+  if(!n||n.judgementRecorded)return;
+  n.judgementRecorded=true;
+  judgementHistory.push({chartId:RECORDING_SCORE.chartId,chartRevision:RECORDING_SCORE.revision,eventId:n.eventId,grade,deltaMs:Number.isFinite(n.timingError)?Math.round(n.timingError*10000)/10:null,dispatchDelayMs:n.inputDelayMs??0,windowRevision:TIMING_RULES.revision,clock:TIMING_RULES.inputClock,calibrationMs:TIMING_RULES.calibrationMs});
+  if(judgementHistory.length>256)judgementHistory.shift();
+}
 function addEffect(lane, kind, points = '', origin = null, style = 0) { effects.push({lane,kind,points,at:now(),origin,style}); if(effects.length>18) effects.shift(); }
 function hitParticles(lane,longNote,origin,perfect=false) {
   const burst=burstIndex++,style=perfect?3+(perfectBurstIndex++%5):burst%3;
@@ -202,6 +210,7 @@ function hitParticles(lane,longNote,origin,perfect=false) {
 
 function fail(n, text = '漏拍了', lane = n?.lane) {
   if(state !== 'playing' || n?.done) return;
+  recordJudgement(n,'miss');
   if(n) finishNote(n);
   // A note is marked done before updating lives, so release/miss/cancel cannot charge it twice.
   misses = Math.min(3,misses+1); combo = 0; hud(); feedback(text,'miss',1.2);
@@ -217,6 +226,7 @@ function fail(n, text = '漏拍了', lane = n?.lane) {
 function success(n,origin=n.hitPoint,holdPoints=30) {
   if(state !== 'playing' || n.done) return;
   if(n.kind==='suona'){n.perfect=!!n.headPerfect&&holdPoints===30;audio.judgeSuona(holdPoints,n.perfect);}
+  recordJudgement(n,n.perfect?'perfect':'good');
   if(n.perfect)perfects++;
   finishNote(n); combo++; hits++; maxCombo = Math.max(maxCombo,combo);
   const multiplier = Math.min(3,1+Math.floor(combo/10));
@@ -236,8 +246,8 @@ function success(n,origin=n.hitPoint,holdPoints=30) {
 function holdProgress(n,t=now()) {
   return Math.max(0,Math.min(1,((n.holdCredit||0)+Math.max(0,t-(n.holdStarted??t)))/(n.holdTotal||n.dur)));
 }
-function settleHold(n,origin=n.hitPoint) {
-  const p=holdProgress(n),points=p>=2/3?30:p>=1/3?20:10;
+function settleHold(n,origin=n.hitPoint,t=now()) {
+  const p=holdProgress(n,t),points=p>=2/3?30:p>=1/3?20:10;
   success(n,origin,points);
 }
 function makeLanePlan(random=Math.random) {
@@ -276,7 +286,7 @@ function spawn(t) {
   while(nextIndex<chart.length && SONG_LEAD+chart[nextIndex].time<t+3.5) {
     const lane=sessionLanes[nextIndex],e=chart[nextIndex++],stage=stages[e.stage];
     // Source timing and instrument order stay fixed; lanes vary each new run.
-    notes.push({id:noteId++,lane,kind:e.kind,color:colors[Math.floor(Math.random()*colors.length)],at:SONG_LEAD+e.time,dur:e.duration,travel:stage.travel,done:false,held:false,stage:e.stage,sourceTime:e.time,accent:e.accent||1,heightRatio:e.heightRatio||1});
+    notes.push({id:noteId++,eventId:e.eventId,lane,kind:e.kind,color:colors[Math.floor(Math.random()*colors.length)],at:SONG_LEAD+e.time,dur:e.duration,travel:stage.travel,done:false,held:false,stage:e.stage,sourceTime:e.time,accent:e.accent||1,heightRatio:e.heightRatio||1});
   }
 }
 function geometry(n,t) {
@@ -452,7 +462,7 @@ function beginCountdown(seconds,resuming=false) {
 }
 function resetGame() {
   stopAllSound(); clearPointers(); cancelAnimationFrame(resultFrame);
-  sessionLanes=[];audio.resetVariations();
+  sessionLanes=[];audio.resetVariations();judgementHistory.length=0;
   notes=[]; effects=[]; particles=[]; burstIndex=perfectBurstIndex=0; score=misses=combo=maxCombo=hits=perfects=0; elapsed=0; nextIndex=noteId=0;
   phase=-1; noticeUntil=0; damageUntil=0; shownLives=-1; waitingAudio=false; hud();
   $('damageFeedback').hidden=true; $('field').classList.remove('damage-shake','damage-active');
@@ -515,8 +525,9 @@ function end(reason='三次失误',completed=false) {
 
 canvas.addEventListener('pointerdown',e=>{
   const pickup=state==='countdown'&&resumeCountdown;
-  if(state!=='playing'&&!pickup)return;e.preventDefault();audio.unlock();
-  const r=canvas.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top, t=now();
+  if(state!=='playing'&&!pickup)return;e.preventDefault();
+  const t=pickup?elapsed:audio.inputTime(e.timeStamp)??now();audio.unlock();
+  const r=canvas.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
   // Hit-test the actual rectangle, with only a small touch allowance. No lane-wide taps.
   const n=notes.find(n=>{ if(n.done || n.held || (pickup&&!n.rearmed)) return false; const g=geometry(n,t); return x>=g.x-3 && x<=g.x+g.width+3 && y>=g.y-6 && y<=g.bottom+6; });
   if(!n) {
@@ -525,9 +536,12 @@ canvas.addEventListener('pointerdown',e=>{
     if(notes.some(n=>{ if(!n.done&&!n.held) return false; const g=geometry(n,t); return x>=g.x-3&&x<=g.x+g.width+3&&y>=g.y-6&&y<=g.bottom+6; })) return;
     fail(null,'空拍了',Math.max(0,Math.min(3,Math.floor(x/(w/4))))); return;
   }
-  const g=geometry(n,t), inWindow=g.y<=line+10 && g.bottom>=line-10;
-  if(!inWindow || (n.kind==='suona' && t>n.at+(n.rearmed?.5:.22))) { fail(n,g.bottom<line-10?'还没到线':'晚了一拍'); return; }
-  n.hitPoint={x,y};if(!n.rearmed){n.timingError=t-n.at;n.headPerfect=Math.abs(n.timingError)<=PERFECT_WINDOW;}n.perfect=n.headPerfect;
+  if(!n.rearmed){n.timingError=t-n.at;n.inputDelayMs=audio.lastInputSample?.dispatchDelayMs||0;}
+  const g=geometry(n,t),earlyGrace=Math.max(10,g.speed*PERFECT_WINDOW),inWindow=g.y<=line+10 && g.bottom>=line-earlyGrace;
+  // The ±70-ms perfect window must remain reachable at every stage speed;
+  // a fixed 10-pixel early tolerance used to shrink it on faster stages.
+  if(!inWindow || (n.kind==='suona' && t>n.at+(n.rearmed?.5:.22))) { fail(n,g.bottom<line-earlyGrace?'还没到线':'晚了一拍'); return; }
+  n.hitPoint={x,y};if(!n.rearmed)n.headPerfect=Math.abs(n.timingError)<=PERFECT_WINDOW;n.perfect=n.headPerfect;
   if(n.kind === 'suona') {
     n.held=true;n.holdTotal??=n.dur;n.holdStarted=pickup?null:t; n.pointer=e.pointerId; holds.set(e.pointerId,n); n.voice=pickup?null:audio.voice();
     try { canvas.setPointerCapture(e.pointerId); } catch {}
@@ -539,9 +553,9 @@ canvas.addEventListener('pointermove',e=>{const n=holds.get(e.pointerId);if(n&&s
 function release(e) {
   const n=holds.get(e.pointerId); if(!n) return; holds.delete(e.pointerId);
   if(state !== 'playing' || n.done) {if(state==='countdown'){n.held=false;n.voice?.();n.voice=null;}return;}
-  settleHold(n,pointerPoint(e));
+  settleHold(n,pointerPoint(e),audio.inputTime(e.timeStamp)??now());
 }
-function cancelPointer(e) { const n=holds.get(e.pointerId); if(n && state==='playing')settleHold(n,pointerPoint(e)); else if(n&&state==='countdown'){n.held=false;holds.delete(e.pointerId);} }
+function cancelPointer(e) { const n=holds.get(e.pointerId); if(n && state==='playing')settleHold(n,pointerPoint(e),audio.inputTime(e.timeStamp)??now()); else if(n&&state==='countdown'){n.held=false;holds.delete(e.pointerId);} }
 canvas.addEventListener('pointerup',release); canvas.addEventListener('pointercancel',cancelPointer); canvas.addEventListener('lostpointercapture',cancelPointer);
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // Suppress native selection/callouts without registering a second game input.
