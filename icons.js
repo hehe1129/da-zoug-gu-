@@ -1,16 +1,14 @@
-/* Use the user's supplied instrument sheet unchanged. Source rectangles are
-   selected at render time; artwork is neither redrawn nor given new faces. */
+/* Keep source artwork files unchanged; render their silhouettes in the warm
+   gold palette of the new reference UI. No faces are added to instruments. */
 'use strict';
 const instrumentSprites = {
-  drum:   {x:96,y:88,width:392,height:404},
-  suona:  {x:560,y:78,width:366,height:422},
-  wood:   {x:982,y:145,width:530,height:352},
-  cymbal: {x:44,y:520,width:510,height:436},
-  gong:   {x:1054,y:522,width:432,height:422}
+ suona:{x:55,y:54,width:465,height:470},wood:{x:545,y:112,width:490,height:400},
+ gong:{x:1096,y:40,width:400,height:485},cymbal:{x:210,y:568,width:560,height:410},
+ drum:{x:842,y:518,width:500,height:462}
 };
 const instrumentSheet = new Image();
 const instrumentArt={};
-function cleanPaperMatte(image,width,height) {
+function cleanPaperMatte(image,width,height,paperSeeds=[]) {
   const pixels=image.data,source=new Uint8ClampedArray(pixels),count=width*height;
   const visited=new Uint8Array(count),queue=new Uint32Array(count);
   let head=0,tail=0;
@@ -24,6 +22,9 @@ function cleanPaperMatte(image,width,height) {
   };
   for(let x=0;x<width;x++){visit(x);visit((height-1)*width+x);}
   for(let y=0;y<height;y++){visit(y*width);visit(y*width+width-1);}
+  // The gong's rope encloses actual background. Seed only those known holes;
+  // enclosed white artwork elsewhere (drum skin, performer masks) stays intact.
+  for(const p of paperSeeds)if(p.x>=0&&p.x<width&&p.y>=0&&p.y<height)visit(p.y*width+p.x);
   while(head<tail){
     const index=queue[head++],x=index%width,y=Math.floor(index/width);
     if(x>0)visit(index-1);if(x<width-1)visit(index+1);
@@ -76,7 +77,15 @@ function prepareInstrumentArt() {
     context.drawImage(instrumentSheet,s.x,s.y,s.width,s.height,0,0,s.width,s.height);
     try {
       const image=context.getImageData(0,0,s.width,s.height);
-      cleanPaperMatte(image,s.width,s.height);
+      // Remove white paper uniformly, including the gong's enclosed rope hole.
+      // Recover foreground pigment from the white matte instead of leaving white halos.
+      const d=image.data;
+      for(let i=0;i<d.length;i+=4){
+        const alpha=Math.min(1,Math.max(0,(255-Math.min(d[i],d[i+1],d[i+2]))/180));
+        if(alpha<.025){d[i+3]=0;continue;}
+        for(let k=0;k<3;k++)d[i+k]=Math.max(0,Math.min(255,255+(d[i+k]-255)/alpha));
+        d[i+3]=Math.round(alpha*255);
+      }
       context.putImageData(image,0,0);
       instrumentArt[kind]={surface,url:surface.toDataURL('image/png')};
     } catch {
@@ -87,13 +96,14 @@ function prepareInstrumentArt() {
   document.querySelectorAll('[data-instrument]').forEach(el=>{el.innerHTML=instrumentSVG(el.dataset.instrument);});
 }
 instrumentSheet.onload=prepareInstrumentArt;
-instrumentSheet.src = 'assets/instruments.jpg';
+instrumentSheet.src = 'assets/instruments-brush-v11.jpg';
 function drawInstrument(context,kind,x,y,width,height) {
   const s=instrumentSprites[kind];
   if(!s || !instrumentSheet.complete || !instrumentSheet.naturalWidth) return;
   const scale=Math.min(width/s.width,height/s.height), dw=s.width*scale, dh=s.height*scale;
   context.save();
   context.globalCompositeOperation='source-over';
+  context.imageSmoothingEnabled=true; context.imageSmoothingQuality='high';
   if(instrumentArt[kind])context.drawImage(instrumentArt[kind].surface,x+(width-dw)/2,y+(height-dh)/2,dw,dh);
   else context.drawImage(instrumentSheet,s.x,s.y,s.width,s.height,x+(width-dw)/2,y+(height-dh)/2,dw,dh);
   context.restore();
@@ -103,8 +113,28 @@ function instrumentSVG(kind) {
   const s=instrumentSprites[kind];
   if(instrumentArt[kind])return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${s.width} ${s.height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><image href="${instrumentArt[kind].url}" width="${s.width}" height="${s.height}"/></svg>`;
   const clip=`sprite-${kind}-${spriteInstance++}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${s.x} ${s.y} ${s.width} ${s.height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><clipPath id="${clip}"><rect x="${s.x}" y="${s.y}" width="${s.width}" height="${s.height}"/></clipPath></defs><image clip-path="url(#${clip})" href="assets/instruments.jpg" width="1536" height="1024"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${s.x} ${s.y} ${s.width} ${s.height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><clipPath id="${clip}"><rect x="${s.x}" y="${s.y}" width="${s.width}" height="${s.height}"/></clipPath></defs><image clip-path="url(#${clip})" href="assets/instruments-brush-v11.jpg" width="1536" height="1024"/></svg>`;
 }
+// Render the exact supplied performers as independent sprites. The source file
+// stays untouched; the same edge matte preserves their original interior colors.
+const performerSheet = new Image();
+const performerSprites = [
+  {x:95,y:0,width:419,height:589},
+  {x:516,y:77,width:379,height:532},
+  {x:134,y:615,width:328,height:593},
+  {x:529,y:612,width:357,height:604}
+];
+performerSheet.onload=()=>{
+  performerSprites.forEach((s,index)=>{
+    const el=document.querySelector(`[data-performer="${index}"]`);if(!el)return;
+    const surface=document.createElement('canvas');surface.width=s.width;surface.height=s.height;
+    const context=surface.getContext('2d');
+    context.drawImage(performerSheet,s.x,s.y,s.width,s.height,0,0,s.width,s.height);
+    try{const image=context.getImageData(0,0,s.width,s.height);cleanPaperMatte(image,s.width,s.height);context.putImageData(image,0,0);}catch{}
+    el.append(surface);el.classList.add('ready');
+  });
+};
+performerSheet.src='assets/performers-v7.jpg';
 const uiPaths={
   arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',volume:'<path d="M11 5L6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',muted:'<path d="M11 5L6 9H3v6h3l5 4V5Zm5 4 5 6m0-6-5 6"/>',pause:'<path d="M8 5v14M16 5v14" stroke-width="3.5"/>',play:'<path d="m8 5 11 7-11 7Z" fill="currentColor" stroke-width="0"/>',again:'<path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/>',heart:'<path d="M12 20 4 12C-2 5 7 0 12 6c5-6 14-1 8 6Z"/>',tap:'<rect x="7" y="2" width="10" height="14" rx="3"/><path d="M3 17h18m-9-6v11"/>',hold:'<rect x="7" y="2" width="10" height="20" rx="3"/><path d="M10 6h4m-2 3v8"/>'
 };

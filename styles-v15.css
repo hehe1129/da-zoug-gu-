@@ -1,0 +1,29 @@
+@import url('styles-v12.css');
+@font-face{font-family:ClassicSong;src:url('assets/fonts/aa-classic-song.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+:root{--font:ClassicSong,'SimSun',serif}
+html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSong,'SimSun',serif!important;font-synthesis:none}
+#app *{font-weight:400}
+.cover-painting{background-image:url('assets/cover-painting-v15.png');background-size:100% 100%}
+.cover-brand{left:16%;top:6.5%;width:44%;height:49%}
+.cover-brand h1{position:relative;height:100%;width:100%;font-size:clamp(82px,12.4vh,116px);line-height:1;color:#1156aa;text-shadow:none}
+.cover-brand h1 span{position:absolute;display:block;margin:0!important;background:linear-gradient(135deg,#10469d 20%,#1559aa 60%,#4298ac);background-clip:text;-webkit-background-clip:text;color:transparent}
+.cover-brand h1 span:nth-child(1){left:0;top:0}
+.cover-brand h1 span:nth-child(2){left:27%;top:32%}
+.cover-brand h1 span:nth-child(3){left:7%;top:67%}
+.cover-side{right:6.6%;top:42%;font-size:11px;line-height:1.1;letter-spacing:1px;color:#357e9b;font-weight:400}
+.cover-header .icon-button{top:2.2%;right:5%;width:60px;height:60px;background:#fff url('assets/sound-reference-v15.jpg') 60% 45%/160% auto no-repeat;border:0;border-radius:0;box-shadow:none}
+.cover-header .icon-button svg{visibility:hidden}
+.cover-header .icon-button[aria-pressed="true"]:after{content:'';position:absolute;width:32px;height:2px;background:#fff5d9;left:15px;top:29px;transform:rotate(-48deg);pointer-events:none}
+.play-center{left:5%;width:90%;bottom:9.8%;height:17%}
+.play-button{padding:18px 0 0!important;transform:none!important}
+.play-button>span{font-size:clamp(38px,6.2vh,56px);line-height:1.2;letter-spacing:5px;border:0;padding:0;color:#fff9e8;white-space:nowrap}
+.play-button:before,.play-button:after{display:none}
+.home-actions{display:none}
+.play-button:focus-visible,.cover-header .icon-button:focus-visible{outline:2px solid #1559aa;outline-offset:4px}
+.play-button:hover>span{text-shadow:0 2px 8px #102e6d}
+.play-button:active>span{transform:translateY(2px)}
+.score-block strong{font-variant-numeric:tabular-nums;line-height:1.1}
+.primary>span:first-child{font-size:35px}
+@media(max-height:650px){.cover-brand h1{font-size:80px}.cover-brand{top:6%;height:49%}.play-button>span{font-size:37px}.cover-header .icon-button{width:52px;height:52px}.cover-header .icon-button[aria-pressed="true"]:after{left:11px;top:25px}.primary>span:first-child{font-size:28px}}
+@media(prefers-reduced-motion:reduce){.play-button>span{transition:none}}
+

@@ -1,89 +1,172 @@
-/* Synthesized preview only. Based on the original Web Audio instruments.
-   A future recording can replace the background transport without changing input rules. */
+/* Supplied recordings only. No oscillator / noise stand-ins. */
 'use strict';
+const AUDIO_SOURCES = {
+  ensemble:{file:'ensemble.mp3'},
+  drum:{file:'drum.mp3',offset:.294,length:.64,gain:.62},
+  cymbal:{file:'cymbal.mp3',offset:.541,length:1.35,gain:1.25},
+  gong:{file:'gong.mp3',offset:.085,length:.72,gain:1.6},
+  wood:{file:'wood.mp3',offset:0,length:.237,gain:3.1},
+  suona:{file:'suona.mp3',offset:0,length:4.279,gain:.5}
+};
 class RhythmAudio {
-  constructor() { this.ctx = null; this.master = null; this.session = null; this.bg = null; this.muted = false; this.unlocking = false; this.noiseBuffer = null; }
+  constructor() {
+    this.ctx=null;this.master=null;this.session=null;this.bg=null;this.song=null;
+    this.muted=false;this.unlocking=false;this.buffers={};this.nodes=new Set();this.variations={};this.lastHit=null;this.lastGameRead=null;
+    // Fetch early, decode only after a user has opened the audio context.
+    this.raw={};this.status='idle';this.failed=[];this.clock=null;this.boost=null;
+    this.preload();
+  }
+  preload() {
+    for(const [kind,meta] of Object.entries(AUDIO_SOURCES)) {
+      if(this.buffers[kind])continue;
+      // Both network and decode have a bounded start screen wait. Aborted files
+      // can be retried with the sound button, without trapping the home screen.
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+      this.raw[kind]=fetch('assets/audio/'+meta.file,{signal:controller.signal})
+        .then(r=>{if(!r.ok)throw new Error('audio '+r.status);return r.arrayBuffer();})
+        .finally(()=>clearTimeout(timer));
+      this.raw[kind].catch(()=>{});
+    }
+  }
   setup() {
-    if (this.ctx) return;
-    const Audio = window.AudioContext || window.webkitAudioContext;
-    if (!Audio) throw new Error('Web Audio unavailable');
-    this.ctx = new Audio();
-    this.master = this.ctx.createGain(); this.master.gain.value = this.muted ? 0 : .52;
-    const comp = this.ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 5;
-    this.analyser = this.ctx.createAnalyser(); this.analyser.fftSize = 256;
-    this.master.connect(comp); comp.connect(this.analyser); this.analyser.connect(this.ctx.destination);
+    if(this.ctx)return;
+    const Context=window.AudioContext||window.webkitAudioContext;
+    if(!Context)throw new Error('Web Audio unavailable');
+    this.ctx=new Context({latencyHint:'interactive'});
+    this.master=this.ctx.createGain();this.master.gain.value=this.muted?0:.72;
+    const comp=this.ctx.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=4;comp.knee.value=12;
+    this.analyser=this.ctx.createAnalyser();this.analyser.fftSize=256;
+    this.master.connect(comp);comp.connect(this.analyser);this.analyser.connect(this.ctx.destination);
+    this.ctx.addEventListener('statechange',()=>{if(this.clock&&this.ctx.state!=='running')this.onInterrupted?.();});
+  }
+  prepare(retry=false) {
+    if(this.loading&&(!retry||this.status==='loading'))return this.loading;
+    try{this.setup();}catch{this.status='unavailable';return Promise.resolve(false);}
+    if(retry&&this.failed.length){this.preload();}
+    this.status='loading';
+    this.loading=Promise.all(Object.keys(AUDIO_SOURCES).map(async kind=>{
+      if(this.buffers[kind])return;
+      try{const bytes=await this.raw[kind];this.buffers[kind]=await this.ctx.decodeAudioData(bytes.slice(0));}
+      catch{ /* Each file fails independently; never substitute a synthetic sound. */ }
+    })).then(()=>{
+      this.failed=Object.keys(AUDIO_SOURCES).filter(kind=>!this.buffers[kind]);
+      this.status=this.failed.length?'partial':'ready';return !!this.buffers.ensemble;
+    });
+    return this.loading;
   }
   unlock() {
-    // Called directly inside a real user gesture; never gate screen transitions on a promise.
     try {
-      this.setup();
-      if (this.ctx.state === 'running' || this.unlocking) return;
-      this.unlocking = true;
-      const timer = setTimeout(() => { if (this.ctx.state !== 'running' && !this.muted) this.onError?.(); }, 1800);
-      this.ctx.resume().then(() => { if (this.ctx.state === 'running') this.onReady?.(); }).catch(() => this.onError?.()).finally(() => { clearTimeout(timer); this.unlocking = false; });
-    } catch { if (!this.muted) this.onError?.(); }
+      this.setup();this.prepare();
+      if(this.ctx.state==='running'||this.unlocking)return;
+      this.unlocking=true;
+      const timer=setTimeout(()=>{if(this.ctx.state!=='running'&&!this.muted)this.onError?.();},1800);
+      this.ctx.resume().then(()=>{if(this.ctx.state==='running')this.onReady?.();})
+        .catch(()=>this.onError?.()).finally(()=>{clearTimeout(timer);this.unlocking=false;});
+    }catch{if(!this.muted)this.onError?.();}
   }
-  setMuted(muted) {
-    this.muted = muted;
-    if (this.ctx && this.master) this.master.gain.setTargetAtTime(muted ? 0 : .52, this.ctx.currentTime, .025);
-  }
+  setMuted(muted) {this.muted=muted;if(this.ctx)this.master.gain.setTargetAtTime(muted?0:.72,this.ctx.currentTime,.025);}
   startTransport() {
-    this.stopTransport();
-    if (!this.ctx) return;
-    this.session = this.ctx.createGain(); this.session.connect(this.master);
-    this.bg = this.ctx.createGain(); this.bg.gain.value = .33; this.bg.connect(this.session);
+    this.stopTransport();if(!this.ctx)return;
+    this.session=this.ctx.createGain();this.session.connect(this.master);
+    this.bg=this.ctx.createGain();this.bg.gain.value=.66;this.bg.connect(this.session);
+    const filter=this.ctx.createBiquadFilter();filter.type='bandpass';filter.frequency.value=1400;filter.Q.value=.65;
+    this.boost=this.ctx.createGain();this.boost.gain.value=0;filter.connect(this.boost);this.boost.connect(this.session);this.melodyFilter=filter;
   }
+  startSong(gameTime) {
+    if(!this.ctx||!this.session)return;
+    this.clock=this.ctx.state==='running'?{context:this.ctx.currentTime,game:gameTime}:null;this.lastGameRead=null;
+    this.ensureSong(gameTime);
+  }
+  transportTime() {return this.clock?this.clock.game+this.ctx.currentTime-this.clock.context:null;}
+  gameTime() {
+    if(!this.clock)return null;
+    let context=this.ctx.currentTime;
+    // Follow the output device position, not just the already-queued graph.
+    // Reject stale / zero timestamps and clamp implausible driver estimates.
+    let stamp;try{stamp=this.ctx.getOutputTimestamp?.();}catch{}
+    const wall=performance.now();
+    const output=stamp?.contextTime+(wall-(stamp?.performanceTime||0))/1000;
+    if(stamp?.contextTime>0&&stamp.performanceTime>0&&Math.abs(wall-stamp.performanceTime)<250&&context-output>=0&&context-output<.25)context=output;
+    else context-=Math.min(.15,Math.max(0,(this.ctx.baseLatency||0)+(this.ctx.outputLatency||0)));
+    const value=this.clock.game+context-this.clock.context;
+    this.lastGameRead=Math.max(this.lastGameRead??value,value);return this.lastGameRead;
+  }
+  ensureSong(gameTime) {
+    if(this.song||!this.buffers.ensemble||!this.bg||this.ctx.state!=='running')return;
+    const position=Math.max(0,gameTime-RECORDING_SCORE.leadIn),delay=Math.max(0,RECORDING_SCORE.leadIn-gameTime);
+    if(position>=this.buffers.ensemble.duration)return;
+    const s=this.ctx.createBufferSource();s.buffer=this.buffers.ensemble;
+    s.connect(this.bg);s.connect(this.melodyFilter);
+    this.track(s);this.song=s;s.start(this.ctx.currentTime+delay,position);
+    s.onended=()=>{this.nodes.delete(s);s.disconnect();/* song remains a sentinel until transport reset. */};
+  }
+  track(node) {this.nodes.add(node);node.onended=()=>{this.nodes.delete(node);node.disconnect();};}
   stopTransport() {
-    const old = this.session, oldBg = this.bg;
-    if (old && this.ctx) {
-      old.gain.setTargetAtTime(.0001, this.ctx.currentTime, .012);
-      setTimeout(() => { old.disconnect(); oldBg?.disconnect(); }, 100);
+    const old=this.session,oldBg=this.bg,filter=this.melodyFilter,boost=this.boost;
+    if(old&&this.ctx){old.gain.setTargetAtTime(.0001,this.ctx.currentTime,.008);
+      for(const node of this.nodes){try{node.stop(this.ctx.currentTime+.04);}catch{}}
+      this.nodes.clear();setTimeout(()=>{old.disconnect();oldBg?.disconnect();filter?.disconnect();boost?.disconnect();},75);
     }
-    this.session = null; this.bg = null;
+    this.session=this.bg=this.song=this.boost=this.melodyFilter=null;this.clock=null;this.lastGameRead=null;
   }
-  tone(freq, dur, amp, type, t, dest, end) {
-    const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = type; o.frequency.setValueAtTime(freq, t);
-    if (end) o.frequency.exponentialRampToValueAtTime(end, t + dur * .7);
-    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(amp, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    o.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + .02); o.onended = () => { o.disconnect(); g.disconnect(); };
+  resetVariations() {this.variations={};this.lastHit=null;}
+  nextVariation(kind,at) {
+    const previous=this.variations[kind];
+    const repeated=this.lastHit?.kind===kind&&at>=this.lastHit.at&&at-this.lastHit.at<1.25;
+    // Fast repeats contrast dark/short and bright/full articulations, choosing
+    // randomly within each family instead of looping a fixed six-hit sequence.
+    const choices=[0,1,2,3,4,5].filter(v=>v!==previous?.variant&&(!repeated||v%2!==previous.variant%2));
+    const variant=choices[Math.floor(Math.random()*choices.length)];
+    this.variations[kind]={variant,at};this.lastHit={kind,at};return variant;
   }
-  noise(dur, amp, t, dest) {
-    const ctx = this.ctx;
-    if (!this.noiseBuffer) { this.noiseBuffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * .7), ctx.sampleRate); const data = this.noiseBuffer.getChannelData(0); for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1; }
-    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = this.noiseBuffer;
-    f.type = 'highpass'; f.frequency.value = 5400;
-    g.gain.setValueAtTime(amp, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    s.connect(f); f.connect(g); g.connect(dest); s.start(t); s.stop(t + dur);
-    s.onended = () => { s.disconnect(); f.disconnect(); g.disconnect(); };
+  sound(kind,t=this.ctx?.currentTime??0,dest=this.session,level=1,options={}) {
+    if(this.ctx?.state!=='running'||!dest||!this.buffers[kind])return;
+    const meta=AUDIO_SOURCES[kind],s=this.ctx.createBufferSource(),g=this.ctx.createGain();s.buffer=this.buffers[kind];
+    const at=Math.max(t,this.ctx.currentTime),variant=options.vary?this.nextVariation(kind,at):0;
+    const detune=options.vary?[.966,1.031,.981,1.044,.990,1.018][variant]:1;
+    // Lower the drum's body and remove the bright membrane slap. Other
+    // instruments keep their root pitch; variations still use the same sample.
+    const rate=(kind==='drum'?.88:1)*detune;s.playbackRate.value=rate;
+    const velocity=options.vary?[.78,1.12,.88,1.02,.84,1.08][variant]:1;
+    const cutoffs={drum:[420,1350,560,1050,720,1550],wood:[750,4500,1050,3300,1350,6000],gong:[1400,5200,1900,4200,2400,6500],cymbal:[3600,11500,4800,9000,4100,13000]};
+    const filter=this.ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=(cutoffs[kind]||[8000])[variant]||8000;filter.Q.value=.55;
+    const body=this.ctx.createBiquadFilter();body.type=kind==='drum'?'lowshelf':'highshelf';body.frequency.value=kind==='drum'?170:kind==='wood'?600:kind==='cymbal'?4000:1800;body.gain.value=kind==='drum'?[4.5,2.5,4,3,5,2.8][variant]:[-5,3.5,-3.5,2.5,-4.5,4][variant];
+    const sourceLength=Math.min(meta.length,s.buffer.duration-meta.offset),length=sourceLength/rate;
+    const gain=meta.gain*level*velocity*(options.accent||1)*(options.perfect?1.06:1);g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gain,at+.002);
+    const decay=[.50,.98,.62,.86,.56,.94][variant];
+    g.gain.setValueAtTime(gain,at+.025);g.gain.linearRampToValueAtTime(gain*.48,at+length*decay*.72);g.gain.linearRampToValueAtTime(0,at+length*decay);
+    s.connect(filter);filter.connect(body);body.connect(g);g.connect(dest);this.track(s);
+    s.onended=()=>{this.nodes.delete(s);s.disconnect();filter.disconnect();body.disconnect();g.disconnect();};s.start(at,meta.offset,sourceLength);
   }
-  sound(kind, t = this.ctx?.currentTime ?? 0, dest = this.session, level = 1) {
-    if (!this.ctx || this.ctx.state !== 'running' || !dest) return;
-    if (kind === 'drum') { this.tone(155,.42,.7*level,'sine',t,dest,58); this.tone(320,.08,.1*level,'triangle',t,dest,85); }
-    if (kind === 'wood') { this.tone(820,.09,.32*level,'sine',t,dest,600); this.tone(1260,.045,.12*level,'triangle',t,dest); }
-    if (kind === 'gong') [220,331,467,613,902].forEach((f,i) => this.tone(f,1.5-i*.19,.18*level/(i+1),'sine',t,dest,f*1.045));
-    if (kind === 'cymbal') { this.noise(.6,.23*level,t,dest); [1810,2430,3270,4120].forEach(f => this.tone(f,.32,.024*level,'square',t,dest)); }
+
+  judgeSuona(points,perfect=false) {
+    if(this.ctx?.state!=='running'||!this.session||!this.buffers.suona)return;
+    // A short voiced articulation from the supplied sample, not its unrelated
+    // four-second melody. Length is deliberately too short to become a phrase.
+    const ctx=this.ctx,s=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    const t=ctx.currentTime,variant=this.nextVariation('suona',t),duration=points===30?.105:points===20?.085:.065;
+    s.buffer=this.buffers.suona;s.playbackRate.value=[.988,1.014,.994,1.019,.991,1.009][variant];f.type='lowpass';f.frequency.value=[1950,2850,2150,2700,2050,3000][variant];
+    const level=(points===30?.55:points===20?.46:.38)*(perfect?1.08:1)*[.88,1.08,.94,1.03,.91,1.06][variant];
+    if(this.bg){this.bg.gain.setTargetAtTime(.57,t,.006);this.bg.gain.setTargetAtTime(.66,t+duration,.04);}
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(level,t+.006);g.gain.setValueAtTime(level,t+duration*.45);g.gain.linearRampToValueAtTime(0,t+duration);
+    s.connect(f);f.connect(g);g.connect(this.session);this.track(s);
+    s.onended=()=>{this.nodes.delete(s);s.disconnect();f.disconnect();g.disconnect();};s.start(t,.51,duration);
   }
-  tick(accent = false) { if (this.ctx?.state === 'running' && this.session) this.tone(accent ? 1046 : 784,.07,.12,'sine',this.ctx.currentTime,this.session); }
-  miss() {
-    if(this.ctx?.state!=='running' || !this.master) return;
-    // A brief falling cue, distinct from a hit. It survives the last-miss music stop.
-    const t=this.ctx.currentTime;
-    this.tone(190,.085,.15,'triangle',t,this.master,130);
-    this.tone(115,.13,.12,'triangle',t+.055,this.master,75);
-  }
+  tick(accent=false) {this.sound('wood',undefined,this.session,accent?.55:.35);}
+  miss() {this.sound('drum',undefined,this.master,.2);}
   voice() {
-    if (this.ctx?.state !== 'running' || !this.session) return () => {};
-    const ctx = this.ctx, bus = ctx.createGain(), filter = ctx.createBiquadFilter(), nodes = [];
-    filter.type = 'lowpass'; filter.frequency.value = 2100;
-    bus.gain.setValueAtTime(.0001,ctx.currentTime); bus.gain.exponentialRampToValueAtTime(.09,ctx.currentTime+.04);
-    bus.connect(filter); filter.connect(this.session);
-    for (const [f,a] of [[440,.7],[880,.2],[1320,.1]]) {
-      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.value = f; g.gain.value = a;
-      o.connect(g); g.connect(bus); o.start(); nodes.push(o,g);
+    if(this.ctx?.state!=='running'||!this.session)return()=>{};
+    if(this.song&&this.boost) {
+      // Highlight the melody in the SAME time-aligned recording. A different
+      // four-second suona performance must not play out of key over the song.
+      const gain=this.boost,ctx=this.ctx;gain.gain.cancelScheduledValues(ctx.currentTime);gain.gain.setTargetAtTime(.28,ctx.currentTime,.025);
+      let stopped=false;return()=>{if(stopped)return;stopped=true;gain.gain.setTargetAtTime(0,ctx.currentTime,.018);};
     }
-    let stopped = false;
-    return () => { if (stopped) return; stopped = true; bus.gain.setTargetAtTime(.0001,ctx.currentTime,.012); nodes.filter(n => n instanceof OscillatorNode).forEach(o => o.stop(ctx.currentTime+.06)); setTimeout(() => { bus.disconnect(); filter.disconnect(); nodes.forEach(n => n.disconnect()); },120); };
+    // Only if the ensemble failed to load: use the supplied suona excerpt,
+    // gated by the finger. Still a recording, never a synthesized substitute.
+    if(!this.buffers.suona)return()=>{};
+    const s=this.ctx.createBufferSource(),g=this.ctx.createGain(),ctx=this.ctx;s.buffer=this.buffers.suona;s.loop=true;g.gain.value=.4;s.connect(g);g.connect(this.session);this.track(s);s.start();let stopped=false;
+    return()=>{if(stopped)return;stopped=true;g.gain.setTargetAtTime(0,ctx.currentTime,.012);s.stop(ctx.currentTime+.06);setTimeout(()=>g.disconnect(),90);};
   }
 }
-const audio = new RhythmAudio();
+const audio=new RhythmAudio();

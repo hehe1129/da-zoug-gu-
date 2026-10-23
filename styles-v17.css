@@ -1,0 +1,25 @@
+@import url('styles-v15.css');
+/* The same reference painting supplies both dialogs, including its cloud tail. */
+.overlay{padding:24px;background:#03132bd6}
+.modal-card{width:100%;height:auto;aspect-ratio:.75;max-height:86%;display:block;padding:0;background:none;border-radius:0;box-shadow:none;isolation:isolate}
+.modal-card:before{inset:0;transform:none;border-radius:0;box-shadow:none;background:transparent url('assets/modal-frame-v17.png') center/100% 100% no-repeat;z-index:-1}
+.modal-card:after,.drum-studs{display:none}
+.modal-top{top:18%;left:17%;right:20%}
+.pause-stat{top:28%;left:17%;right:24%;margin:0;gap:18px}
+.pause-stat>span{font-size:18px}
+.pause-stat>span:last-child{width:82%}
+.pause-stat strong{font-size:42px;margin:0 0 0 8px}
+.modal-card .primary{position:absolute;top:72%;left:13%;width:78%;height:14%;min-height:0;padding:0;display:flex;align-items:center;justify-content:center}
+.modal-card .primary:before{display:none}
+.modal-card .primary>span:first-child{font-size:34px;line-height:1.15;letter-spacing:3px;padding-bottom:4px}
+.modal-card .secondary{position:absolute;top:86%;right:5%;min-height:40px;padding:4px 0;width:auto;color:#fff0c9;font-size:16px}
+.result-score{top:22%;left:17%;right:19%}
+.result-score .micro{font-size:20px}
+.result-score strong{font-size:clamp(52px,9.5vh,72px);line-height:1;margin:8px 0}
+.result-score>span:last-child{font-size:10px;line-height:1.35}
+.final-level{top:16%;left:17%;right:20%;font-size:10px;line-height:1.4}
+.result-stats{top:50%;left:17%;right:20%;gap:12px}
+.result-stats>span{font-size:11px}
+.result-stats strong{font-size:21px}
+.result-eyebrow{top:61%;left:17%;right:18%;font-size:10px;line-height:1.35}
+@media(max-height:650px){.modal-card{height:auto;max-height:90%}.pause-stat{gap:16px}.pause-stat>span{font-size:16px}.pause-stat strong{font-size:32px}.modal-card .primary>span:first-child{font-size:27px}.result-score .micro{font-size:18px}.result-score strong{font-size:54px;margin:5px 0}.result-stats strong{font-size:18px}.modal-card .secondary{font-size:14px}.final-level,.result-eyebrow,.result-score>span:last-child{font-size:9px}}

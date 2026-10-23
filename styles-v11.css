@@ -1,0 +1,13 @@
+@import url('styles-v10.css');
+@font-face{font-family:Guming;src:url('assets/fonts/guming-r.ttf') format('truetype');font-style:normal;font-weight:100 900;font-display:swap}
+:root{--font:Guming,'Microsoft YaHei',sans-serif}#app,#app *{font-family:Guming,'Microsoft YaHei',sans-serif!important;font-synthesis:none}
+.game-screen{background:var(--stage-shell)!important;transition:background-color 700ms var(--ease-out)}.cover-brand{left:14%;top:8%;width:62%;height:43%}.cover-brand h1{height:100%;width:100%;margin:0}.cover-brand .title-art{display:block!important;width:100%;height:100%;margin:0!important}.title-art svg{width:100%;height:100%;overflow:visible}
+.cover-painting{position:absolute;inset:0;background:#fff center/100% 100% no-repeat;pointer-events:none}.cover-drum,.cover-scene,.cover-side{display:none}.cover-header .icon-button{top:4%;right:5%;width:54px;height:54px}.play-center{left:6%;bottom:11%;width:88%;height:13%}.play-button{background:none!important;padding-top:10px}.play-button>span{font-size:clamp(32px,4.8vh,45px);letter-spacing:5px}.home-actions{bottom:1%;opacity:.8}.quick-rules{background:#ffffffb3;padding:4px}
+.score-block strong{font-size:64px;font-weight:400}.stage-cue{background:#fff0d7;color:#15448b}.game-screen.stage-transition .stage-path{animation:stage-accent 700ms var(--ease-out)}.game-screen.stage-transition .stage-cue{animation:stage-banner 550ms var(--ease-out)}
+@keyframes stage-accent{0%{opacity:.35;transform:scaleX(.86)}100%{opacity:1;transform:scaleX(1)}}@keyframes stage-banner{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.stage-cue,.stage-path{pointer-events:none}.primary>span:first-child{font-weight:400;font-size:36px}.pause-stat strong{font-weight:400}.result-score strong{font-weight:400}.modal-card .micro{font-size:11px}.result-stats>span{font-size:12px}.result-stats strong{font-size:21px}
+@media(max-height:650px){.score-block strong{font-size:52px}.primary>span:first-child{font-size:29px}.play-button>span{font-size:30px}.cover-brand{top:7%;height:43%}}
+@media(prefers-reduced-motion:reduce){.game-screen{transition:none}.game-screen.stage-transition .stage-path,.game-screen.stage-transition .stage-cue{animation:none}}
+.cover-painting{background-image:url('assets/cover-painting-v11.png')}
+.cover-side{display:block;right:5%;top:40%;font-size:10px;line-height:1.5}
+.game-screen{color:var(--stage-ink)!important}.game-controls .icon-button,.phase>b,#levelCount{color:inherit}.stage-track i{background:var(--stage-ink)}#app[data-level="2"] .lives,#app[data-level="3"] .lives{color:#bd1d64}#app[data-level="2"] .lives svg,#app[data-level="3"] .lives svg{stroke:#bd1d64;fill:#bd1d64}#app[data-level="2"] .lives .lost,#app[data-level="3"] .lives .lost{fill:none}

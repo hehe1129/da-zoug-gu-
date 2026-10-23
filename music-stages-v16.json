@@ -1,0 +1,55 @@
+{
+  "boundaries": [
+    0,
+    21.8401,
+    36.1336,
+    66.17,
+    96.1564,
+    134.7389,
+    183.817098
+  ],
+  "candidates": [
+    {
+      "time": 21.79,
+      "novelty": 1.125,
+      "onset": 21.8401,
+      "flux": 61.32,
+      "beforeAttacks": 17,
+      "afterAttacks": 15
+    },
+    {
+      "time": 36.134,
+      "novelty": 1.428,
+      "onset": 36.1336,
+      "flux": 62.712,
+      "beforeAttacks": 14,
+      "afterAttacks": 20
+    },
+    {
+      "time": 66.22,
+      "novelty": 1.545,
+      "onset": 66.17,
+      "flux": 25.542,
+      "beforeAttacks": 18,
+      "afterAttacks": 16
+    },
+    {
+      "time": 96.106,
+      "novelty": 1.167,
+      "onset": 96.1564,
+      "flux": 48.879,
+      "beforeAttacks": 18,
+      "afterAttacks": 15
+    },
+    {
+      "time": 134.589,
+      "novelty": 1.273,
+      "onset": 134.7389,
+      "flux": 36.874,
+      "beforeAttacks": 18,
+      "afterAttacks": 18
+    }
+  ],
+  "source": "assets/audio/ensemble.mp3",
+  "method": "Strongest five left/right feature-change peaks over pulse periodicity, attack density, energy and frequency balance; snapped to nearby measured onsets. Algorithmic game sections, not a traditional score transcription."
+}
