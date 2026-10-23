@@ -1,0 +1,809 @@
+{
+  "librosa": "0.11.0",
+  "sampleRate": 22050,
+  "hop": 128,
+  "resolutionMs": 5.804988662131519,
+  "original": 387,
+  "total": 414,
+  "perStage": [
+    44,
+    32,
+    69,
+    69,
+    94,
+    106
+  ],
+  "holds": 12,
+  "minGap": 0.23869999999999436,
+  "shiftedCount": 67,
+  "addedCount": 27,
+  "moved": [
+    {
+      "old": 1.0197,
+      "new": 1.0283,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 2.1521,
+      "new": 2.1603,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 15.1875,
+      "new": 15.1983,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 17.3076,
+      "new": 17.3171,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 19.7321,
+      "new": 19.7436,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 26.3421,
+      "new": 26.3903,
+      "kind": "cymbal",
+      "band": "high"
+    },
+    {
+      "old": 27.0305,
+      "new": 27.0056,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 27.6192,
+      "new": 27.6267,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 29.4251,
+      "new": 29.4379,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 31.8396,
+      "new": 31.847,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 33.012,
+      "new": 33.0196,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 38.5144,
+      "new": 38.5227,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 44.86,
+      "new": 44.8676,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 47.5938,
+      "new": 47.6017,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 54.8473,
+      "new": 54.8579,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 57.2818,
+      "new": 57.3135,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 57.9503,
+      "new": 57.923,
+      "kind": "wood",
+      "band": "mid"
+    },
+    {
+      "old": 60.6142,
+      "new": 60.6223,
+      "kind": "cymbal",
+      "band": "high"
+    },
+    {
+      "old": 61.8614,
+      "new": 61.8239,
+      "kind": "cymbal",
+      "band": "high"
+    },
+    {
+      "old": 62.49,
+      "new": 62.4973,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 67.1444,
+      "new": 67.1529,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 73.7793,
+      "new": 73.788,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 74.2682,
+      "new": 74.2756,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 74.7122,
+      "new": 74.7226,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 75.5902,
+      "new": 75.5992,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 76.2038,
+      "new": 76.2145,
+      "kind": "wood",
+      "band": "mid"
+    },
+    {
+      "old": 77.9049,
+      "new": 77.9154,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 79.172,
+      "new": 79.1809,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 86.8596,
+      "new": 86.8667,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 88.436,
+      "new": 88.4456,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 90.8754,
+      "new": 90.8895,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 92.4768,
+      "new": 92.4859,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 94.6419,
+      "new": 94.6511,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 98.4432,
+      "new": 98.4534,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 99.6206,
+      "new": 99.6376,
+      "kind": "wood",
+      "band": "mid"
+    },
+    {
+      "old": 105.6968,
+      "new": 105.7038,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 107.0836,
+      "new": 107.0912,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 111.3489,
+      "new": 111.3579,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 120.553,
+      "new": 120.5646,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 121.2115,
+      "new": 121.1683,
+      "kind": "wood",
+      "band": "mid"
+    },
+    {
+      "old": 123.651,
+      "new": 123.6587,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 125.0029,
+      "new": 125.0112,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 128.1008,
+      "new": 128.1111,
+      "kind": "cymbal",
+      "band": "high"
+    },
+    {
+      "old": 133.1943,
+      "new": 133.2079,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 137.5893,
+      "new": 137.6023,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 139.5398,
+      "new": 139.5469,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 140.1235,
+      "new": 140.1332,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 141.4056,
+      "new": 141.4161,
+      "kind": "wood",
+      "band": "mid"
+    },
+    {
+      "old": 141.9394,
+      "new": 141.9502,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 142.6727,
+      "new": 142.6816,
+      "kind": "wood",
+      "band": "mid"
+    },
+    {
+      "old": 143.1666,
+      "new": 143.175,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 147.0228,
+      "new": 147.0528,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 152.665,
+      "new": 152.672,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 155.0945,
+      "new": 155.1043,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 155.7281,
+      "new": 155.7428,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 158.6065,
+      "new": 158.6163,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 159.0754,
+      "new": 159.0865,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 159.694,
+      "new": 159.7018,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 166.2541,
+      "new": 166.2789,
+      "kind": "cymbal",
+      "band": "high"
+    },
+    {
+      "old": 166.5784,
+      "new": 166.5866,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 167.192,
+      "new": 167.2019,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 168.7634,
+      "new": 168.7518,
+      "kind": "cymbal",
+      "band": "high"
+    },
+    {
+      "old": 171.9013,
+      "new": 171.9097,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 173.1734,
+      "new": 173.181,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 174.4006,
+      "new": 174.4117,
+      "kind": "gong",
+      "band": "mid"
+    },
+    {
+      "old": 175.0641,
+      "new": 175.0735,
+      "kind": "drum",
+      "band": "low"
+    },
+    {
+      "old": 178.8455,
+      "new": 178.8525,
+      "kind": "drum",
+      "band": "low"
+    }
+  ],
+  "added": [
+    {
+      "time": 17.021,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 0,
+      "strength": 6.763,
+      "accent": 1.06,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 3
+    },
+    {
+      "time": 56.3905,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 2,
+      "strength": 6.4961,
+      "accent": 1.06,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 63.0488,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 2,
+      "strength": 6.2076,
+      "accent": 1.06,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 120.3092,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 4,
+      "strength": 5.5975,
+      "accent": 1.06,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 0
+    },
+    {
+      "time": 30.0939,
+      "kind": "wood",
+      "duration": 0,
+      "stage": 1,
+      "strength": 5.0581,
+      "accent": 1.06,
+      "band": "mid",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 78.9196,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 3,
+      "strength": 5.0043,
+      "accent": 1.06,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 2
+    },
+    {
+      "time": 55.5023,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 2,
+      "strength": 4.7971,
+      "accent": 1.06,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 2
+    },
+    {
+      "time": 64.2969,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 2,
+      "strength": 4.61,
+      "accent": 1.055,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 90.5644,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 3,
+      "strength": 4.4735,
+      "accent": 1.052,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 45.7848,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 2,
+      "strength": 4.46,
+      "accent": 1.051,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 3
+    },
+    {
+      "time": 63.6757,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 2,
+      "strength": 4.3804,
+      "accent": 1.05,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 3
+    },
+    {
+      "time": 107.4279,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 4,
+      "strength": 4.2759,
+      "accent": 1.047,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 75.901,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 3,
+      "strength": 4.1693,
+      "accent": 1.044,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 21.845,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 1,
+      "strength": 4.1508,
+      "accent": 1.044,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 0
+    },
+    {
+      "time": 124.5991,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 4,
+      "strength": 4.1104,
+      "accent": 1.043,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 57.5921,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 2,
+      "strength": 4.0289,
+      "accent": 1.041,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 34.5637,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 1,
+      "strength": 4.0159,
+      "accent": 1.04,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 3
+    },
+    {
+      "time": 20.3589,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 0,
+      "strength": 3.965,
+      "accent": 1.039,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 0
+    },
+    {
+      "time": 94.2738,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 3,
+      "strength": 3.9476,
+      "accent": 1.039,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 0
+    },
+    {
+      "time": 27.3423,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 1,
+      "strength": 3.9444,
+      "accent": 1.039,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 2
+    },
+    {
+      "time": 118.9682,
+      "kind": "cymbal",
+      "duration": 0,
+      "stage": 4,
+      "strength": 3.9248,
+      "accent": 1.038,
+      "band": "high",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 0
+    },
+    {
+      "time": 69.1905,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 3,
+      "strength": 3.889,
+      "accent": 1.037,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 3
+    },
+    {
+      "time": 5.1672,
+      "kind": "drum",
+      "duration": 0,
+      "stage": 0,
+      "strength": 3.8816,
+      "accent": 1.037,
+      "band": "low",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 1
+    },
+    {
+      "time": 118.3587,
+      "kind": "wood",
+      "duration": 0,
+      "stage": 4,
+      "strength": 3.7643,
+      "accent": 1.034,
+      "band": "mid",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 2
+    },
+    {
+      "time": 173.4655,
+      "kind": "wood",
+      "duration": 0,
+      "stage": 5,
+      "strength": 3.0647,
+      "accent": 1.017,
+      "band": "mid",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 2
+    },
+    {
+      "time": 18.4026,
+      "kind": "wood",
+      "duration": 0,
+      "stage": 0,
+      "strength": 2.7591,
+      "accent": 1.009,
+      "band": "mid",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 3
+    },
+    {
+      "time": 5.6607,
+      "kind": "wood",
+      "duration": 0,
+      "stage": 0,
+      "strength": 2.7496,
+      "accent": 1.009,
+      "band": "mid",
+      "added": true,
+      "addedV22": true,
+      "heightRatio": 0.82,
+      "lane": 2
+    }
+  ],
+  "sectionTempoCandidates": [
+    {
+      "from": 0,
+      "to": 21.8401,
+      "bpmCandidate": 100.35
+    },
+    {
+      "from": 21.8401,
+      "to": 36.1336,
+      "bpmCandidate": 101.33
+    },
+    {
+      "from": 36.1336,
+      "to": 66.17,
+      "bpmCandidate": 99.38
+    },
+    {
+      "from": 66.17,
+      "to": 96.1564,
+      "bpmCandidate": 96.6
+    },
+    {
+      "from": 96.1564,
+      "to": 134.7389,
+      "bpmCandidate": 96.6
+    },
+    {
+      "from": 134.7389,
+      "to": 183.817098,
+      "bpmCandidate": 96.6
+    }
+  ]
+}

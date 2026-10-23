@@ -3,6 +3,8 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const canvas = $('board'), pen = canvas.getContext('2d');
+const feedbackCanvas=$('perfectFeedback'),feedbackPen=feedbackCanvas.getContext('2d');
+let feedbackOffset={x:0,y:0},feedbackWidth=0,feedbackHeight=0,feedbackDirty=false;
 const names = {drum:'大鼓',gong:'小锣',cymbal:'铜钹',wood:'木鱼',suona:'唢呐'};
 const colors = ['#ffedbf','#fff0c9','#ffe9b3'];
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -81,7 +83,7 @@ function loadVisuals(tracker,retry){
   const tasks=[
     readyImage(instrumentSheet,()=>Object.keys(instrumentArt).length===5,retry),
     readyImage(perfectSheet,()=>perfectArt.length===5,retry),
-    visualImage('assets/modal-frame-v19.webp',retry),
+    visualImage('assets/modal-frame-v22.webp',retry),
     visualImage('assets/cover-painting-v19.webp',retry),
     visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry)
   ];
@@ -120,6 +122,10 @@ function feedback(text, kind = '', duration = .8) { $('notice').textContent = te
 function dimensions() {
   const r = canvas.getBoundingClientRect(); w = r.width; h = r.height;
   const d = Math.min(devicePixelRatio || 1, 2); canvas.width = Math.round(w*d); canvas.height = Math.round(h*d); pen.setTransform(d,0,0,d,0,0);
+  const screen=$('game').getBoundingClientRect();
+  feedbackWidth=screen.width;feedbackHeight=screen.height;
+  feedbackCanvas.width=Math.round(screen.width*d);feedbackCanvas.height=Math.round(screen.height*d);
+  feedbackPen.setTransform(d,0,0,d,0,0);feedbackOffset={x:r.left-screen.left,y:r.top-screen.top};
   line = h * .81; tile = Math.max(68, Math.min(94,h*.17));
   paintScenery(Math.max(0,phase));
 }
@@ -218,7 +224,7 @@ function success(n,origin=n.hitPoint,holdPoints=30) {
   const point=origin||{x:(n.lane+.5)*w/4,y:line};
   // Rapid hits at one position retire the old figure gently, rather than
   // stacking several translucent images into an opaque patch.
-  if(n.perfect)for(const e of effects)if(e.perfect&&Math.hypot(e.origin.x-point.x,e.origin.y-point.y)<64)e.strength=(e.strength??1)*.3;
+  if(n.perfect)for(const e of effects)if(e.perfect&&Math.hypot(e.origin.x-point.x,e.origin.y-point.y)<64)e.strength=(e.strength??1)*.4;
   const style=hitParticles(n.lane,n.kind==='suona',point,n.perfect);
   addEffect(n.lane,'hit','+'+points,point,style);effects.at(-1).perfect=!!n.perfect;effects.at(-1).bonus=bonus;
   if(n.perfect){const active=effects.filter(e=>e.perfect);if(active.length>5)effects.splice(effects.indexOf(active[0]),1);}
@@ -316,6 +322,23 @@ function roundRect(x,y,width,height,radius,fill,stroke) {
   if(fill) { pen.fillStyle=fill; pen.fill(); } if(stroke) { pen.strokeStyle=stroke; pen.stroke(); }
 }
 function draw(t) {
+  // This separate pointer-transparent surface spans the whole game screen.
+  // The field keeps clipping falling tiles, but never clips a perfect figure.
+  const perfectEffects=effects.filter(e=>e.kind==='hit'&&e.perfect);
+  if(feedbackDirty||perfectEffects.length)feedbackPen.clearRect(0,0,feedbackWidth,feedbackHeight);
+  feedbackDirty=perfectEffects.length>0;
+  for(const e of perfectEffects){
+    const origin={x:e.origin.x+feedbackOffset.x,y:e.origin.y+feedbackOffset.y};
+    drawPerfectPerformer(feedbackPen,{...e,origin},t-e.at,reducedMotion,feedbackWidth,coarsePointer?112:240);
+    feedbackPen.save();feedbackPen.globalAlpha=Math.max(0,1-(t-e.at)/.65);
+    const x=Math.max(42,Math.min(feedbackWidth-42,origin.x));
+    feedbackPen.textAlign='center';feedbackPen.font='15px ClassicSong';feedbackPen.fillStyle='#fff4c7';
+    feedbackPen.fillText('PERFECT',x,origin.y-30);
+    feedbackPen.font='14px ClassicSong';feedbackPen.fillStyle='#ffdd2d';
+    feedbackPen.fillText(e.points,x,origin.y+30-(reducedMotion?0:(t-e.at)*18));feedbackPen.restore();
+  }
+  // Keep the timing reference legible through the translucent figure.
+  if(feedbackDirty)feedbackPen.clearRect(feedbackOffset.x,feedbackOffset.y+line-1.5,w,3);
   const palette=stagePalette(t);
   pen.clearRect(0,0,w,h); pen.fillStyle=palette.field; pen.fillRect(0,0,w,h);
   const laneWidth=w/4;
@@ -359,11 +382,9 @@ function draw(t) {
   pen.globalAlpha=1;
   for(const e of effects)if(e.kind==='hit'){
     const age=t-e.at,alpha=Math.max(0,1-age/.5),x=e.origin.x,y=e.origin.y;
-    if(e.perfect)drawPerfectPerformer(pen,e,age,reducedMotion,w,coarsePointer?96:240);
     pen.globalAlpha=alpha;pen.strokeStyle='#ffdd2d';pen.lineWidth=1.5;
     if(!e.perfect&&!reducedMotion){pen.beginPath();pen.arc(x,y,8+age*46,0,Math.PI*2);pen.stroke();}
-    if(e.perfect){pen.fillStyle='#fff4c7';pen.font='15px ClassicSong';pen.textAlign='center';pen.fillText('PERFECT',x,y-24);}
-    pen.fillStyle='#ffdd2d';pen.font='14px ClassicSong';pen.textAlign='center';pen.fillText(e.points,x,y+25-(reducedMotion?0:age*18));
+    if(!e.perfect){pen.fillStyle='#ffdd2d';pen.font='14px ClassicSong';pen.textAlign='center';pen.fillText(e.points,x,y+25-(reducedMotion?0:age*18));}
   }
   pen.globalAlpha=1;
   for(const n of notes) {

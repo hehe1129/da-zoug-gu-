@@ -2,9 +2,9 @@
    gold palette of the new reference UI. No faces are added to instruments. */
 'use strict';
 const instrumentSprites = {
- suona:{x:55,y:54,width:465,height:470},wood:{x:545,y:112,width:490,height:400},
- gong:{x:1096,y:40,width:400,height:485},cymbal:{x:210,y:568,width:560,height:410},
- drum:{x:842,y:518,width:500,height:462}
+ suona:{x:315,y:310,width:250,height:265},wood:{x:620,y:20,width:230,height:275},
+ gong:{x:40,y:45,width:215,height:255},cymbal:{x:275,y:65,width:300,height:210},
+ drum:{x:635,y:335,width:235,height:240}
 };
 const instrumentSheet = new Image();
 const instrumentArt={};
@@ -77,13 +77,15 @@ function prepareInstrumentArt() {
     context.drawImage(instrumentSheet,s.x,s.y,s.width,s.height,0,0,s.width,s.height);
     try {
       const image=context.getImageData(0,0,s.width,s.height);
-      // Remove white paper uniformly, including the gong's enclosed rope hole.
-      // Recover foreground pigment from the white matte instead of leaving white halos.
+      // Native atlas extraction: unmix the supplied cream paper, also inside
+      // the gong rope. Recover its pigment rather than painting over its colors.
       const d=image.data;
+      const paper=[255,242,216];
       for(let i=0;i<d.length;i+=4){
-        const alpha=Math.min(1,Math.max(0,(255-Math.min(d[i],d[i+1],d[i+2]))/180));
-        if(alpha<.025){d[i+3]=0;continue;}
-        for(let k=0;k<3;k++)d[i+k]=Math.max(0,Math.min(255,255+(d[i+k]-255)/alpha));
+        const contrast=Math.max(...paper.map((p,k)=>p-d[i+k]));
+        const alpha=Math.min(1,Math.max(0,(contrast-3)/65));
+        if(alpha<.035){d[i+3]=0;continue;}
+        for(let k=0;k<3;k++)d[i+k]=Math.max(0,Math.min(255,paper[k]+(d[i+k]-paper[k])/alpha));
         d[i+3]=Math.round(alpha*255);
       }
       context.putImageData(image,0,0);
@@ -96,7 +98,7 @@ function prepareInstrumentArt() {
   document.querySelectorAll('[data-instrument]').forEach(el=>{el.innerHTML=instrumentSVG(el.dataset.instrument);});
 }
 instrumentSheet.onload=prepareInstrumentArt;
-instrumentSheet.src = 'assets/instruments-brush-v11.jpg';
+instrumentSheet.src = 'assets/instruments-source-v22.jpg';
 function drawInstrument(context,kind,x,y,width,height) {
   const s=instrumentSprites[kind];
   if(!s || !instrumentSheet.complete || !instrumentSheet.naturalWidth) return;
@@ -113,7 +115,7 @@ function instrumentSVG(kind) {
   const s=instrumentSprites[kind];
   if(instrumentArt[kind])return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${s.width} ${s.height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><image href="${instrumentArt[kind].url}" width="${s.width}" height="${s.height}"/></svg>`;
   const clip=`sprite-${kind}-${spriteInstance++}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${s.x} ${s.y} ${s.width} ${s.height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><clipPath id="${clip}"><rect x="${s.x}" y="${s.y}" width="${s.width}" height="${s.height}"/></clipPath></defs><image clip-path="url(#${clip})" href="assets/instruments-brush-v11.jpg" width="1536" height="1024"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${s.x} ${s.y} ${s.width} ${s.height}" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><clipPath id="${clip}"><rect x="${s.x}" y="${s.y}" width="${s.width}" height="${s.height}"/></clipPath></defs><image clip-path="url(#${clip})" href="assets/instruments-source-v22.jpg" width="900" height="612"/></svg>`;
 }
 // Render the exact supplied performers as independent sprites. The source file
 // stays untouched; the same edge matte preserves their original interior colors.
