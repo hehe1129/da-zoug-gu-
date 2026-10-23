@@ -172,14 +172,14 @@ class RhythmAudio {
     const detune=options.vary?[.966,1.031,.981,1.044,.990,1.018][variant]:1;
     // Lower the drum's body and remove the bright membrane slap. Other
     // instruments keep their root pitch; variations still use the same sample.
-    const rate=(kind==='drum'?.88:1)*detune;s.playbackRate.value=rate;
+    const rate=(kind==='drum'?.78:1)*detune;s.playbackRate.value=rate;
     const velocity=options.vary?[.78,1.12,.88,1.02,.84,1.08][variant]:1;
-    const cutoffs={drum:[420,1350,560,1050,720,1550],wood:[750,4500,1050,3300,1350,6000],gong:[1400,5200,1900,4200,2400,6500],cymbal:[3600,11500,4800,9000,4100,13000]};
+    const cutoffs={drum:[320,680,390,590,450,750],wood:[750,4500,1050,3300,1350,6000],gong:[1400,5200,1900,4200,2400,6500],cymbal:[3600,11500,4800,9000,4100,13000]};
     const filter=this.ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=(cutoffs[kind]||[8000])[variant]||8000;filter.Q.value=.55;
-    const body=this.ctx.createBiquadFilter();body.type=kind==='drum'?'lowshelf':'highshelf';body.frequency.value=kind==='drum'?170:kind==='wood'?600:kind==='cymbal'?4000:1800;body.gain.value=kind==='drum'?[4.5,2.5,4,3,5,2.8][variant]:[-5,3.5,-3.5,2.5,-4.5,4][variant];
+    const body=this.ctx.createBiquadFilter();body.type=kind==='drum'?'lowshelf':'highshelf';body.frequency.value=kind==='drum'?180:kind==='wood'?600:kind==='cymbal'?4000:1800;body.gain.value=kind==='drum'?[6,4,5.5,4.5,6,4.2][variant]:[-5,3.5,-3.5,2.5,-4.5,4][variant];
     const sourceLength=Math.min(meta.length,s.buffer.duration-meta.offset),length=sourceLength/rate;
     const gain=meta.gain*level*velocity*(options.accent||1)*(options.perfect?1.06:1);g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gain,at+.002);
-    const decay=[.50,.98,.62,.86,.56,.94][variant];
+    const decay=(kind==='drum'?[.36,.67,.42,.59,.39,.65]:[.50,.98,.62,.86,.56,.94])[variant];
     g.gain.setValueAtTime(gain,at+.025);g.gain.linearRampToValueAtTime(gain*.48,at+length*decay*.72);g.gain.linearRampToValueAtTime(0,at+length*decay);
     s.connect(filter);filter.connect(body);body.connect(g);g.connect(dest);this.track(s);
     s.onended=()=>{this.nodes.delete(s);s.disconnect();filter.disconnect();body.disconnect();g.disconnect();};s.start(at,meta.offset,sourceLength);

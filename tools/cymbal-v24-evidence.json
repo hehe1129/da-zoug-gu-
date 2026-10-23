@@ -1,0 +1,339 @@
+{
+  "total": 445,
+  "cymbalCount": 93,
+  "gongCount": 82,
+  "chords": 27,
+  "actions": {
+    "retime": 7,
+    "chord": 14,
+    "add": 3
+  },
+  "changes": [
+    {
+      "action": "add",
+      "time": 14.6217,
+      "evidence": {
+        "time": 14.6217,
+        "strength": 3.738,
+        "metalShare": 0.981,
+        "tailRatio": 0.029,
+        "flux": 2.204,
+        "nearestOldCymbal": 0.307,
+        "rawTime": 14.5992
+      }
+    },
+    {
+      "action": "chord",
+      "time": 14.8832,
+      "evidence": {
+        "time": 14.9148,
+        "strength": 5.389,
+        "metalShare": 0.803,
+        "tailRatio": 0.077,
+        "flux": 2.875,
+        "nearestOldCymbal": 0.603,
+        "rawTime": 14.8952
+      }
+    },
+    {
+      "action": "chord",
+      "time": 25.5489,
+      "evidence": {
+        "time": 25.5118,
+        "strength": 2.125,
+        "metalShare": 0.765,
+        "tailRatio": 0.014,
+        "flux": 2.271,
+        "nearestOldCymbal": 0.51,
+        "rawTime": 25.5009
+      }
+    },
+    {
+      "action": "chord",
+      "time": 30.4129,
+      "evidence": {
+        "time": 30.388,
+        "strength": 2.977,
+        "metalShare": 0.785,
+        "tailRatio": 0.188,
+        "flux": 1.751,
+        "nearestOldCymbal": 0.356,
+        "rawTime": 30.3945
+      }
+    },
+    {
+      "action": "chord",
+      "time": 45.1643,
+      "evidence": {
+        "time": 45.1588,
+        "strength": 2.239,
+        "metalShare": 0.966,
+        "tailRatio": 0.225,
+        "flux": 3.122,
+        "nearestOldCymbal": 3.894,
+        "rawTime": 45.1798
+      }
+    },
+    {
+      "action": "chord",
+      "time": 47.6017,
+      "evidence": {
+        "time": 47.5853,
+        "strength": 2.548,
+        "metalShare": 0.831,
+        "tailRatio": 0.075,
+        "flux": 2.523,
+        "nearestOldCymbal": 1.45,
+        "rawTime": 47.6237
+      }
+    },
+    {
+      "action": "retime",
+      "from": 49.0854,
+      "time": 49.0569,
+      "groupSize": 1,
+      "evidence": {
+        "time": 49.0569,
+        "strength": 1.522,
+        "metalShare": 0.814,
+        "tailRatio": 0.488,
+        "flux": 1.245,
+        "nearestOldCymbal": 0.033,
+        "rawTime": 49.0402
+      }
+    },
+    {
+      "action": "chord",
+      "time": 57.923,
+      "evidence": {
+        "time": 57.8921,
+        "strength": 4.875,
+        "metalShare": 0.986,
+        "tailRatio": 0.603,
+        "flux": 2.861,
+        "nearestOldCymbal": 0.289,
+        "rawTime": 57.8695
+      }
+    },
+    {
+      "action": "retime",
+      "from": 62.1906,
+      "time": 62.1152,
+      "groupSize": 1,
+      "evidence": {
+        "time": 62.1152,
+        "strength": 1.717,
+        "metalShare": 0.752,
+        "tailRatio": 0.123,
+        "flux": 2.922,
+        "nearestOldCymbal": 0.077,
+        "rawTime": 62.1014
+      }
+    },
+    {
+      "action": "chord",
+      "time": 62.7843,
+      "evidence": {
+        "time": 62.774,
+        "strength": 3.844,
+        "metalShare": 0.721,
+        "tailRatio": 0.136,
+        "flux": 2.454,
+        "nearestOldCymbal": 0.268,
+        "rawTime": 62.769
+      }
+    },
+    {
+      "action": "chord",
+      "time": 76.8523,
+      "evidence": {
+        "time": 76.8453,
+        "strength": 3.087,
+        "metalShare": 0.798,
+        "tailRatio": 0.331,
+        "flux": 2.001,
+        "nearestOldCymbal": 0.951,
+        "rawTime": 76.8402
+      }
+    },
+    {
+      "action": "chord",
+      "time": 78.2242,
+      "evidence": {
+        "time": 78.2618,
+        "strength": 4.536,
+        "metalShare": 0.83,
+        "tailRatio": 0.105,
+        "flux": 1.57,
+        "nearestOldCymbal": 0.593,
+        "rawTime": 78.3147
+      }
+    },
+    {
+      "action": "chord",
+      "time": 79.1809,
+      "evidence": {
+        "time": 79.1964,
+        "strength": 4.999,
+        "metalShare": 0.94,
+        "tailRatio": 0.345,
+        "flux": 2.572,
+        "nearestOldCymbal": 0.289,
+        "rawTime": 79.1971
+      }
+    },
+    {
+      "action": "retime",
+      "from": 90.5644,
+      "time": 90.5364,
+      "groupSize": 1,
+      "evidence": {
+        "time": 90.5364,
+        "strength": 2.374,
+        "metalShare": 0.833,
+        "tailRatio": 0.202,
+        "flux": 2.183,
+        "nearestOldCymbal": 0.036,
+        "rawTime": 90.5168
+      }
+    },
+    {
+      "action": "retime",
+      "from": 97.8247,
+      "time": 97.7346,
+      "groupSize": 1,
+      "evidence": {
+        "time": 97.7346,
+        "strength": 2.11,
+        "metalShare": 0.97,
+        "tailRatio": 0.054,
+        "flux": 2.661,
+        "nearestOldCymbal": 0.098,
+        "rawTime": 97.715
+      }
+    },
+    {
+      "action": "retime",
+      "from": 101.2369,
+      "time": 101.1711,
+      "groupSize": 1,
+      "evidence": {
+        "time": 101.1711,
+        "strength": 1.73,
+        "metalShare": 0.71,
+        "tailRatio": 0.012,
+        "flux": 1.57,
+        "nearestOldCymbal": 0.002,
+        "rawTime": 101.227
+      }
+    },
+    {
+      "action": "chord",
+      "time": 112.3167,
+      "evidence": {
+        "time": 112.2964,
+        "strength": 2.04,
+        "metalShare": 0.979,
+        "tailRatio": 0.264,
+        "flux": 1.469,
+        "nearestOldCymbal": 0.649,
+        "rawTime": 112.2855
+      }
+    },
+    {
+      "action": "retime",
+      "from": 124.5991,
+      "time": 124.6175,
+      "groupSize": 1,
+      "evidence": {
+        "time": 124.6175,
+        "strength": 1.694,
+        "metalShare": 0.952,
+        "tailRatio": 0.401,
+        "flux": 1.993,
+        "nearestOldCymbal": 0.051,
+        "rawTime": 124.6385
+      }
+    },
+    {
+      "action": "retime",
+      "from": 137.3199,
+      "time": 137.3101,
+      "groupSize": 1,
+      "evidence": {
+        "time": 137.3101,
+        "strength": 1.697,
+        "metalShare": 0.961,
+        "tailRatio": 0.425,
+        "flux": 1.964,
+        "nearestOldCymbal": 0.049,
+        "rawTime": 137.3573
+      }
+    },
+    {
+      "action": "add",
+      "time": 141.0195,
+      "evidence": {
+        "time": 141.0195,
+        "strength": 3.041,
+        "metalShare": 0.997,
+        "tailRatio": 0.001,
+        "flux": 1.606,
+        "nearestOldCymbal": 0.338,
+        "rawTime": 141.0782
+      }
+    },
+    {
+      "action": "chord",
+      "time": 141.9502,
+      "evidence": {
+        "time": 141.9164,
+        "strength": 4.483,
+        "metalShare": 0.943,
+        "tailRatio": 0.013,
+        "flux": 1.687,
+        "nearestOldCymbal": 1.168,
+        "rawTime": 141.9084
+      }
+    },
+    {
+      "action": "chord",
+      "time": 148.6042,
+      "evidence": {
+        "time": 148.6385,
+        "strength": 2.905,
+        "metalShare": 0.994,
+        "tailRatio": 0.171,
+        "flux": 1.521,
+        "nearestOldCymbal": 5.853,
+        "rawTime": 148.6305
+      }
+    },
+    {
+      "action": "chord",
+      "time": 149.8813,
+      "evidence": {
+        "time": 149.8518,
+        "strength": 2.375,
+        "metalShare": 0.994,
+        "tailRatio": 0.058,
+        "flux": 1.897,
+        "nearestOldCymbal": 4.634,
+        "rawTime": 149.8496
+      }
+    },
+    {
+      "action": "add",
+      "time": 154.7831,
+      "evidence": {
+        "time": 154.7831,
+        "strength": 4.667,
+        "metalShare": 0.717,
+        "tailRatio": 0.029,
+        "flux": 1.463,
+        "nearestOldCymbal": 0.277,
+        "rawTime": 154.7606
+      }
+    }
+  ]
+}
