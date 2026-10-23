@@ -11,7 +11,7 @@ const AUDIO_SOURCES = {
 class RhythmAudio {
   constructor() {
     this.ctx=null;this.master=null;this.session=null;this.bg=null;this.song=null;
-    this.muted=false;this.unlocking=false;this.buffers={};this.nodes=new Set();this.variations={};this.lastHit=null;this.lastGameRead=null;
+    this.muted=false;this.unlocking=false;this.buffers={};this.nodes=new Set();this.variations={};this.lastHit=null;this.lastGameRead=null;this.visualClock=null;
     // Cover and controls get the network first; decode only after a user gesture.
     this.raw={};this.status='idle';this.failed=[];this.clock=null;this.boost=null;
   }
@@ -73,7 +73,7 @@ class RhythmAudio {
   }
   startSong(gameTime) {
     if(!this.ctx||!this.session)return;
-    this.clock=this.ctx.state==='running'?{context:this.ctx.currentTime,game:gameTime}:null;this.lastGameRead=null;
+    this.clock=this.ctx.state==='running'?{context:this.ctx.currentTime,game:gameTime}:null;this.lastGameRead=null;this.visualClock=null;
     this.ensureSong(gameTime);
   }
   transportTime() {return this.clock?this.clock.game+this.ctx.currentTime-this.clock.context:null;}
@@ -87,8 +87,22 @@ class RhythmAudio {
     const output=stamp?.contextTime+(wall-(stamp?.performanceTime||0))/1000;
     if(stamp?.contextTime>0&&stamp.performanceTime>0&&Math.abs(wall-stamp.performanceTime)<250&&context-output>=0&&context-output<.25)context=output;
     else context-=Math.min(.15,Math.max(0,(this.ctx.baseLatency||0)+(this.ctx.outputLatency||0)));
-    const value=this.clock.game+context-this.clock.context;
-    this.lastGameRead=Math.max(this.lastGameRead??value,value);return this.lastGameRead;
+    const target=this.clock.game+context-this.clock.context;
+    // Audio clocks can advance in blocks, or switch between output timestamps
+    // and the latency fallback. A monotonic max alone turns those changes into
+    // stationary frames followed by jumps, even with an idle GPU and no network.
+    // Advance on the high-resolution wall clock; gently follow the audible
+    // position without letting clock corrections stop or jerk falling notes.
+    const previous=this.visualClock;
+    if(!previous)this.visualClock={wall,value:target};
+    else {
+      const dt=Math.max(0,(wall-previous.wall)/1000),predicted=previous.value+dt;
+      const error=target-predicted,limit=dt*.025;
+      const correction=Math.max(-limit,Math.min(limit,error*Math.min(1,dt/.8)));
+      previous.wall=wall;previous.value=predicted+correction;
+    }
+    this.lastClockError=target-this.visualClock.value;
+    this.lastGameRead=Math.max(this.lastGameRead??this.visualClock.value,this.visualClock.value);return this.lastGameRead;
   }
   ensureSong(gameTime) {
     if(this.song||!this.buffers.ensemble||!this.bg||this.ctx.state!=='running')return;
@@ -106,7 +120,7 @@ class RhythmAudio {
       for(const node of this.nodes){try{node.stop(this.ctx.currentTime+.04);}catch{}}
       this.nodes.clear();setTimeout(()=>{old.disconnect();oldBg?.disconnect();filter?.disconnect();boost?.disconnect();},75);
     }
-    this.session=this.bg=this.song=this.boost=this.melodyFilter=null;this.clock=null;this.lastGameRead=null;
+    this.session=this.bg=this.song=this.boost=this.melodyFilter=null;this.clock=null;this.lastGameRead=null;this.visualClock=null;
   }
   resetVariations() {this.variations={};this.lastHit=null;}
   nextVariation(kind,at) {
