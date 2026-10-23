@@ -39,6 +39,8 @@ let burstIndex = 0, perfectBurstIndex = 0;
 let sessionLanes = [];
 let stageCueUntil = 0, themeAt = 0, themeBefore = stages[0];
 const scenery=document.createElement('canvas');
+const coarsePointer=matchMedia('(pointer: coarse)').matches;
+function textIfChanged(el,text){if(el.textContent!==text)el.textContent=text;}
 let countStarted = 0, countDuration = 3, lastCount = -1, transitionTimer = 0, resultFrame = 0, messageTimer = 0;
 let waitingAudio = false, loadStarted = 0, resumeCountdown = false;
 
@@ -217,17 +219,19 @@ function update(t) {
   notes = notes.filter(n => !n.done || t < n.at+n.dur+1);
   effects = effects.filter(e => t-e.at < (e.kind==='miss' ? .85 : e.perfect ? 1 : .65));
   particles = particles.filter(p=>t-p.at<p.life);
-  if(t > damageUntil){$('damageFeedback').hidden = true;$('field').classList.remove('damage-active');}
+  if(t > damageUntil&&!$('damageFeedback').hidden){$('damageFeedback').hidden = true;$('field').classList.remove('damage-active');}
   const position=Math.max(0,t-SONG_LEAD), sections=RECORDING_SCORE.sections;
   const current=Math.min(5,sections.findIndex((v,i)=>i<6&&position>=v&&position<sections[i+1]));
   if(current>=0&&current!==phase)enterStage(current);
-  if(t>=stageCueUntil)$('stageCue').dataset.visible='false';
+  if(t>=stageCueUntil&&$('stageCue').dataset.visible==='true')$('stageCue').dataset.visible='false';
   const progress=Math.max(0,Math.min(1,(position-sections[phase])/(sections[phase+1]-sections[phase])));
-  $('stageTrack').children[phase].firstElementChild.style.transform=`scaleX(${progress})`;
+  const progressBar=$('stageTrack').children[phase].firstElementChild;
+  const step=Math.floor(progress*100);
+  if(progressBar.dataset.progress!==String(step)){progressBar.dataset.progress=String(step);progressBar.style.transform=`scaleX(${step/100})`;}
   if(t>=SONG_LEAD+RECORDING_SCORE.duration+.35){end('全曲完成',true);return;}
   if(t > noticeUntil) {
     const activeHold = notes.find(n=>n.held&&!n.done);
-    $('notice').textContent = activeHold ? `按住 · 当前 ${holdProgress(activeHold,t)>=2/3?30:holdProgress(activeHold,t)>=1/3?20:10} 分` : combo >= 5 ? '拍点正好，继续！' : '方块碰线时点击'; $('notice').dataset.kind = '';
+    const idleText = activeHold ? `按住 · 当前 ${holdProgress(activeHold,t)>=2/3?30:holdProgress(activeHold,t)>=1/3?20:10} 分` : combo >= 5 ? '拍点正好，继续！' : '方块碰线时点击'; textIfChanged($('notice'),idleText);if($('notice').dataset.kind)$('notice').dataset.kind = '';
   }
 }
 function background(t) {
@@ -286,7 +290,7 @@ function draw(t) {
   pen.globalAlpha=1;
   for(const e of effects)if(e.kind==='hit'){
     const age=t-e.at,alpha=Math.max(0,1-age/.5),x=e.origin.x,y=e.origin.y;
-    if(e.perfect)drawPerfectPerformer(pen,e,age,reducedMotion);
+    if(e.perfect)drawPerfectPerformer(pen,e,age,reducedMotion,w,coarsePointer?96:240);
     pen.globalAlpha=alpha;pen.strokeStyle='#ffdd2d';pen.lineWidth=1.5;
     if(!e.perfect&&!reducedMotion){pen.beginPath();pen.arc(x,y,8+age*46,0,Math.PI*2);pen.stroke();}
     if(e.perfect){pen.fillStyle='#fff4c7';pen.font='15px ClassicSong';pen.textAlign='center';pen.fillText('PERFECT',x,y-24);}
@@ -467,3 +471,9 @@ document.addEventListener('keydown',e=>{
   else if(!e.shiftKey && document.activeElement===buttons.at(-1)) { e.preventDefault(); buttons[0].focus(); }
 });
 hud(); soundButtons();
+
+// The first paint must not compete with the ensemble download or dialog art.
+window.gameReady=true;window.dispatchEvent(new Event('game-ready'));
+const warmAssets=()=>{if(audio.status==='idle')audio.preload();const image=new Image();image.src='assets/modal-frame-v19.webp';};
+if(document.readyState==='complete')setTimeout(warmAssets,1000);
+else window.addEventListener('load',()=>setTimeout(warmAssets,1000),{once:true});

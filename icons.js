@@ -134,7 +134,8 @@ performerSheet.onload=()=>{
     el.append(surface);el.classList.add('ready');
   });
 };
-performerSheet.src='assets/performers-v7.jpg';
+// The current cover is already painted. Do not process four obsolete sprites.
+if(document.querySelector('.cover-scene')&&getComputedStyle(document.querySelector('.cover-scene')).display!=='none')performerSheet.src='assets/performers-v7.jpg';
 const uiPaths={
   arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',volume:'<path d="M11 5L6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',muted:'<path d="M11 5L6 9H3v6h3l5 4V5Zm5 4 5 6m0-6-5 6"/>',pause:'<path d="M8 5v14M16 5v14" stroke-width="3.5"/>',play:'<path d="m8 5 11 7-11 7Z" fill="currentColor" stroke-width="0"/>',again:'<path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/>',heart:'<path d="M12 20 4 12C-2 5 7 0 12 6c5-6 14-1 8 6Z"/>',tap:'<rect x="7" y="2" width="10" height="14" rx="3"/><path d="M3 17h18m-9-6v11"/>',hold:'<rect x="7" y="2" width="10" height="20" rx="3"/><path d="M10 6h4m-2 3v8"/>'
 };

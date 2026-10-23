@@ -12,16 +12,15 @@ class RhythmAudio {
   constructor() {
     this.ctx=null;this.master=null;this.session=null;this.bg=null;this.song=null;
     this.muted=false;this.unlocking=false;this.buffers={};this.nodes=new Set();this.variations={};this.lastHit=null;this.lastGameRead=null;
-    // Fetch early, decode only after a user has opened the audio context.
+    // Cover and controls get the network first; decode only after a user gesture.
     this.raw={};this.status='idle';this.failed=[];this.clock=null;this.boost=null;
-    this.preload();
   }
   preload() {
     for(const [kind,meta] of Object.entries(AUDIO_SOURCES)) {
-      if(this.buffers[kind])continue;
+      if(this.buffers[kind]||this.raw[kind]&&!this.failed.includes(kind))continue;
       // Both network and decode have a bounded start screen wait. Aborted files
       // can be retried with the sound button, without trapping the home screen.
-      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),kind==='ensemble'?60000:15000);
       this.raw[kind]=fetch('assets/audio/'+meta.file,{signal:controller.signal})
         .then(r=>{if(!r.ok)throw new Error('audio '+r.status);return r.arrayBuffer();})
         .finally(()=>clearTimeout(timer));
@@ -42,7 +41,7 @@ class RhythmAudio {
   prepare(retry=false) {
     if(this.loading&&(!retry||this.status==='loading'))return this.loading;
     try{this.setup();}catch{this.status='unavailable';return Promise.resolve(false);}
-    if(retry&&this.failed.length){this.preload();}
+    this.preload();
     this.status='loading';
     this.loading=Promise.all(Object.keys(AUDIO_SOURCES).map(async kind=>{
       if(this.buffers[kind])return;
