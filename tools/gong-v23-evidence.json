@@ -1,0 +1,349 @@
+{
+  "total": 428,
+  "gongCount": 82,
+  "actions": {
+    "retime": 10,
+    "revoice": 0,
+    "chord": 13,
+    "add": 1
+  },
+  "changes": [
+    {
+      "action": "add",
+      "time": 9.0682,
+      "evidence": {
+        "time": 9.0682,
+        "strength": 1.639,
+        "metalShare": 0.908,
+        "tailRatio": 0.663,
+        "flux": 1.181,
+        "nearestOldGong": 7.034,
+        "rawTime": 9.0844
+      }
+    },
+    {
+      "action": "retime",
+      "from": 19.7436,
+      "time": 19.7029,
+      "evidence": {
+        "time": 19.7029,
+        "strength": 2.132,
+        "metalShare": 0.757,
+        "tailRatio": 0.125,
+        "flux": 4.242,
+        "nearestOldGong": 0.005,
+        "rawTime": 19.7366
+      }
+    },
+    {
+      "action": "chord",
+      "time": 20.3589,
+      "evidence": {
+        "time": 20.3299,
+        "strength": 3.505,
+        "metalShare": 0.92,
+        "tailRatio": 0.396,
+        "flux": 3.124,
+        "nearestOldGong": 0.591,
+        "rawTime": 20.3229
+      }
+    },
+    {
+      "action": "retime",
+      "from": 27.0056,
+      "time": 27.0027,
+      "evidence": {
+        "time": 27.0027,
+        "strength": 4.581,
+        "metalShare": 0.998,
+        "tailRatio": 0.441,
+        "flux": 1.549,
+        "nearestOldGong": 0.08,
+        "rawTime": 27.0741
+      }
+    },
+    {
+      "action": "retime",
+      "from": 29.4379,
+      "time": 29.3421,
+      "evidence": {
+        "time": 29.3421,
+        "strength": 5.688,
+        "metalShare": 1.0,
+        "tailRatio": 0.133,
+        "flux": 2.042,
+        "nearestOldGong": 0.053,
+        "rawTime": 29.3729
+      }
+    },
+    {
+      "action": "chord",
+      "time": 39.1081,
+      "evidence": {
+        "time": 39.1235,
+        "strength": 3.246,
+        "metalShare": 0.998,
+        "tailRatio": 0.154,
+        "flux": 2.569,
+        "nearestOldGong": 3.598,
+        "rawTime": 39.102
+      }
+    },
+    {
+      "action": "chord",
+      "time": 50.592,
+      "evidence": {
+        "time": 50.5942,
+        "strength": 2.248,
+        "metalShare": 0.86,
+        "tailRatio": 0.319,
+        "flux": 3.761,
+        "nearestOldGong": 0.659,
+        "rawTime": 50.6307
+      }
+    },
+    {
+      "action": "retime",
+      "from": 59.1027,
+      "time": 59.1188,
+      "evidence": {
+        "time": 59.1188,
+        "strength": 4.634,
+        "metalShare": 0.905,
+        "tailRatio": 0.277,
+        "flux": 0.825,
+        "nearestOldGong": 0.091,
+        "rawTime": 59.1815
+      }
+    },
+    {
+      "action": "chord",
+      "time": 60.6223,
+      "evidence": {
+        "time": 60.6194,
+        "strength": 1.716,
+        "metalShare": 0.773,
+        "tailRatio": 0.357,
+        "flux": 0.812,
+        "nearestOldGong": 0.226,
+        "rawTime": 60.6908
+      }
+    },
+    {
+      "action": "retime",
+      "from": 73.788,
+      "time": 73.8896,
+      "evidence": {
+        "time": 73.8896,
+        "strength": 2.084,
+        "metalShare": 0.936,
+        "tailRatio": 0.574,
+        "flux": 0.736,
+        "nearestOldGong": 0.121,
+        "rawTime": 73.8971
+      }
+    },
+    {
+      "action": "chord",
+      "time": 87.1838,
+      "evidence": {
+        "time": 87.1395,
+        "strength": 2.139,
+        "metalShare": 0.939,
+        "tailRatio": 0.306,
+        "flux": 3.353,
+        "nearestOldGong": 0.64,
+        "rawTime": 87.1731
+      }
+    },
+    {
+      "action": "retime",
+      "from": 110.7503,
+      "time": 110.7919,
+      "evidence": {
+        "time": 110.7919,
+        "strength": 1.772,
+        "metalShare": 0.856,
+        "tailRatio": 0.94,
+        "flux": 1.015,
+        "nearestOldGong": 0.096,
+        "rawTime": 110.8343
+      }
+    },
+    {
+      "action": "retime",
+      "from": 111.9675,
+      "time": 112.0081,
+      "evidence": {
+        "time": 112.0081,
+        "strength": 2.519,
+        "metalShare": 0.754,
+        "tailRatio": 0.12,
+        "flux": 1.162,
+        "nearestOldGong": 0.092,
+        "rawTime": 112.0475
+      }
+    },
+    {
+      "action": "retime",
+      "from": 113.1698,
+      "time": 113.172,
+      "evidence": {
+        "time": 113.172,
+        "strength": 1.918,
+        "metalShare": 0.89,
+        "tailRatio": 0.602,
+        "flux": 1.738,
+        "nearestOldGong": 0.068,
+        "rawTime": 113.2259
+      }
+    },
+    {
+      "action": "chord",
+      "time": 113.8582,
+      "evidence": {
+        "time": 113.8395,
+        "strength": 1.621,
+        "metalShare": 0.807,
+        "tailRatio": 0.339,
+        "flux": 0.916,
+        "nearestOldGong": 0.556,
+        "rawTime": 113.8587
+      }
+    },
+    {
+      "action": "retime",
+      "from": 121.7952,
+      "time": 121.8272,
+      "evidence": {
+        "time": 121.8272,
+        "strength": 2.268,
+        "metalShare": 0.985,
+        "tailRatio": 0.297,
+        "flux": 2.537,
+        "nearestOldGong": 0.034,
+        "rawTime": 121.8173
+      }
+    },
+    {
+      "action": "chord",
+      "time": 122.753,
+      "evidence": {
+        "time": 122.7125,
+        "strength": 1.823,
+        "metalShare": 0.929,
+        "tailRatio": 0.223,
+        "flux": 1.276,
+        "nearestOldGong": 0.331,
+        "rawTime": 122.6997
+      }
+    },
+    {
+      "action": "chord",
+      "time": 123.9952,
+      "evidence": {
+        "time": 123.9547,
+        "strength": 1.982,
+        "metalShare": 0.984,
+        "tailRatio": 0.212,
+        "flux": 1.137,
+        "nearestOldGong": 0.284,
+        "rawTime": 123.9303
+      }
+    },
+    {
+      "action": "chord",
+      "time": 125.6215,
+      "evidence": {
+        "time": 125.5946,
+        "strength": 2.651,
+        "metalShare": 0.955,
+        "tailRatio": 0.306,
+        "flux": 2.099,
+        "nearestOldGong": 1.926,
+        "rawTime": 125.5731
+      }
+    },
+    {
+      "action": "chord",
+      "time": 127.3575,
+      "evidence": {
+        "time": 127.4,
+        "strength": 2.7,
+        "metalShare": 0.763,
+        "tailRatio": 0.243,
+        "flux": 2.884,
+        "nearestOldGong": 3.18,
+        "rawTime": 127.4133
+      }
+    },
+    {
+      "action": "chord",
+      "time": 130.0065,
+      "evidence": {
+        "time": 129.9774,
+        "strength": 6.924,
+        "metalShare": 0.956,
+        "tailRatio": 0.22,
+        "flux": 3.512,
+        "nearestOldGong": 0.632,
+        "rawTime": 129.9617
+      }
+    },
+    {
+      "action": "chord",
+      "time": 152.672,
+      "evidence": {
+        "time": 152.6488,
+        "strength": 2.567,
+        "metalShare": 0.921,
+        "tailRatio": 0.179,
+        "flux": 2.939,
+        "nearestOldGong": 0.61,
+        "rawTime": 152.6244
+      }
+    },
+    {
+      "action": "chord",
+      "time": 161.2605,
+      "evidence": {
+        "time": 161.2634,
+        "strength": 3.772,
+        "metalShare": 0.961,
+        "tailRatio": 0.424,
+        "flux": 1.994,
+        "nearestOldGong": 0.603,
+        "rawTime": 161.2738
+      }
+    },
+    {
+      "action": "retime",
+      "from": 165.6405,
+      "time": 165.6404,
+      "evidence": {
+        "time": 165.6404,
+        "strength": 2.192,
+        "metalShare": 0.991,
+        "tailRatio": 0.294,
+        "flux": 3.885,
+        "nearestOldGong": 0.001,
+        "rawTime": 165.6275
+      }
+    }
+  ],
+  "chordTimes": [
+    20.3589,
+    39.1081,
+    50.592,
+    60.6223,
+    87.1838,
+    113.8582,
+    122.753,
+    123.9952,
+    125.6215,
+    127.3575,
+    130.0065,
+    152.672,
+    161.2605
+  ]
+}
