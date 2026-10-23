@@ -1,0 +1,16 @@
+/* V21: supplied cover speaker, loading screen, touch and result refinements. */
+.cover-header .icon-button{background:#fff url('assets/sound-reference-v21.jpg') 58% 45%/300% auto no-repeat}
+.cover-header .icon-button[aria-pressed="true"]:after{background:#205f9b}
+#over .primary>span:first-child{border-bottom:0;padding-bottom:0}
+#app,#app *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#app img,#app svg,#app canvas{-webkit-user-drag:none}
+.loading-screen{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:22px;padding:32px;background:#fffdf6;color:#1856ac;text-align:center}
+.loading-mark{font-size:clamp(52px,10vh,78px);letter-spacing:8px;margin:0 0 14px;font-weight:400}
+.loading-screen h2{font-size:20px;font-weight:400;margin:0}
+.loading-screen strong{font-size:42px;line-height:1;font-weight:400;font-variant-numeric:tabular-nums}
+.load-track{width:min(100%,240px);height:5px;border-radius:3px;background:#f5dbe6;overflow:hidden}
+.load-track i{display:block;height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:#1856ac;transition:transform 160ms linear}
+.loading-screen p{font-size:14px;min-height:42px;line-height:1.6;margin:0;max-width:270px}
+.load-retry{min-height:48px;padding:10px 32px;background:#1856ac;color:#fff6d7;border-radius:24px;font-size:18px}
+.loading-screen.load-error .load-track i{background:#d55591}
+@media(prefers-reduced-motion:reduce){.load-track i{transition:none}}

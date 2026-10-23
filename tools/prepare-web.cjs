@@ -4,8 +4,8 @@ const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
 function flatten(file){return fs.readFileSync(path.join(root,file),'utf8').replace(/@import\s+url\(['"]([^'"]+)['"]\);/g,(_,parent)=>flatten(parent)).replace(/@font-face\s*\{[^}]+\}/g,'');}
 const preview=fs.readFileSync(path.join(root,'assets/cover-preview-v19.webp')).toString('base64');
-const css=flatten('styles-v18.css')+`\n/* Mobile startup / rendering V19 */
-@font-face{font-family:ClassicSong;src:url('assets/fonts/aa-classic-song-ui-v19.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+const css=flatten('styles-v18.css')+fs.readFileSync(path.join(root,'styles-v21.css'),'utf8')+`\n/* Mobile startup / rendering V19 */
+@font-face{font-family:ClassicSong;src:url('assets/fonts/aa-classic-song-ui-v21.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
 .cover-painting{background-image:url('assets/cover-painting-v19.webp'),url('data:image/webp;base64,${preview}')}
 .modal-card:before{background-image:url('assets/modal-frame-v19.webp')}
 #startup button{color:inherit;background:transparent;text-decoration:underline;padding:4px 8px}

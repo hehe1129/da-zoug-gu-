@@ -1,31 +1,57 @@
 /* Supplied recordings only. No oscillator / noise stand-ins. */
 'use strict';
 const AUDIO_SOURCES = {
-  ensemble:{file:'ensemble.mp3'},
-  drum:{file:'drum.mp3',offset:.294,length:.64,gain:.62},
-  cymbal:{file:'cymbal.mp3',offset:.541,length:1.35,gain:1.25},
-  gong:{file:'gong.mp3',offset:.085,length:.72,gain:1.6},
-  wood:{file:'wood.mp3',offset:0,length:.237,gain:3.1},
-  suona:{file:'suona.mp3',offset:0,length:4.279,gain:.5}
+  ensemble:{bytes:4413225,file:'ensemble.mp3'},
+  drum:{bytes:48479,file:'drum.mp3',offset:.294,length:.64,gain:.62},
+  cymbal:{bytes:68541,file:'cymbal.mp3',offset:.541,length:1.35,gain:1.25},
+  gong:{bytes:35313,file:'gong.mp3',offset:.085,length:.72,gain:1.6},
+  wood:{bytes:7728,file:'wood.mp3',offset:0,length:.237,gain:3.1},
+  suona:{bytes:104276,file:'suona.mp3',offset:0,length:4.279,gain:.5}
 };
 class RhythmAudio {
   constructor() {
     this.ctx=null;this.master=null;this.session=null;this.bg=null;this.song=null;
     this.muted=false;this.unlocking=false;this.buffers={};this.nodes=new Set();this.variations={};this.lastHit=null;this.lastGameRead=null;this.visualClock=null;
-    // Cover and controls get the network first; decode only after a user gesture.
-    this.raw={};this.status='idle';this.failed=[];this.clock=null;this.boost=null;
+    // Preload and decode before the cover; audible output unlocks on a gesture.
+    this.raw={};this.transfers={};this.fetchErrors={};this.primed=false;this.status='idle';this.failed=[];this.clock=null;this.boost=null;
   }
-  preload() {
+  preload(retry=false) {
     for(const [kind,meta] of Object.entries(AUDIO_SOURCES)) {
-      if(this.buffers[kind]||this.raw[kind]&&!this.failed.includes(kind))continue;
-      // Both network and decode have a bounded start screen wait. Aborted files
-      // can be retried with the sound button, without trapping the home screen.
-      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),kind==='ensemble'?60000:15000);
-      this.raw[kind]=fetch('assets/audio/'+meta.file,{signal:controller.signal})
-        .then(r=>{if(!r.ok)throw new Error('audio '+r.status);return r.arrayBuffer();})
-        .finally(()=>clearTimeout(timer));
-      this.raw[kind].catch(()=>{});
+      if(this.buffers[kind]||this.raw[kind])continue;
+      const controller=new AbortController();
+      // Allow a slow but progressing recording download; fail a stalled one.
+      let stallTimer;const refresh=()=>{clearTimeout(stallTimer);stallTimer=setTimeout(()=>controller.abort(),kind==='ensemble'?30000:20000);};
+      const deadline=setTimeout(()=>controller.abort(),kind==='ensemble'?180000:60000);refresh();
+      this.transfers[kind]=0;delete this.fetchErrors[kind];
+      const request=fetch('assets/audio/'+meta.file,{signal:controller.signal,cache:retry?'reload':'default'})
+        .then(async response=>{
+          if(!response.ok)throw new Error('audio '+response.status);
+          if(!response.body?.getReader){clearTimeout(stallTimer);return response.arrayBuffer();}
+          refresh();
+          const reader=response.body.getReader(),chunks=[];let received=0;
+          const expected=Number(response.headers.get('content-length'))||meta.bytes;
+          while(true){const {done,value}=await reader.read();if(done)break;refresh();chunks.push(value);received+=value.byteLength;this.transfers[kind]=Math.min(.9,received/expected*.9);}
+          const bytes=new Uint8Array(received);let offset=0;
+          for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+          return bytes.buffer;
+        }).finally(()=>{clearTimeout(stallTimer);clearTimeout(deadline);});
+      this.raw[kind]=request;
+      // A rejected prefetch must not poison the next load attempt forever.
+      request.catch(error=>{if(this.raw[kind]===request)delete this.raw[kind];this.fetchErrors[kind]=error;});
     }
+  }
+  loadProgress() {
+    let loaded=0,total=0;
+    for(const [kind,meta] of Object.entries(AUDIO_SOURCES)){total+=meta.bytes;loaded+=meta.bytes*(this.buffers[kind]?1:(this.transfers[kind]||0));}
+    return total?loaded/total:0;
+  }
+  decode(bytes) {
+    // Callback support also covers embedded browsers with legacy decoding APIs.
+    return new Promise((resolve,reject)=>{
+      const timer=setTimeout(()=>reject(new Error('audio decode timeout')),20000);
+      const done=value=>{clearTimeout(timer);resolve(value);},failed=error=>{clearTimeout(timer);reject(error);};
+      try{const pending=this.ctx.decodeAudioData(bytes.slice(0),done,failed);pending?.then?.(done,failed);}catch(error){failed(error);}
+    });
   }
   setup() {
     if(this.ctx)return;
@@ -41,21 +67,28 @@ class RhythmAudio {
   prepare(retry=false) {
     if(this.loading&&(!retry||this.status==='loading'))return this.loading;
     try{this.setup();}catch{this.status='unavailable';return Promise.resolve(false);}
-    this.preload();
+    this.preload(retry);
     this.status='loading';
     this.loading=Promise.all(Object.keys(AUDIO_SOURCES).map(async kind=>{
       if(this.buffers[kind])return;
-      try{const bytes=await this.raw[kind];this.buffers[kind]=await this.ctx.decodeAudioData(bytes.slice(0));}
-      catch{ /* Each file fails independently; never substitute a synthetic sound. */ }
+      try{
+        const bytes=await this.raw[kind],buffer=await this.decode(bytes);
+        if(!buffer?.length||!Number.isFinite(buffer.duration)||buffer.duration<=0)throw new Error('empty audio');
+        if(kind==='ensemble'&&typeof RECORDING_SCORE!=='undefined'&&buffer.duration<RECORDING_SCORE.duration-1)throw new Error('incomplete ensemble');
+        this.buffers[kind]=buffer;this.transfers[kind]=1;delete this.raw[kind];delete this.fetchErrors[kind];
+      }catch(error){delete this.raw[kind];this.fetchErrors[kind]=error;}
+
     })).then(()=>{
       this.failed=Object.keys(AUDIO_SOURCES).filter(kind=>!this.buffers[kind]);
       this.status=this.failed.length?'partial':'ready';return !!this.buffers.ensemble;
     });
     return this.loading;
   }
-  unlock() {
+  unlock(retry=false) {
     try {
-      this.setup();this.prepare();
+      this.setup();this.prepare(retry);
+      // Prime the mobile output route inside the user's gesture, with silence.
+      if(!this.primed){const source=this.ctx.createBufferSource();source.buffer=this.ctx.createBuffer(1,1,this.ctx.sampleRate);source.connect(this.master);source.onended=()=>source.disconnect();source.start();this.primed=true;}
       if(this.ctx.state==='running'||this.unlocking)return;
       this.unlocking=true;
       const timer=setTimeout(()=>{if(this.ctx.state!=='running'&&!this.muted)this.onError?.();},1800);

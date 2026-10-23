@@ -31,7 +31,7 @@ const stages = [
   {name:'沸腾',travel:2.08,shell:'#a15487',field:'#693e78',lane:'#754d82',ink:'#fffbed',accent:'#185ac6',accentInk:'#fffbed',motif:'confetti'},
   {name:'满堂',travel:1.96,shell:'#154b90',field:'#183c78',lane:'#214681',ink:'#fffbed',accent:'#185ac6',accentInk:'#fffbed',motif:'sunburst'}
 ];
-let state = 'home', notes = [], holds = new Map(), effects = [], particles = [], score = 0, misses = 0, combo = 0, maxCombo = 0, hits = 0, perfects = 0;
+let state = 'loading', notes = [], holds = new Map(), effects = [], particles = [], score = 0, misses = 0, combo = 0, maxCombo = 0, hits = 0, perfects = 0;
 let w = 0, h = 0, line = 0, tile = 0, startClock = 0, elapsed = 0, raf = 0, nextIndex = 0, noteId = 0;
 let noticeUntil = 0, phase = -1;
 let damageUntil = 0, shownLives = -1;
@@ -43,6 +43,75 @@ const coarsePointer=matchMedia('(pointer: coarse)').matches;
 function textIfChanged(el,text){if(el.textContent!==text)el.textContent=text;}
 let countStarted = 0, countDuration = 3, lastCount = -1, transitionTimer = 0, resultFrame = 0, messageTimer = 0;
 let waitingAudio = false, loadStarted = 0, resumeCountdown = false;
+
+// Load and decode all required resources BEFORE revealing the cover.
+let loadingGeneration=0,loadFrame=0;
+const visualImages=new Map();
+function withTimeout(promise,message,ms=90000){
+  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error(message)),ms);promise.then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});});
+}
+function readyImage(image,check=()=>true,retry=false){
+  if(image.complete&&image.naturalWidth&&check())return Promise.resolve(image);
+  return withTimeout(new Promise((resolve,reject)=>{
+    const clean=()=>{image.removeEventListener('load',loaded);image.removeEventListener('error',failed);};
+    const loaded=()=>{clean();if(image.naturalWidth&&check())resolve(image);else reject(new Error('贴图未能准备完成，请重试'));};
+    const failed=()=>{clean();reject(new Error('有图片未能载入，请重试'));};
+    image.addEventListener('load',loaded,{once:true});image.addEventListener('error',failed,{once:true});
+    if(image.complete){
+      if(image.naturalWidth)setTimeout(loaded,0);
+      else image.src=image.src.split('?')[0]+(retry?'?retry='+Date.now():'');
+    }
+  }),'图片载入超时，请重试');
+}
+function visualImage(url,retry){
+  let image=visualImages.get(url);
+  if(!image){image=new Image();image.src=url;visualImages.set(url,image);}
+  return readyImage(image,()=>true,retry);
+}
+function readyFont(retry){
+  if(!document.fonts)return Promise.resolve();
+  const faces=Array.from(document.fonts).filter(face=>face.family==='ClassicSong');
+  if(faces.some(face=>face.status==='loaded'))return Promise.resolve();
+  const loading=retry&&faces.some(face=>face.status==='error')&&window.FontFace
+    ?new FontFace('ClassicSong',"url('assets/fonts/aa-classic-song-ui-v21.woff2?retry="+Date.now()+"')").load().then(face=>document.fonts.add(face))
+    :document.fonts.load('16px ClassicSong').then(faces=>{if(!faces.length)throw new Error('font missing');});
+  return withTimeout(loading.catch(()=>{throw new Error('字体未能载入，请重试');}),'字体未能载入，请重试');
+}
+function loadVisuals(tracker,retry){
+  const tasks=[
+    readyImage(instrumentSheet,()=>Object.keys(instrumentArt).length===5,retry),
+    readyImage(perfectSheet,()=>perfectArt.length===5,retry),
+    visualImage('assets/modal-frame-v19.webp',retry),
+    visualImage('assets/cover-painting-v19.webp',retry),
+    visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry)
+  ];
+  tracker.total=tasks.length;
+  return Promise.all(tasks.map(task=>task.then(value=>{tracker.done++;return value;})));
+}
+async function loadGameAssets(retry=false){
+  const generation=++loadingGeneration,tracker={done:0,total:6};cancelAnimationFrame(loadFrame);
+  setState('loading');$('loading').hidden=false;$('home').hidden=true;
+  $('loading').classList.remove('load-error');$('loading').setAttribute('aria-busy','true');$('loadRetry').hidden=true;
+  textIfChanged($('loadingStatus'),'正在准备乐曲、音效与画面');
+  let shown=-1;
+  const progress=()=>{if(generation!==loadingGeneration)return;const value=Math.min(99,Math.floor((audio.loadProgress()*.9+tracker.done/tracker.total*.1)*100));if(value!==shown){shown=value;textIfChanged($('loadingPercent'),value+'%');$('loadingProgress').setAttribute('aria-valuenow',value);$('loadingProgress').firstElementChild.style.transform='scaleX('+value/100+')';}loadFrame=requestAnimationFrame(progress);};progress();
+  try{
+    const sound=audio.prepare(retry).then(()=>{
+      if(audio.status!=='ready')throw new Error(audio.failed.includes('ensemble')?'背景音乐未能载入，请重试':audio.status==='unavailable'?'声音未能准备完成，请点击重试':'乐器音效未能载入，请重试');
+    });
+    await Promise.all([sound,loadVisuals(tracker,retry)]);
+    if(generation!==loadingGeneration)return;
+    cancelAnimationFrame(loadFrame);textIfChanged($('loadingPercent'),'100%');$('loadingProgress').setAttribute('aria-valuenow','100');$('loadingProgress').firstElementChild.style.transform='scaleX(1)';
+    textIfChanged($('loadingStatus'),'准备完成');$('loading').setAttribute('aria-busy','false');
+    await new Promise(resolve=>setTimeout(resolve,reducedMotion?0:180));if(generation!==loadingGeneration)return;
+    $('loading').hidden=true;$('home').hidden=false;setState('home');if(!reducedMotion)restartAnimation($('home'),'entering');
+  }catch(error){
+    if(generation!==loadingGeneration)return;
+    cancelAnimationFrame(loadFrame);$('loading').classList.add('load-error');$('loading').setAttribute('aria-busy','false');
+    textIfChanged($('loadingStatus'),error.message||'资源未能载入，请重试');$('loadRetry').hidden=false;
+  }
+}
+window.retryGameLoad=()=>{audio.unlock(true);loadGameAssets(true);};
 
 function setState(value) { state = value; $('app').dataset.state = value; }
 function now() { return state === 'playing' ? audio.gameTime() ?? (performance.now() - startClock) / 1000 : elapsed; }
@@ -328,14 +397,15 @@ function draw(t) {
 function frame() {
   if(state === 'countdown') {
     if(waitingAudio) {
-      if(audio.status==='loading'&&performance.now()-loadStarted<10500) {
+      if(audio.status==='loading') {
         draw(elapsed);raf=requestAnimationFrame(frame);return;
       }
       waitingAudio=false;countStarted=performance.now();$('countLabel').textContent='准备好了吗';$('countHint').textContent='跟着原曲，方块碰线时点击';
-      if(audio.status!=='ready')audio.onAssetError?.();
+      if(audio.status!=='ready'){home();loadGameAssets(true);return;}
     }
     const left=countDuration-(performance.now()-countStarted)/1000;
     if(left <= 0) {
+      if(audio.ctx?.state!=='running'){pause();audio.onError?.();return;}
       $('countdown').hidden=true; setState('playing'); startClock=performance.now()-elapsed*1000; audio.startSong(elapsed);
       for(const n of notes)if(n.held&&!n.done){n.holdStarted=elapsed;n.voice=audio.voice();}
       feedback('开敲！','combo',.6);
@@ -370,7 +440,8 @@ function resetGame() {
   $('notice').textContent='跟着拍点来'; $('notice').dataset.kind='';
 }
 function start() {
-  if(['transition','countdown','playing'].includes(state)) return;
+  if(['loading','transition','countdown','playing'].includes(state)) return;
+  if(audio.status!=='ready'){audio.unlock(true);loadGameAssets(true);return;}
   audio.unlock(); // gesture synchronous, before any animation timeout
   clearTimeout(transitionTimer); resetGame(); audio.startTransport();
   $('error').hidden=true; const fromHome=!$('home').hidden; setState('transition');
@@ -418,7 +489,7 @@ function end(reason='三次失误',completed=false) {
   $('bestLabel').textContent=score>best?'个人新纪录 · 好有鼓气！':`个人最佳 ${Math.max(best,score)} · 下场再响一点`;
   const started=performance.now(), target=score; cancelAnimationFrame(resultFrame);
   const count=()=>{ const p=reducedMotion?1:Math.min(1,(performance.now()-started)/700); $('finalScore').textContent=Math.round(target*(1-Math.pow(1-p,3))); if(p<1 && state==='over') resultFrame=requestAnimationFrame(count); };
-  count(); $('retry').focus({preventScroll:true});
+  count(); $('resultTitle').focus({preventScroll:true});
 }
 
 canvas.addEventListener('pointerdown',e=>{
@@ -452,13 +523,16 @@ function release(e) {
 function cancelPointer(e) { const n=holds.get(e.pointerId); if(n && state==='playing')settleHold(n,pointerPoint(e)); else if(n&&state==='countdown'){n.held=false;holds.delete(e.pointerId);} }
 canvas.addEventListener('pointerup',release); canvas.addEventListener('pointercancel',cancelPointer); canvas.addEventListener('lostpointercapture',cancelPointer);
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
+// Suppress native selection/callouts without registering a second game input.
+for(const type of ['selectstart','dragstart','contextmenu'])$('app').addEventListener(type,e=>e.preventDefault());
+for(const type of ['touchstart','touchmove'])canvas.addEventListener(type,e=>{if(state==='playing'||state==='countdown')e.preventDefault();},{passive:false});
 $('start').onclick=start; $('retry').onclick=()=>{ $('game').inert=false; start(); }; $('pause').onclick=pause; $('resume').onclick=resume; $('quit').onclick=home; $('back').onclick=home;
 function soundButtons() { document.querySelectorAll('.sound-toggle').forEach(el=>{ el.innerHTML=uiSVG(audio.muted?'muted':'volume'); el.setAttribute('aria-label',audio.muted?'开启声音':'关闭声音'); el.setAttribute('aria-pressed',String(audio.muted)); }); }
 document.querySelectorAll('.sound-toggle').forEach(el=>{ el.onclick=()=>{ audio.setMuted(!audio.muted); if(!audio.muted){audio.unlock();if(audio.failed.length)audio.prepare(true).then(()=>{if(audio.failed.length)audio.onAssetError?.();});} soundButtons(); }; });
 audio.onError=()=>{ clearTimeout(messageTimer); $('error').textContent='声音未开启，可点右上角声音按钮重试'; $('error').hidden=false; messageTimer=setTimeout(()=>{ $('error').hidden=true; },4000); };
 audio.onReady=()=>{ if(audio.status==='partial')audio.onAssetError?.();else $('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now()); };
 audio.onInterrupted=()=>pause();
-audio.onAssetError=()=>{clearTimeout(messageTimer);$('error').textContent='部分音频未载入，可无声试玩；关闭再开启声音重试';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},6500);};
+audio.onAssetError=()=>{clearTimeout(messageTimer);$('error').textContent='声音未能载入，请重新载入游戏';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},6500);};
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) pause(); });
 window.addEventListener('blur',()=>pause());
 window.addEventListener('resize',()=>{ if(state==='playing'||state==='countdown') pause(); if(state==='paused'){ dimensions(); draw(elapsed); } });
@@ -467,13 +541,13 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape') { if(state==='playing'||state==='countdown') pause(); else if(state==='paused') resume(); }
   if(e.key!=='Tab' || !['paused','over'].includes(state)) return;
   const buttons=Array.from($(state==='paused'?'paused':'over').querySelectorAll('button'));
+  if(!buttons.includes(document.activeElement)){e.preventDefault();buttons[e.shiftKey?buttons.length-1:0].focus();return;}
   if(e.shiftKey && document.activeElement===buttons[0]) { e.preventDefault(); buttons.at(-1).focus(); }
   else if(!e.shiftKey && document.activeElement===buttons.at(-1)) { e.preventDefault(); buttons[0].focus(); }
 });
 hud(); soundButtons();
 
-// The first paint must not compete with the ensemble download or dialog art.
+// Script readiness and resource readiness are separate: the cover appears only
+// after decoded recordings, prepared art and the supplied font are all ready.
 window.gameReady=true;window.dispatchEvent(new Event('game-ready'));
-const warmAssets=()=>{if(audio.status==='idle')audio.preload();const image=new Image();image.src='assets/modal-frame-v19.webp';};
-if(document.readyState==='complete')setTimeout(warmAssets,1000);
-else window.addEventListener('load',()=>setTimeout(warmAssets,1000),{once:true});
+loadGameAssets();
