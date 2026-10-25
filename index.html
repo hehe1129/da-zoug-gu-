@@ -548,10 +548,52 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 .leaderboard-sheet:before{background-image:url('assets/ranking-panel-v31.webp')}
 /* The table header shares the clean ivory panel surface. */
 .leaderboard-sheet .rank-scroll th{background:#fff8e7}
+/* Wider, compact four-column rows inside the existing un-stretched arch. */
+.leaderboard-sheet .rank-toolbar{justify-content:flex-end;left:16.5%;right:15.5%;top:22%}
+.leaderboard-sheet .rank-scroll{left:16.5%;right:17.5%;top:27.4%;bottom:42%}
+.leaderboard-sheet .rank-scroll .rank-number{width:28px}
+.leaderboard-sheet .rank-scroll .rank-name{width:auto}
+.leaderboard-sheet .rank-scroll .rank-score{width:45px}
+.leaderboard-sheet .rank-scroll .rank-wish{width:82px}
+.leaderboard-sheet .rank-scroll th{font-size:11.5px;line-height:1.3;padding:3px 1px;white-space:nowrap}
+.leaderboard-sheet .rank-scroll th:first-child,.leaderboard-sheet .rank-scroll td:first-child,
+.leaderboard-sheet .rank-scroll th:last-child,.leaderboard-sheet .rank-scroll td:last-child{width:auto}
+.leaderboard-sheet .rank-scroll td{font-size:12px;line-height:1.25;padding:0 1px;height:21px}
+.leaderboard-sheet .rank-scroll td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leaderboard-sheet .rank-scroll th:nth-child(3),.leaderboard-sheet .rank-scroll td:nth-child(3){text-align:center}
+.leaderboard-sheet .rank-scroll td:nth-child(4){color:#111}
+.leaderboard-sheet .rank-medal{width:18px;height:18px;font-size:12px}
+#app .wish-preview{display:block;width:100%;min-width:0;min-height:21px;padding:2px 0;background:transparent;border:0;text-align:left;color:#111;font-size:11.5px;line-height:1.3;white-space:nowrap;text-decoration:none}
+#app .wish-preview:disabled{opacity:1}
+#app .wish-preview,#app .wish-full{font-family:ClassicSong,ClassicSongNames,SimSun,"Songti SC",serif}
+.rank-paging{position:absolute;left:17%;right:16%;top:58.5%;display:flex;justify-content:space-between;align-items:center;gap:3px;height:30px;color:#07398d;font-size:11px}
+#app .rank-paging button{min-height:30px;min-width:46px;padding:3px 1px;font-size:11px;background:transparent;color:inherit}
+.leaderboard-sheet .rank-mine{top:64.8%;left:17%;right:18%;padding-top:0}
+.leaderboard-sheet .rank-mine>span{font-size:12px;margin-bottom:5px}
+.leaderboard-sheet .rank-mine>div{grid-template-columns:25px minmax(0,1fr) 48px;font-size:12px;line-height:1.3}
+#app .edit-wish{position:absolute;top:-9px;left:80px;right:auto;min-height:30px;padding:5px 2px;background:transparent;color:#07398d;font-size:12px;text-decoration:none}
+.wish-dialog{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:min(84%,340px);max-height:78dvh;overflow:auto;padding:24px 22px 18px;background:#fff8e7;color:#07398d;border:1px solid #a4c2df;border-radius:16px;box-shadow:0 14px 45px #041a3960}
+.wish-dialog h3{margin:0 0 18px;font-size:22px;line-height:1.4;font-weight:400;overflow-wrap:anywhere}
+.wish-full{margin:0 0 20px;font-size:18px;line-height:1.8;overflow-wrap:anywhere;white-space:pre-wrap;color:#111}
+#app .wish-dialog textarea{display:block;width:100%;min-height:120px;padding:10px;background:#fffdf6;color:#111;border:1px solid #a4c2df;border-radius:6px;font:16px/1.6 ClassicSong,ClassicSongNames,SimSun,serif;user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;touch-action:auto}
+.wish-count{font-size:12px;text-align:right;margin-top:5px}.wish-error{font-size:13px;color:#a32954;min-height:20px;margin:4px 0 8px}
+#app .wish-dialog button{min-height:44px;padding:8px 12px;color:#07398d;background:transparent;font-size:18px}
+#app #wishSave{width:100%;background:#1859ac;color:#fff8e7;border-radius:8px}#app #wishClose{display:block;margin:7px auto 0}
+.wish-dialog :focus-visible,.rank-paging button:focus-visible,.wish-preview:focus-visible,.edit-wish:focus-visible{outline:2px solid #1859ac;outline-offset:2px}
+@media(max-height:650px){
+ .leaderboard-sheet .rank-scroll td{font-size:11px;height:19px;padding:0 1px}
+ .leaderboard-sheet .rank-scroll th{font-size:10.5px}
+ .leaderboard-sheet .rank-scroll .rank-number{width:26px}
+ .leaderboard-sheet .rank-scroll .rank-score{width:40px}
+ .leaderboard-sheet .rank-scroll .rank-wish{width:74px}
+ #app .wish-preview{font-size:10.5px;min-height:19px}
+ .leaderboard-sheet .rank-mine>div{font-size:11px}
+ .rank-paging{top:58%}
+}
 </style>
   <!-- styles:end -->
   <link rel="preload" href="assets/cover-painting-v19.webp" as="image" fetchpriority="high">
-  <script src="icons.js?v=22" defer></script><script src="perfect-art-v22.js?v=22" defer></script><script src="score.js?v=25" defer></script><script src="audio.js?v=30" defer></script><script data-optional="leaderboard" src="leaderboard-config.js?v=26" defer></script><script data-optional="leaderboard" src="leaderboard-client.js?v=26" defer></script><script data-optional="leaderboard" src="leaderboard.js?v=29" defer></script><script src="weather.js?v=31" defer></script><script src="game.js?v=31" defer></script>
+  <script src="icons.js?v=22" defer></script><script src="perfect-art-v22.js?v=22" defer></script><script src="score.js?v=25" defer></script><script src="audio.js?v=32" defer></script><script data-optional="leaderboard" src="leaderboard-config.js?v=26" defer></script><script data-optional="leaderboard" src="leaderboard-client.js?v=32" defer></script><script data-optional="leaderboard" src="leaderboard.js?v=32" defer></script><script src="weather.js?v=31" defer></script><script src="game.js?v=32" defer></script>
   <script>
     // A slow or failed script must leave a visible cover and a usable retry.
     window.startupWait=function(failed){var loading=document.getElementById('loading');if(loading&&!loading.hidden){document.getElementById('loadingStatus').textContent=failed?'游戏未能载入，请重试':'游戏正在载入，请稍候';document.getElementById('loadRetry').hidden=!failed;return;}var box=document.getElementById('startup');if(!box)return;box.hidden=false;box.querySelector('span').textContent=failed?'载入遇到问题，请重试':'游戏正在载入，请稍后再点一次';box.querySelector('button').hidden=false;};
@@ -600,15 +642,21 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
     </section>
     <section id="leaderboardDialog" class="overlay community-overlay leaderboard-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="leaderboardTitle">
       <div class="community-sheet leaderboard-sheet">
-        <header class="community-heading"><h2 id="leaderboardTitle"><span class="rank-heading-lead">鼓</span><span>气榜</span></h2><button id="rankClose" class="community-close" type="button" aria-label="关闭排行榜"></button></header>
-        <div class="rank-toolbar"><span>前50名</span><button id="rankRefresh" type="button">刷新</button></div>
+        <header class="community-heading"><h2 id="leaderboardTitle"><span class="rank-heading-lead">鼓</span><span>气榜</span></h2></header>
+        <div class="rank-toolbar"><button id="rankRefresh" type="button">刷新</button></div>
         <div id="rankBody" class="rank-scroll" aria-busy="false" tabindex="0" aria-label="排行榜名单">
           <p id="rankStatus" class="rank-state" role="status">正在听取好成绩…</p><button id="rankRetry" class="rank-retry" type="button" hidden>重新连接</button>
-          <table id="rankTable" hidden><thead><tr><th scope="col">名次</th><th scope="col">昵称</th><th scope="col">最高分</th></tr></thead><tbody id="rankRows"></tbody></table>
+          <table id="rankTable" hidden><colgroup><col class="rank-number"><col class="rank-name"><col class="rank-score"><col class="rank-wish"></colgroup><thead><tr><th scope="col">名次</th><th scope="col">昵称</th><th scope="col">最高分</th><th scope="col" aria-label="心愿"></th></tr></thead><tbody id="rankRows"></tbody></table>
         </div>
-        <footer id="rankMine" class="rank-mine" hidden><span>我的最高分</span><div><b id="myRank"></b><strong id="myNickname"></strong><em id="myBestScore"></em></div></footer>
+        <nav id="rankPaging" class="rank-paging" aria-label="榜单翻页" hidden><button id="rankPrevious" type="button">上一页</button><span id="rankPage" aria-live="polite"></span><button id="rankNext" type="button">下一页</button></nav>
+        <footer id="rankMine" class="rank-mine" hidden><span>我的最高分</span><button id="editWish" class="edit-wish" type="button">写心愿</button><div><b id="myRank"></b><strong id="myNickname"></strong><em id="myBestScore"></em></div></footer>
         <div class="rank-actions"><button id="rankHome" type="button">返回首页</button></div>
       </div>
+      <section id="wishDialog" class="wish-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="wishTitle">
+        <h3 id="wishTitle">心愿</h3><p id="wishFull" class="wish-full"></p>
+        <form id="wishForm" novalidate><label class="sr-only" for="wishInput">我的心愿，最多50字</label><textarea id="wishInput" rows="4" maxlength="200" placeholder="愿鼓声带来…" spellcheck="false" aria-describedby="wishCount wishError"></textarea><div id="wishCount" class="wish-count">0 / 50</div><p id="wishError" class="wish-error" role="status"></p><button id="wishSave" type="submit">保存心愿</button></form>
+        <button id="wishClose" type="button">收起</button>
+      </section>
     </section>
     <p id="startup" class="audio-message" role="status" hidden><span></span> <button type="button" onclick="location.reload()" hidden>重新载入</button></p>
     <p id="error" class="audio-message" role="status" hidden></p>

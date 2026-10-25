@@ -7,6 +7,8 @@
   const REVISION='v25-attack-calibration-1',MAX_SCORE=17800,MAX_HITS=445;
   function cleanNickname(value){return String(value??'').normalize('NFC').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g,'').replace(/\s+/g,' ').trim();}
   function validNickname(value){const name=cleanNickname(value);return name.length>0&&Array.from(name).length<=12;}
+  const cleanWish=cleanNickname;
+  function validWish(value){return typeof value==='string'&&Array.from(cleanWish(value)).length<=50;}
   function newRunId(){
     if(root.crypto?.randomUUID)return root.crypto.randomUUID();
     const bytes=new Uint8Array(16);if(root.crypto?.getRandomValues)root.crypto.getRandomValues(bytes);else for(let i=0;i<16;i++)bytes[i]=Math.floor(Math.random()*256);
@@ -138,14 +140,23 @@
         }catch(error){this.lastError=error;this.setStatus('failed');return false;}
       })().finally(()=>{this.inflight=null;});return this.inflight;
     }
-    async rankings(){
+    async saveWish(value,expectedPlayer=this.playerId){
+      if(!validWish(value))throw new Error('invalid-wish');
+      const wish=cleanWish(value),{client,accessToken}=await this.identity();
+      if(expectedPlayer&&this.playerId!==expectedPlayer)throw new Error('wish-identity-changed');
+      const {data,error}=await client.rpc('dzg_save_wish',{p_wish:wish}).setHeader('Authorization','Bearer '+accessToken);
+      if(error)throw error;
+      if(!data||data.wish!==wish)throw new Error('invalid-wish-acknowledgement');
+      return data.wish;
+    }
+    async rankings(page=1){
       const client=await this.getClient();if(this.nickname)await this.identity();
-      const {data,error}=await client.rpc('dzg_leaderboard');if(error)throw error;
-      if(!data||!Array.isArray(data.entries)||data.entries.length>50)throw new Error('invalid-leaderboard');
-      const valid=row=>row&&Number.isInteger(row.rank)&&row.rank>0&&validNickname(row.nickname)&&Number.isInteger(row.best_score)&&row.best_score>=0&&row.best_score<=MAX_SCORE&&typeof row.is_current==='boolean';
+      const {data,error}=await client.rpc('dzg_leaderboard_page',{p_page:page});if(error)throw error;
+      if(!data||!Array.isArray(data.entries)||data.entries.length>20||!Number.isInteger(data.page)||data.page<1||!Number.isInteger(data.total)||data.total<0||data.page_size!==20)throw new Error('invalid-leaderboard');
+      const valid=row=>row&&Number.isInteger(row.rank)&&row.rank>0&&validNickname(row.nickname)&&Number.isInteger(row.best_score)&&row.best_score>=0&&row.best_score<=MAX_SCORE&&typeof row.is_current==='boolean'&&validWish(row.wish);
       if(data.entries.some(row=>!valid(row))||(data.current_player&&!valid(data.current_player)))throw new Error('invalid-leaderboard');
       return data;
     }
   }
-  return{LeaderboardClient,cleanNickname,validNickname,validResult,checkConfig,newRunId,REVISION,MAX_SCORE};
+  return{LeaderboardClient,cleanNickname,validNickname,cleanWish,validWish,validResult,checkConfig,newRunId,REVISION,MAX_SCORE};
 });

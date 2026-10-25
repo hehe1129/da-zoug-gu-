@@ -31,6 +31,8 @@ async function startLocalAPI(){
     if(flags.dropNextAck){flags.dropNextAck=false;res.destroy();return;}send(200,result);return;
    }
    if(url.pathname==='/rest/v1/rpc/dzg_leaderboard'){stats.reads++;send(200,await rpc(db,id,'dzg_leaderboard'));return;}
+   if(url.pathname==='/rest/v1/rpc/dzg_leaderboard_page'){stats.reads++;send(200,await rpc(db,id,'dzg_leaderboard_page',[body.p_page]));return;}
+   if(url.pathname==='/rest/v1/rpc/dzg_save_wish'){send(200,await rpc(db,id,'dzg_save_wish',[body.p_wish]));return;}
    send(404,{message:'Not found'});
   }catch(error){send(error.code==='42501'?403:400,{code:error.code||'TEST',message:error.message});}
  });

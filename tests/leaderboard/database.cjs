@@ -4,10 +4,15 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const A='11111111-1111-4111-8111-111111111111',B='22222222-2222-4222-8222-222222222222',REV='v25-attack-calibration-1';
 async function createDatabase(){
   const db=new PGlite();await db.exec(`create role anon nologin;create role authenticated nologin;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to anon,authenticated;grant execute on function auth.uid() to anon,authenticated;`);
-  const sql=fs.readFileSync(path.join(__dirname,'../../supabase/leaderboard.sql'),'utf8');await db.exec(sql);return{db,sql};
+  const sql=fs.readFileSync(path.join(__dirname,'../../supabase/leaderboard.sql'),'utf8')+'\n'+fs.readFileSync(path.join(__dirname,'../../supabase/leaderboard-wishes.sql'),'utf8');await db.exec(sql);return{db,sql};
 }
 async function asUser(db,id,fn){return db.transaction(async tx=>{await tx.exec('set local role '+(id?'authenticated':'anon'));await tx.query("select set_config('request.jwt.claim.sub',$1,true)",[id||'']);return fn(tx);});}
-async function rpc(db,id,name,args){return asUser(db,id,tx=>name==='dzg_leaderboard'?tx.query('select public.dzg_leaderboard() as result'):tx.query('select public.dzg_submit_score($1::uuid,$2::text,$3::integer,$4::integer,$5::integer,$6::text) as result',args)).then(r=>r.rows[0].result);}
+async function rpc(db,id,name,args){return asUser(db,id,tx=>{
+ if(name==='dzg_leaderboard')return tx.query('select public.dzg_leaderboard() as result');
+ if(name==='dzg_leaderboard_page')return tx.query('select public.dzg_leaderboard_page($1::integer) as result',args||[1]);
+ if(name==='dzg_save_wish')return tx.query('select public.dzg_save_wish($1::text) as result',args);
+ return tx.query('select public.dzg_submit_score($1::uuid,$2::text,$3::integer,$4::integer,$5::integer,$6::text) as result',args);
+}).then(r=>r.rows[0].result);}
 async function test(){
  const {db,sql}=await createDatabase();const results=[];
  const pass=s=>{results.push(s);console.log('PASS',s);};
@@ -18,7 +23,7 @@ async function test(){
   r=await submit(A,400,20,5);assert.equal(r.best_score,900);assert.equal(r.improved,false);
   r=await submit(A,1200,50,20);assert.equal(r.best_score,1200);pass('only personal high scores increase');
   await db.exec(sql);assert.equal((await rpc(db,A,'dzg_leaderboard')).current_player.best_score,1200);pass('migration can be rerun without losing scores');
-  const install=await db.query(fs.readFileSync(path.join(__dirname,'../../supabase/verify-leaderboard.sql'),'utf8'));assert.ok(install.rows.every(r=>r.passed),JSON.stringify(install.rows));pass('all eight read-only installation checks pass');
+  const install=await db.query(fs.readFileSync(path.join(__dirname,'../../supabase/verify-leaderboard.sql'),'utf8'));assert.ok(install.rows.every(r=>r.passed),JSON.stringify(install.rows));pass('all read-only installation checks pass');
   const run=crypto.randomUUID();await submit(A,1300,50,20,'鼓友',run);const count=(await db.query('select count(*)::int n from dazougu_private.score_submissions where player_id=$1',[A])).rows[0].n;
   r=await submit(A,1300,50,20,'鼓友',run);assert.equal(r.duplicate,true);assert.equal((await db.query('select count(*)::int n from dazougu_private.score_submissions where player_id=$1',[A])).rows[0].n,count);
   await assert.rejects(submit(A,1400,50,20,'鼓友',run));pass('run ID retries are idempotent and reject mutated payloads');

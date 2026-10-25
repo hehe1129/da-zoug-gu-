@@ -20,7 +20,7 @@
 
 在 Supabase 左侧 **SQL Editor → New query** 中粘贴完整内容，点击 **Run**。这一步使用你在 Dashboard 中的登录权限，不需要把任何管理员密钥复制出来。脚本可以重复执行，不会清空已有玩家数据。
 
-随后新建一个查询，粘贴并运行 [supabase/verify-leaderboard.sql](supabase/verify-leaderboard.sql)。应有 **8 项检查，passed 全部为 true**。
+再运行 [supabase/leaderboard-wishes.sql](supabase/leaderboard-wishes.sql)，这是 V32 的心愿与全员分页升级，保留旧成绩和旧接口。随后运行 [supabase/verify-leaderboard.sql](supabase/verify-leaderboard.sql)，应有 **11 项检查，passed 全部为 true**。本次已通过已连接的 Supabase 执行，无需用户再次粘贴。
 
 不要把 `dazougu_private` 添加到 Data API 的 Exposed schemas，也不要给 `anon` 或 `authenticated` 手工开放表权限。客户端只调用两个已授权的公开 RPC。
 
@@ -66,7 +66,8 @@ node tools/check-leaderboard-config.cjs --require-config
 3. 刷新页面再次游玩，应保留昵称和匿名身份；首页、结算页都能打开排行榜。
 4. 另用无痕窗口或另一台设备游玩，可使用同样昵称。两人应是两个玩家，共享同一榜单；当前玩家以粉色行突出显示。
 5. 在网页和音频已加载后模拟断网，已加载的游戏继续运行；结算显示未同步，恢复网络后点“重试”应完成补交，不重复创建成绩。
-6. 有超过50位玩家时，只展示前50名；当前玩家不在前50名内时仍在底部显示自己的名次和最高分。
+6. 所有已提交成绩的玩家都可上榜，每页20位，使用上一页/下一页浏览；当前玩家不在本页时仍在底部显示自己的名次和最高分。
+7. 点击“写心愿”或自己的心愿，可保存不超过50个 Unicode 字符的内容。列表只显示前六字，超出显示省略号，点击展开完整内容；其他玩家可阅读但不能编辑。心愿写入失败时保留编辑框草稿并提供重试。
 
 本地自动化测试使用独立 GoTrue 协议测试服务和真实 PostgreSQL WASM 引擎，测试数据只在本机，不是线上玩家。2026-10-26另外使用真实 Supabase、官方 SDK 和两个隔离浏览器上下文完成17项云端联调；测试后已退出并删除两名临时玩家，确认榜单及测试回执清理完毕。详见 QA-V26.md。
 

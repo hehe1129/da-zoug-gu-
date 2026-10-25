@@ -3,9 +3,9 @@
 select 'RLS enabled on both private tables' as check_name,
   (select count(*)=2 from pg_tables where schemaname='dazougu_private'
     and tablename in ('player_bests','score_submissions') and rowsecurity) as passed
-union all select 'Private schema not accessible to API roles',
-  not has_schema_privilege('anon','dazougu_private','usage')
-  and not has_schema_privilege('authenticated','dazougu_private','usage')
+union all select 'API roles cannot create private objects',
+  not has_schema_privilege('anon','dazougu_private','create')
+  and not has_schema_privilege('authenticated','dazougu_private','create')
 union all select 'No direct API table writes or reads',
   not exists (select 1 from unnest(array['anon','authenticated']) r,
     unnest(array['player_bests','score_submissions']) t,
@@ -26,4 +26,12 @@ union all select 'Highest-score trigger active',
   exists (select 1 from pg_trigger where tgname='dzg_monotonic_best'
     and tgrelid='dazougu_private.player_bests'::regclass and tgenabled='O')
 union all select 'Submission deduplication primary key exists',
-  exists (select 1 from pg_constraint where conrelid='dazougu_private.score_submissions'::regclass and contype='p');
+  exists (select 1 from pg_constraint where conrelid='dazougu_private.score_submissions'::regclass and contype='p')
+union all select 'Only authenticated players can save wishes',
+  has_function_privilege('authenticated','public.dzg_save_wish(text)','execute')
+  and not has_function_privilege('anon','public.dzg_save_wish(text)','execute')
+union all select 'Wish length constrained in database',
+  exists (select 1 from pg_constraint where conrelid='dazougu_private.player_bests'::regclass and conname='dzg_wish_length')
+union all select 'New exposed APIs are invokers with fixed search paths',
+  (select count(*)=2 from pg_proc where oid in ('public.dzg_save_wish(text)'::regprocedure,
+    'public.dzg_leaderboard_page(integer)'::regprocedure) and not prosecdef and proconfig @> array['search_path=""']);

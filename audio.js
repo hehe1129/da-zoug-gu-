@@ -6,7 +6,9 @@ const AUDIO_SOURCES = {
   cymbal:{bytes:68541,file:'cymbal.mp3',offset:.541,length:1.35,gain:1.25},
   gong:{bytes:35313,file:'gong.mp3',offset:.085,length:.72,gain:1.6},
   wood:{bytes:7728,file:'wood.mp3',offset:0,length:.237,gain:3.1},
-  suona:{bytes:104276,file:'suona.mp3',offset:0,length:4.279,gain:.5}
+  suona:{bytes:104276,file:'suona.mp3',offset:0,length:4.279,gain:.5},
+  rainLight:{bytes:131134,file:'rain-light-v32.mp3'},
+  rainHeavy:{bytes:481175,file:'rain-heavy-v32.mp3'}
 };
 class RhythmAudio {
   constructor() {
@@ -14,6 +16,7 @@ class RhythmAudio {
     this.muted=false;this.unlocking=false;this.buffers={};this.nodes=new Set();this.variations={};this.lastHit=null;this.lastGameRead=null;this.visualClock=null;
     // Preload and decode before the cover; audible output unlocks on a gesture.
     this.raw={};this.transfers={};this.fetchErrors={};this.primed=false;this.status='idle';this.failed=[];this.clock=null;this.boost=null;
+    this.rain=null;this.rainLayers=new Set();this.rainLoops={};this.rainType=null;
   }
   preload(retry=false) {
     for(const [kind,meta] of Object.entries(AUDIO_SOURCES)) {
@@ -80,6 +83,7 @@ class RhythmAudio {
 
     })).then(()=>{
       this.suonaSustain(); // prepare the short, crossfaded recording loop before play
+      this.rainLoop('rainLight');this.rainLoop('rainHeavy');
       this.failed=Object.keys(AUDIO_SOURCES).filter(kind=>!this.buffers[kind]);
       this.status=this.failed.length?'partial':'ready';return !!this.buffers.ensemble;
     });
@@ -98,6 +102,44 @@ class RhythmAudio {
     }catch{if(!this.muted)this.onError?.();}
   }
   setMuted(muted) {this.muted=muted;if(this.ctx)this.master.gain.setTargetAtTime(muted?0:.72,this.ctx.currentTime,.025);}
+  rainLoop(kind) {
+    if(this.rainLoops[kind])return this.rainLoops[kind];
+    const input=this.buffers[kind];if(!input?.getChannelData||!this.ctx?.createBuffer)return null;
+    // Equal-power seam preserves steady rain energy across repeated playback.
+    const overlap=Math.min(Math.floor(input.sampleRate*.28),Math.floor(input.length/4)),frames=input.length-overlap;
+    const loop=this.ctx.createBuffer(input.numberOfChannels,frames,input.sampleRate);
+    for(let c=0;c<input.numberOfChannels;c++){
+      const samples=input.getChannelData(c),out=loop.getChannelData(c);
+      out.set(samples.subarray(0,frames));
+      for(let i=0;i<overlap;i++){
+        const angle=(i+.5)/overlap*Math.PI/2;
+        out[i]=samples[i]*Math.sin(angle)+samples[frames+i]*Math.cos(angle);
+      }
+    }
+    this.rainLoops[kind]=loop;return loop;
+  }
+  setRain(type,cover=false) {
+    if(!this.ctx||!this.master)return;
+    const kind=type==='heavy'?'rainHeavy':type==='light'?'rainLight':null;
+    const wanted=kind&&this.ctx.state==='running'?kind:null;
+    const level=cover?.65:wanted==='rainHeavy'?.5:.24;
+    const now=this.ctx.currentTime;
+    if(wanted===this.rainType){if(this.rain)this.rain.gain.gain.setTargetAtTime(level,now,.18);return;}
+    const previous=this.rain;this.rain=null;this.rainType=wanted;
+    if(previous){
+      previous.gain.gain.cancelScheduledValues(now);
+      previous.gain.gain.setTargetAtTime(0,now,.09);
+      try{previous.source.stop(now+.55);}catch{}
+    }
+    if(!wanted)return;
+    const buffer=this.rainLoop(wanted);if(!buffer){this.rainType=null;return;}
+    const source=this.ctx.createBufferSource(),gain=this.ctx.createGain();source.buffer=buffer;source.loop=true;
+    source.loopEnd=buffer.duration;gain.gain.setValueAtTime(0,now);gain.gain.setTargetAtTime(level,now,.18);
+    source.connect(gain);gain.connect(this.master);
+    const layer={source,gain};this.rainLayers.add(layer);this.rain=layer;
+    source.onended=()=>{this.rainLayers.delete(layer);source.disconnect();gain.disconnect();};
+    source.start(now);
+  }
   startTransport() {
     this.stopTransport();if(!this.ctx)return;
     this.session=this.ctx.createGain();this.session.connect(this.master);

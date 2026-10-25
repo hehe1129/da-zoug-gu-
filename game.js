@@ -122,7 +122,12 @@ async function loadGameAssets(retry=false){
 }
 window.retryGameLoad=()=>{audio.unlock(true);loadGameAssets(true);};
 
-function setState(value) { state = value; $('app').dataset.state = value; }
+function syncWeatherAudio() {
+  const cover=state==='home'||state==='transition';
+  const wet=cover||(['playing','countdown','paused','over'].includes(state)&&phase>=2);
+  audio.setRain(document.hidden||!wet?null:!cover&&phase===5?'heavy':'light',cover);
+}
+function setState(value) { state = value; $('app').dataset.state = value; syncWeatherAudio(); }
 function now() { return state === 'playing' ? audio.gameTime() ?? (performance.now() - startClock) / 1000 : elapsed; }
 function restartAnimation(el, className) { el.classList.remove(className); void el.offsetWidth; el.classList.add(className); }
 function feedback(text, kind = '', duration = .8) { $('notice').textContent = text; $('notice').dataset.kind = kind; noticeUntil = now() + duration; if (!reducedMotion) restartAnimation($('notice'), 'bump'); }
@@ -167,6 +172,7 @@ function enterStage(index,announce=true) {
   $('stageTrack').setAttribute('aria-label',`第 ${index+1} 阶段，共 6 阶段：${s.name}`);
   $('stageTrack').querySelectorAll('span').forEach((el,i)=>{el.dataset.status=i<index?'done':i===index?'current':'next';el.firstElementChild.style.transform=`scaleX(${i<index?1:0})`;});
   paintScenery(index);
+  syncWeatherAudio();
   if(announce&&old>=0&&old!==index){
     stageCueUntil=now()+2.1;
     $('stageCue').innerHTML=`<span>LEVEL <b>${String(index+1).padStart(2,'0')}</b> / 06</span><strong>${s.name}</strong><i aria-hidden="true">↗</i>`;
@@ -573,12 +579,14 @@ for(const type of ['selectstart','dragstart','contextmenu'])$('app').addEventLis
 for(const type of ['touchstart','touchmove'])canvas.addEventListener(type,e=>{if(state==='playing'||state==='countdown')e.preventDefault();},{passive:false});
 $('start').onclick=start; $('retry').onclick=()=>{ $('game').inert=false; start(); }; $('pause').onclick=pause; $('resume').onclick=resume; $('quit').onclick=home; $('back').onclick=home;
 function soundButtons() { document.querySelectorAll('.sound-toggle').forEach(el=>{ el.innerHTML=uiSVG(audio.muted?'muted':'volume'); el.setAttribute('aria-label',audio.muted?'开启声音':'关闭声音'); el.setAttribute('aria-pressed',String(audio.muted)); }); }
-document.querySelectorAll('.sound-toggle').forEach(el=>{ el.onclick=()=>{ audio.setMuted(!audio.muted); if(!audio.muted){audio.unlock();if(audio.failed.length)audio.prepare(true).then(()=>{if(audio.failed.length)audio.onAssetError?.();});} soundButtons(); }; });
+document.addEventListener('pointerdown',()=>{if(state==='home'&&!audio.muted){audio.unlock();syncWeatherAudio();}},{capture:true});
+document.addEventListener('keydown',event=>{if(state==='home'&&!audio.muted&&!event.ctrlKey&&!event.metaKey){audio.unlock();syncWeatherAudio();}},{capture:true});
+document.querySelectorAll('.sound-toggle').forEach(el=>{ el.onclick=()=>{ audio.setMuted(!audio.muted); if(!audio.muted){audio.unlock();if(audio.failed.length)audio.prepare(true).then(()=>{if(audio.failed.length)audio.onAssetError?.();});} syncWeatherAudio();soundButtons(); }; });
 audio.onError=()=>{ clearTimeout(messageTimer); $('error').textContent='声音未开启，可点右上角声音按钮重试'; $('error').hidden=false; messageTimer=setTimeout(()=>{ $('error').hidden=true; },4000); };
-audio.onReady=()=>{ if(audio.status==='partial')audio.onAssetError?.();else $('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now()); };
+audio.onReady=()=>{ if(audio.status==='partial')audio.onAssetError?.();else $('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
 audio.onInterrupted=()=>pause();
 audio.onAssetError=()=>{clearTimeout(messageTimer);$('error').textContent='声音未能载入，请重新载入游戏';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},6500);};
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) pause(); });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) pause();syncWeatherAudio(); });
 window.addEventListener('blur',()=>pause());
 window.addEventListener('resize',()=>{
   // A mobile keyboard closing after first-time naming must not pause the fresh

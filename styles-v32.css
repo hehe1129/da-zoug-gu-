@@ -1,0 +1,42 @@
+/* Wider, compact four-column rows inside the existing un-stretched arch. */
+.leaderboard-sheet .rank-toolbar{justify-content:flex-end;left:16.5%;right:15.5%;top:22%}
+.leaderboard-sheet .rank-scroll{left:16.5%;right:17.5%;top:27.4%;bottom:42%}
+.leaderboard-sheet .rank-scroll .rank-number{width:28px}
+.leaderboard-sheet .rank-scroll .rank-name{width:auto}
+.leaderboard-sheet .rank-scroll .rank-score{width:45px}
+.leaderboard-sheet .rank-scroll .rank-wish{width:82px}
+.leaderboard-sheet .rank-scroll th{font-size:11.5px;line-height:1.3;padding:3px 1px;white-space:nowrap}
+.leaderboard-sheet .rank-scroll th:first-child,.leaderboard-sheet .rank-scroll td:first-child,
+.leaderboard-sheet .rank-scroll th:last-child,.leaderboard-sheet .rank-scroll td:last-child{width:auto}
+.leaderboard-sheet .rank-scroll td{font-size:12px;line-height:1.25;padding:0 1px;height:21px}
+.leaderboard-sheet .rank-scroll td:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leaderboard-sheet .rank-scroll th:nth-child(3),.leaderboard-sheet .rank-scroll td:nth-child(3){text-align:center}
+.leaderboard-sheet .rank-scroll td:nth-child(4){color:#111}
+.leaderboard-sheet .rank-medal{width:18px;height:18px;font-size:12px}
+#app .wish-preview{display:block;width:100%;min-width:0;min-height:21px;padding:2px 0;background:transparent;border:0;text-align:left;color:#111;font-size:11.5px;line-height:1.3;white-space:nowrap;text-decoration:none}
+#app .wish-preview:disabled{opacity:1}
+#app .wish-preview,#app .wish-full{font-family:ClassicSong,ClassicSongNames,SimSun,"Songti SC",serif}
+.rank-paging{position:absolute;left:17%;right:16%;top:58.5%;display:flex;justify-content:space-between;align-items:center;gap:3px;height:30px;color:#07398d;font-size:11px}
+#app .rank-paging button{min-height:30px;min-width:46px;padding:3px 1px;font-size:11px;background:transparent;color:inherit}
+.leaderboard-sheet .rank-mine{top:64.8%;left:17%;right:18%;padding-top:0}
+.leaderboard-sheet .rank-mine>span{font-size:12px;margin-bottom:5px}
+.leaderboard-sheet .rank-mine>div{grid-template-columns:25px minmax(0,1fr) 48px;font-size:12px;line-height:1.3}
+#app .edit-wish{position:absolute;top:-9px;left:80px;right:auto;min-height:30px;padding:5px 2px;background:transparent;color:#07398d;font-size:12px;text-decoration:none}
+.wish-dialog{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:min(84%,340px);max-height:78dvh;overflow:auto;padding:24px 22px 18px;background:#fff8e7;color:#07398d;border:1px solid #a4c2df;border-radius:16px;box-shadow:0 14px 45px #041a3960}
+.wish-dialog h3{margin:0 0 18px;font-size:22px;line-height:1.4;font-weight:400;overflow-wrap:anywhere}
+.wish-full{margin:0 0 20px;font-size:18px;line-height:1.8;overflow-wrap:anywhere;white-space:pre-wrap;color:#111}
+#app .wish-dialog textarea{display:block;width:100%;min-height:120px;padding:10px;background:#fffdf6;color:#111;border:1px solid #a4c2df;border-radius:6px;font:16px/1.6 ClassicSong,ClassicSongNames,SimSun,serif;user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;touch-action:auto}
+.wish-count{font-size:12px;text-align:right;margin-top:5px}.wish-error{font-size:13px;color:#a32954;min-height:20px;margin:4px 0 8px}
+#app .wish-dialog button{min-height:44px;padding:8px 12px;color:#07398d;background:transparent;font-size:18px}
+#app #wishSave{width:100%;background:#1859ac;color:#fff8e7;border-radius:8px}#app #wishClose{display:block;margin:7px auto 0}
+.wish-dialog :focus-visible,.rank-paging button:focus-visible,.wish-preview:focus-visible,.edit-wish:focus-visible{outline:2px solid #1859ac;outline-offset:2px}
+@media(max-height:650px){
+ .leaderboard-sheet .rank-scroll td{font-size:11px;height:19px;padding:0 1px}
+ .leaderboard-sheet .rank-scroll th{font-size:10.5px}
+ .leaderboard-sheet .rank-scroll .rank-number{width:26px}
+ .leaderboard-sheet .rank-scroll .rank-score{width:40px}
+ .leaderboard-sheet .rank-scroll .rank-wish{width:74px}
+ #app .wish-preview{font-size:10.5px;min-height:19px}
+ .leaderboard-sheet .rank-mine>div{font-size:11px}
+ .rank-paging{top:58%}
+}
