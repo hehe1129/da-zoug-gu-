@@ -91,7 +91,7 @@ function loadVisuals(tracker,retry){
     visualImage('assets/cover-painting-v19.webp',retry),
     visualImage('assets/cover-foreground-mask-v30.webp',retry),
     visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry),
-    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v29.webp',retry),
+    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v31.webp',retry),
     visualImage('assets/ranking-panel-v27.webp',retry) // original alpha contour for the blue reference artwork
   ];
   tracker.total=tasks.length;
@@ -364,7 +364,7 @@ function draw(t) {
   const wash=pen.createLinearGradient(0,h*.26,w*.4,h);
   wash.addColorStop(0,'#e2d9aa00');wash.addColorStop(1,'#eddeb449');pen.fillStyle=wash;pen.fillRect(0,0,w,h);
   pen.drawImage(scenery,0,0,w,h);
-  window.DazouguWeather?.drawFieldRain(pen,t,w,h,phase,reducedMotion);
+  window.DazouguWeather?.drawFieldRain(pen,t,w,h,phase,reducedMotion,'back');
   // Misses tint only their lane, below the notes. The HUD banner remains unobstructed.
   for(const e of effects) {
     const age=t-e.at, strength=Math.max(0,1-age/(e.kind==='miss' ? .85 : .42));
@@ -428,7 +428,8 @@ function draw(t) {
     if(e.kind==='miss') { pen.fillStyle='#f24494'; pen.font='20px ClassicSong'; pen.textAlign='center'; pen.fillText('−1',x,line+36); }
     pen.globalAlpha=1;
   }
-  // Always on top of both confetti and tiles; the timing reference stays clear.
+  window.DazouguWeather?.drawFieldRain(pen,t,w,h,phase,reducedMotion,'front');
+  // Always on top of rain, confetti and tiles; the timing reference stays clear.
   pen.fillStyle=t<damageUntil?'#f04e94':'#ffdc35'; pen.fillRect(0,line-1.5,w,3);
 }
 function frame() {

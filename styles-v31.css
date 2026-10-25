@@ -1,0 +1,7 @@
+/* Keep the protruding title, without the pale outline. */
+.rank-heading-lead{text-shadow:none;-webkit-text-stroke:0}
+/* Synthetic bold hollows this supplied font's 鼓 glyph on Chromium. */
+#app #leaderboardTitle .rank-heading-lead{font-weight:400;font-synthesis:none}
+.leaderboard-sheet:before{background-image:url('assets/ranking-panel-v31.webp')}
+/* The table header shares the clean ivory panel surface. */
+.leaderboard-sheet .rank-scroll th{background:#fff8e7}
