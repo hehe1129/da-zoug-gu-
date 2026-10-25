@@ -79,6 +79,7 @@ class RhythmAudio {
       }catch(error){delete this.raw[kind];this.fetchErrors[kind]=error;}
 
     })).then(()=>{
+      this.suonaSustain(); // prepare the short, crossfaded recording loop before play
       this.failed=Object.keys(AUDIO_SOURCES).filter(kind=>!this.buffers[kind]);
       this.status=this.failed.length?'partial':'ready';return !!this.buffers.ensemble;
     });
@@ -191,13 +192,13 @@ class RhythmAudio {
     // Lower the drum's body and remove the bright membrane slap. Other
     // instruments keep their root pitch; variations still use the same sample.
     const rate=(kind==='drum'?.78:1)*detune;s.playbackRate.value=rate;
-    const velocity=options.vary?[.78,1.12,.88,1.02,.84,1.08][variant]:1;
-    const cutoffs={drum:[320,680,390,590,450,750],wood:[750,4500,1050,3300,1350,6000],gong:[1400,5200,1900,4200,2400,6500],cymbal:[3600,11500,4800,9000,4100,13000]};
+    const velocity=options.vary?(kind==='cymbal'?[1.03,1.12,1.04,1.02,1.04,1.08]:[.78,1.12,.88,1.02,.84,1.08])[variant]:1;
+    const cutoffs={drum:[320,680,390,590,450,750],wood:[750,4500,1050,3300,1350,6000],gong:[1400,5200,1900,4200,2400,6500],cymbal:[5200,11500,6200,9000,5600,13000]};
     const filter=this.ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=(cutoffs[kind]||[8000])[variant]||8000;filter.Q.value=.55;
-    const body=this.ctx.createBiquadFilter();body.type=kind==='drum'?'lowshelf':'highshelf';body.frequency.value=kind==='drum'?180:kind==='wood'?600:kind==='cymbal'?4000:1800;body.gain.value=kind==='drum'?[6,4,5.5,4.5,6,4.2][variant]:[-5,3.5,-3.5,2.5,-4.5,4][variant];
+    const body=this.ctx.createBiquadFilter();body.type=kind==='drum'?'lowshelf':'highshelf';body.frequency.value=kind==='drum'?180:kind==='wood'?600:kind==='cymbal'?4000:1800;body.gain.value=kind==='drum'?[6,4,5.5,4.5,6,4.2][variant]:kind==='cymbal'?[-1.5,3.5,-1,2.5,-1.25,4][variant]:[-5,3.5,-3.5,2.5,-4.5,4][variant];
     const sourceLength=Math.min(meta.length,s.buffer.duration-meta.offset),length=sourceLength/rate;
     const gain=meta.gain*level*velocity*(options.accent||1)*(options.perfect?1.06:1);g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(gain,at+.002);
-    const decay=(kind==='drum'?[.36,.67,.42,.59,.39,.65]:[.50,.98,.62,.86,.56,.94])[variant];
+    const decay=(kind==='drum'?[.36,.67,.42,.59,.39,.65]:kind==='cymbal'?[.72,.98,.80,.86,.76,.94]:[.50,.98,.62,.86,.56,.94])[variant];
     g.gain.setValueAtTime(gain,at+.025);g.gain.linearRampToValueAtTime(gain*.48,at+length*decay*.72);g.gain.linearRampToValueAtTime(0,at+length*decay);
     s.connect(filter);filter.connect(body);body.connect(g);g.connect(dest);this.track(s);
     s.onended=()=>{this.nodes.delete(s);s.disconnect();filter.disconnect();body.disconnect();g.disconnect();};s.start(at,meta.offset,sourceLength);
@@ -208,9 +209,9 @@ class RhythmAudio {
     // A short voiced articulation from the supplied sample, not its unrelated
     // four-second melody. Length is deliberately too short to become a phrase.
     const ctx=this.ctx,s=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
-    const t=ctx.currentTime,variant=this.nextVariation('suona',t),duration=points===30?.105:points===20?.085:.065;
+    const t=ctx.currentTime,variant=this.nextVariation('suona',t),duration=points===30?.22:points===20?.17:.13;
     s.buffer=this.buffers.suona;s.playbackRate.value=[.988,1.014,.994,1.019,.991,1.009][variant];f.type='lowpass';f.frequency.value=[1950,2850,2150,2700,2050,3000][variant];
-    const level=(points===30?.55:points===20?.46:.38)*(perfect?1.08:1)*[.88,1.08,.94,1.03,.91,1.06][variant];
+    const level=(points===30?.72:points===20?.62:.52)*(perfect?1.08:1)*[.88,1.08,.94,1.03,.91,1.06][variant];
     if(this.bg){this.bg.gain.setTargetAtTime(.57,t,.006);this.bg.gain.setTargetAtTime(.66,t+duration,.04);}
     g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(level,t+.006);g.gain.setValueAtTime(level,t+duration*.45);g.gain.linearRampToValueAtTime(0,t+duration);
     s.connect(f);f.connect(g);g.connect(this.session);this.track(s);
@@ -218,19 +219,32 @@ class RhythmAudio {
   }
   tick(accent=false) {this.sound('wood',undefined,this.session,accent?.55:.35);}
   miss() {this.sound('drum',undefined,this.master,.2);}
-  voice() {
-    if(this.ctx?.state!=='running'||!this.session)return()=>{};
-    if(this.song&&this.boost) {
-      // Highlight the melody in the SAME time-aligned recording. A different
-      // four-second suona performance must not play out of key over the song.
-      const gain=this.boost,ctx=this.ctx;gain.gain.cancelScheduledValues(ctx.currentTime);gain.gain.setTargetAtTime(.28,ctx.currentTime,.025);
-      let stopped=false;return()=>{if(stopped)return;stopped=true;gain.gain.setTargetAtTime(0,ctx.currentTime,.018);};
+  suonaSustain() {
+    const source=this.buffers.suona;
+    if(!source?.getChannelData||!this.ctx?.createBuffer)return null;
+    if(this.sustainSource===source&&this.sustainBuffer)return this.sustainBuffer;
+    // The supplied excerpt has a silent gap near 1.1 s. Loop a voiced A-note
+    // region instead of restarting that gap or another four-second melody.
+    const rate=source.sampleRate,start=Math.floor(.51*rate),length=Math.min(Math.floor(.24*rate),source.length-start);
+    if(length<rate*.05)return null;
+    const overlap=Math.min(Math.floor(.024*rate),Math.floor(length/4)),frames=length-overlap;
+    const buffer=this.ctx.createBuffer(source.numberOfChannels,frames,rate);
+    for(let channel=0;channel<source.numberOfChannels;channel++){
+      const input=source.getChannelData(channel),out=buffer.getChannelData(channel);
+      for(let i=0;i<frames;i++)out[i]=i<overlap?input[start+i]*(i/overlap)+input[start+frames+i]*(1-i/overlap):input[start+i];
     }
-    // Only if the ensemble failed to load: use the supplied suona excerpt,
-    // gated by the finger. Still a recording, never a synthesized substitute.
-    if(!this.buffers.suona)return()=>{};
-    const s=this.ctx.createBufferSource(),g=this.ctx.createGain(),ctx=this.ctx;s.buffer=this.buffers.suona;s.loop=true;g.gain.value=.4;s.connect(g);g.connect(this.session);this.track(s);s.start();let stopped=false;
-    return()=>{if(stopped)return;stopped=true;g.gain.setTargetAtTime(0,ctx.currentTime,.012);s.stop(ctx.currentTime+.06);setTimeout(()=>g.disconnect(),90);};
+    this.sustainSource=source;this.sustainBuffer=buffer;return buffer;
+  }
+  voice() {
+    if(this.ctx?.state!=='running'||!this.session||!this.buffers.suona)return()=>{};
+    const ctx=this.ctx,s=ctx.createBufferSource(),g=ctx.createGain(),filter=ctx.createBiquadFilter();
+    s.buffer=this.suonaSustain()||this.buffers.suona;s.loop=true;s.loopStart=0;s.loopEnd=s.buffer.duration;
+    filter.type='lowpass';filter.frequency.value=4800;filter.Q.value=.5;
+    const t=ctx.currentTime;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1.4,t+.012);
+    s.connect(filter);filter.connect(g);g.connect(this.session);this.track(s);
+    s.onended=()=>{this.nodes.delete(s);s.disconnect();filter.disconnect();g.disconnect();};s.start(t);
+    let stopped=false;
+    return()=>{if(stopped)return;stopped=true;const now=ctx.currentTime;g.gain.cancelScheduledValues(now);g.gain.setTargetAtTime(.0001,now,.012);try{s.stop(now+.08);}catch{}};
   }
 }
 const audio=new RhythmAudio();

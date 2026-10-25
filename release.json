@@ -1,1 +1,1 @@
-{"version":"V29-preview","baseCommit":"4a4f82a","releaseDate":"2026-10-26","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"参考鼓气榜排版、越界鼓字、黑色姓名分数与蓝色其他文字、保留原外层背景；封面80条CSS雨线","status":"cloud-validated-ui-refined-awaiting-preview-confirmation"}
+{"version":"V30","baseCommit":"4148a1d","releaseDate":"2026-10-26","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"共享鼓气榜；封面不规则前后分层雨、三至六阶段渐强雨；钹声弱档增强，原唢呐录音持续长按发声","status":"release"}

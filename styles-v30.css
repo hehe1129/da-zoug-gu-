@@ -1,0 +1,15 @@
+/* The original cover stays intact; only its occlusion and weather are layered. */
+.cover-painting{z-index:0}
+.cover-rain-back{z-index:1}
+.cover-foreground{position:absolute;inset:0;z-index:2;pointer-events:none;background:url('assets/cover-painting-v19.webp') center/100% 100% no-repeat;-webkit-mask:url('assets/cover-foreground-mask-v30.webp') center/100% 100% no-repeat;mask:url('assets/cover-foreground-mask-v30.webp') center/100% 100% no-repeat}
+.cover-rain-front{z-index:3}
+.cover-header{z-index:4}.play-center{z-index:5}
+/* Separate the full touch targets on short, proportionally scaled panels. */
+.leaderboard-sheet .community-close{top:calc(50% - 16px)}
+.leaderboard-sheet .rank-toolbar{top:23%}
+.cover-rain i{animation-name:cover-rainfall-v30;animation-duration:var(--duration)}
+/* Keep the rain moving behind the ranking dialog, as requested. */
+#app[data-state="home"] .cover-rain i,#app[data-state="home"]:has(.community-overlay:not([hidden])) .cover-rain i{animation-play-state:running}
+@keyframes cover-rainfall-v30{0%{transform:translate3d(var(--rain-from),-30px,0) rotate(var(--rain-angle));opacity:0}6%{opacity:var(--rain-opacity)}91%{opacity:var(--rain-opacity)}100%{transform:translate3d(var(--rain-to),calc(100dvh + 160px),0) rotate(var(--rain-angle));opacity:0}}
+@media(prefers-reduced-motion:reduce){.cover-rain{display:none}}
+@media(max-height:450px){.leaderboard-sheet .community-close{top:calc(50% - 34px)}}

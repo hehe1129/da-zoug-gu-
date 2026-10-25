@@ -89,6 +89,7 @@ function loadVisuals(tracker,retry){
     readyImage(perfectSheet,()=>perfectArt.length===5,retry),
     visualImage('assets/modal-frame-v22.webp',retry),
     visualImage('assets/cover-painting-v19.webp',retry),
+    visualImage('assets/cover-foreground-mask-v30.webp',retry),
     visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry),
     visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v29.webp',retry),
     visualImage('assets/ranking-panel-v27.webp',retry) // original alpha contour for the blue reference artwork
@@ -363,6 +364,7 @@ function draw(t) {
   const wash=pen.createLinearGradient(0,h*.26,w*.4,h);
   wash.addColorStop(0,'#e2d9aa00');wash.addColorStop(1,'#eddeb449');pen.fillStyle=wash;pen.fillRect(0,0,w,h);
   pen.drawImage(scenery,0,0,w,h);
+  window.DazouguWeather?.drawFieldRain(pen,t,w,h,phase,reducedMotion);
   // Misses tint only their lane, below the notes. The HUD banner remains unobstructed.
   for(const e of effects) {
     const age=t-e.at, strength=Math.max(0,1-age/(e.kind==='miss' ? .85 : .42));
