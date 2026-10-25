@@ -70,8 +70,7 @@
     }catch{if(generation===requestGeneration){byId('rankStatus').textContent='暂时连不上，稍后再试';byId('rankRetry').hidden=false;}}
     finally{if(generation===requestGeneration){byId('rankRefresh').disabled=false;byId('rankBody').setAttribute('aria-busy','false');}}
   }
-  for(const id of ['homeLeaderboard','resultLeaderboard'])byId(id).onclick=()=>{if(open('leaderboardDialog')){byId('rankPlay').textContent=app.dataset.state==='over'?'再敲一场':'鸣鼓开场';refresh();}};
-  byId('rankPlay').onclick=()=>{requestGeneration++;close();byId(app.dataset.state==='over'?'retry':'start').click();};
+  for(const id of ['homeLeaderboard','resultLeaderboard'])byId(id).onclick=()=>{if(open('leaderboardDialog'))refresh();};
   byId('rankHome').onclick=()=>{requestGeneration++;close();if(app.dataset.state==='over')byId('back').click();else byId('start').focus({preventScroll:true});};
   byId('rankClose').onclick=()=>{requestGeneration++;close();};byId('rankRetry').onclick=refresh;byId('rankRefresh').onclick=refresh;
   byId('scoreSyncRetry').onclick=()=>{byId('scoreSyncRetry').disabled=true;client.flush().finally(()=>renderSubmission());};
