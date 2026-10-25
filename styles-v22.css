@@ -2,8 +2,3 @@
 #perfectFeedback{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
 .game-top,.game-info,.feedback-band,.combo-bar{z-index:4}
 .modal-card .primary>span:first-child{border-bottom:0;padding-bottom:0}
-.cover-dust{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;contain:strict}
-.cover-dust i{position:absolute;left:var(--x);top:var(--y);width:var(--size);height:var(--size);border-radius:50%;background:var(--dust);opacity:0;animation:cover-drift var(--duration) linear var(--delay) infinite;animation-play-state:paused}
-#app[data-state="home"] .cover-dust i{animation-play-state:running}
-@keyframes cover-drift{0%{transform:translate3d(0,32px,0);opacity:0}18%{opacity:.72}72%{opacity:.58}100%{transform:translate3d(var(--drift),-125px,0);opacity:0}}
-@media(prefers-reduced-motion:reduce){.cover-dust i{animation:none;opacity:.4}}

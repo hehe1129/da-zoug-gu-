@@ -1,0 +1,34 @@
+/* Blue-rimmed reference panel. The paper and illustration keep their 2:3 ratio. */
+.leaderboard-sheet{container-type:inline-size;color:#07398d}
+.leaderboard-sheet:before{background-image:url('assets/ranking-panel-v29.webp');-webkit-mask:url('assets/ranking-panel-v27.webp') center/100% 100% no-repeat;mask:url('assets/ranking-panel-v27.webp') center/100% 100% no-repeat}
+.leaderboard-sheet .community-heading{left:11.5%;right:20%;top:9.8%;height:11%;display:block}
+.leaderboard-sheet .community-heading h2{display:flex;align-items:baseline;white-space:nowrap;font-size:clamp(28px,14.3cqw,64px);letter-spacing:-.025em;line-height:1.08;color:#07398d}
+#app #leaderboardTitle,#app #leaderboardTitle span{font-weight:700;font-synthesis:weight}
+.rank-heading-lead{font-size:1.08em;text-shadow:-1px -1px 0 #fff9e9,0 -1px 0 #fff9e9,1px -1px 0 #fff9e9,-1px 0 0 #fff9e9,1px 0 0 #fff9e9,-1px 1px 0 #fff9e9,0 1px 0 #fff9e9,1px 1px 0 #fff9e9}
+.leaderboard-sheet .community-close{position:absolute;right:0;top:50%;color:#07398d}
+.leaderboard-sheet .rank-toolbar{top:21.5%;color:#07398d}
+.leaderboard-sheet .rank-toolbar button,.leaderboard-sheet .rank-scroll th,.leaderboard-sheet .rank-mine>span{color:#07398d}
+.leaderboard-sheet .rank-scroll{top:27.8%;bottom:39%;scrollbar-color:#a4c2df #faf6e8}
+.leaderboard-sheet .rank-scroll th{padding:4px 2px;background:#fbf7eb}
+.leaderboard-sheet .rank-scroll td{font-size:15px;padding:2px;line-height:1.35;color:#07398d}
+.leaderboard-sheet .rank-scroll td:nth-child(2),.leaderboard-sheet .rank-scroll td:nth-child(3),#app #myNickname,#app #myBestScore{color:#111}
+.leaderboard-sheet .rank-scroll tr.current-player{background:#2e6ec814;color:#07398d}
+.rank-medal{position:relative;isolation:isolate;width:20px;height:20px;background:none;color:#07398d;font-size:15px}
+.rank-medal:before{content:'';position:absolute;inset:0;background:url('assets/rank-drum-v27.webp') center/100% 100% no-repeat;z-index:-1}
+.rank-scroll tr:nth-child(2) .rank-medal:before,.rank-scroll tr:nth-child(3) .rank-medal:before{filter:hue-rotate(155deg) saturate(.65)}
+.leaderboard-sheet .rank-mine{color:#07398d}
+.leaderboard-sheet .rank-mine>div{font-size:15px;line-height:1.35}
+#rankHome{color:#b9daff}
+#rankHome:before,#rankHome:after{content:'';position:absolute;top:50%;width:15%;height:1px;background:currentColor}
+#rankHome:before{left:-10%}#rankHome:after{right:-10%}
+.leaderboard-sheet .rank-state{color:#07398d}
+.leaderboard-sheet .rank-retry{background:#f9f4e5;color:#07398d}
+
+/* Eighty long rain streaks; compositor-only motion, no extra game canvas work. */
+.cover-rain{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;contain:strict}
+.cover-rain i{position:absolute;left:var(--x);top:-65px;width:var(--rain-width);height:var(--rain-length);border-radius:999px;background:linear-gradient(to bottom,#4b91c900,#4b91c9 45%,#2167a5);opacity:0;animation:cover-rainfall 2s linear var(--delay) infinite both;animation-play-state:paused}
+#app[data-state="home"] .cover-rain i{animation-play-state:running}
+#app:has(.community-overlay:not([hidden])) .cover-rain i{animation-play-state:paused}
+@keyframes cover-rainfall{0%{transform:translate3d(0,-20px,0) rotate(5deg);opacity:0}8%{opacity:var(--rain-opacity)}90%{opacity:var(--rain-opacity)}100%{transform:translate3d(-30px,calc(100dvh + 160px),0) rotate(5deg);opacity:0}}
+@media(max-height:650px){.leaderboard-sheet .rank-scroll td{font-size:14px;padding:2px}.leaderboard-sheet .rank-mine>div{font-size:14px}.rank-medal{width:18px;height:18px;font-size:14px}}
+@media(prefers-reduced-motion:reduce){.cover-rain{display:none}}

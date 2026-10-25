@@ -90,7 +90,8 @@ function loadVisuals(tracker,retry){
     visualImage('assets/modal-frame-v22.webp',retry),
     visualImage('assets/cover-painting-v19.webp',retry),
     visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry),
-    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v27.webp',retry)
+    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v29.webp',retry),
+    visualImage('assets/ranking-panel-v27.webp',retry) // original alpha contour for the blue reference artwork
   ];
   tracker.total=tasks.length;
   return Promise.all(tasks.map(task=>task.then(value=>{tracker.done++;return value;})));
