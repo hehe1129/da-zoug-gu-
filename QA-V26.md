@@ -4,7 +4,7 @@
 
 ## 当前连接状态
 
-2026-10-26更新：用户已创建真实 Free 项目 `kqrwcupkmtydzjyvshny`，状态 ACTIVE_HEALTHY，新加坡区域，PostgreSQL 17.11。通过已连接的 Supabase 插件完成建表、权限和配置；未使用管理员密钥填充前端，未启用付费服务，也未替换线上 V25。下面的本地测试和新增云端安装检查分别记录，不冒充完整云端玩家联调。
+2026-10-26更新：用户已创建真实 Free 项目 `kqrwcupkmtydzjyvshny`，状态 ACTIVE_HEALTHY，新加坡区域，PostgreSQL 17.11。通过已连接的 Supabase 插件完成建表、权限和配置；用户开启匿名登录后，另用真实云端完成玩家联调。未使用管理员密钥填充前端，未启用付费服务，也未替换线上 V25。下文分别记录本地与云端验证。
 
 ### 云端安装检查（2026-10-26）
 
@@ -15,7 +15,22 @@
 - 从项目接口取得现代 publishable key 和 URL，自动填写本地配置；配置检查通过，没有取得或写入 service_role / secret key。
 - 使用公开 key 实际读取 `/auth/v1/settings` 和 `/rest/v1/rpc/dzg_leaderboard`，均返回200；榜单0条，匿名登录标志为false。没有创建云端测试玩家或提交测试分数。
 - 安全 Advisor 余下的提示对应有意授权的两个 SECURITY DEFINER RPC：只读排行榜允许公开调用，写分函数只允许 authenticated 且主人来自 auth.uid()。它们固定空 search_path、全限定表名、明确撤销默认 PUBLIC 权限；没有为了消除提示而开放私有表。有关提示的官方说明：[公开调用](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable)、[认证调用](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)。
-- 尚待用户在 Dashboard 开启匿名登录；之后继续真实匿名身份、提交、最高分与共享榜单测试，再发布。
+- 用户在 Dashboard 开启并保存匿名登录后，实际公开 Auth settings 确认 `external.anonymous_users=true`，排行榜接口仍为200。
+
+### 真实云端玩家联调（2026-10-26）
+
+通过原有网页、官方 SDK、真实 Supabase Auth/PostgREST 和两个隔离的 Edge 浏览器上下文，手机尺寸390px和375px，完成17项检查；没有拦截云端配置或使用本机数据库替代线上。网络故障场景仅临时阻断测试页的写分请求。
+
+- 首次取名过滤空白；获得实际 `is_anonymous=true` 的认证身份，游戏结束自动提交。
+- 重开、刷新保留昵称和认证身份；900分后提交600分仍保留900，之后1200分更新成功。
+- 两名同昵称玩家对应不同匿名 ID，真实共享榜单按1500、1200倒序排列，当前玩家只高亮自己。
+- 写分网络失败保留待重试成绩，仍可重开；恢复后最高待同步1800分成功提交，较低的1700不覆盖待提交最高局。
+- 相同run重试返回duplicate，同一run改分及999999越界分被数据库拒绝；实际SQL确认首位玩家仅5条不同run回执。
+- 私有表读取被拒绝；未认证写分被拒绝；公开排名每行只有名次、昵称、最高分、本人标记4字段。
+- 浏览器无未捕获异常。测试分数通过显式结束快照注入，属于协议/流程验证，并非人类实际演奏或反作弊证明。
+- 两个测试身份均已全局退出，再按精确ID、匿名状态和测试昵称限定删除；复核测试用户、最高分、回执均为0，公开榜单为空。未清理其他玩家。
+
+忽略目录证据：`output/supabase/cloud-install-v26.json`、`cloud-players-v26.json`、`cloud-ranking-v26.png`。这些文件不含认证令牌或管理员密钥；截图中的两行是随后已清理的临时测试成绩。
 
 ## 数据库
 
@@ -45,7 +60,7 @@
 
 ## 浏览器联调
 
-使用 Microsoft Edge、官方 Supabase SDK 2.118.0、两个及更多隔离浏览器上下文、仅在本机运行的 GoTrue 协议服务与真实 PostgreSQL 数据库。云端 Supabase Auth 仍待真实项目验证。
+以下本地测试使用 Microsoft Edge、官方 Supabase SDK 2.118.0、两个及更多隔离浏览器上下文、仅在本机运行的 GoTrue 协议服务与真实 PostgreSQL 数据库。真实云端测试另见前文。
 
 `tests/leaderboard/browser.cjs` 覆盖：
 
@@ -77,4 +92,4 @@
 
 现有 `tests/chart-recording.cjs`、`tests/input-timing.cjs`、`tests/audio-clock.cjs`、`tests/audio-loading.cjs` 通过。原录音与谱面没有修改；没有把网络请求加入渲染循环。
 
-未进行实体手机、微信或免费配额容量的实测。已核验真实项目安装权限与只读接口，匿名认证/玩家写入仍待后台开启后验证；纯前端仍能被伪造成绩，没有宣称完全防作弊。
+未进行实体手机、微信或免费配额容量的实测。已核验真实项目安装权限、匿名认证、玩家写入、身份保留与共享排名；纯前端仍能被伪造成绩，没有宣称完全防作弊。新版待本地确认后发布，当前生产仍为V25。

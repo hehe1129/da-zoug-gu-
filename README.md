@@ -2,7 +2,7 @@
 
 温岭非遗大奏鼓文创产品的扫码音乐游戏。手机竖屏优先，也支持电脑鼠标。
 
-本地新增 **V26 在线排行榜预览**：代码与本地数据库/浏览器验证已完成，真实 Free 项目已经建表、通过权限检查并填写公开配置，等待开启匿名登录后继续云端玩家联调。设置和上线步骤见 [ONLINE-LEADERBOARD.md](ONLINE-LEADERBOARD.md)，验证见 [QA-V26.md](QA-V26.md)。当前线上仍为下面的 V25，原网址没有变。
+本地新增 **V26 在线排行榜预览**：真实 Free 项目已建表、完成权限与公开配置，匿名登录已开启，两个真实玩家的17项云端联调通过。临时测试玩家和成绩已清理，待本地确认后发布。设置和上线步骤见 [ONLINE-LEADERBOARD.md](ONLINE-LEADERBOARD.md)，验证见 [QA-V26.md](QA-V26.md)。当前线上仍为下面的 V25，原网址没有变。
 
 生产网址保持 https://hehe1129.github.io/da-zoug-gu-/ 。当前发布为用户授权的 V25，通过原 `main` 分支发布。上一线上版 V24 `d349908` 保留在 `backup/before-rhythm-calibration-v25`。下文各版本的“未发布”描述为当时的开发记录，部署结果以 GitHub Actions 为准。
 
