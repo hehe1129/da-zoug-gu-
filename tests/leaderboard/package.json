@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "description": "Local PostgreSQL verification only; never shipped in the game",
+  "devDependencies": { "@electric-sql/pglite": "0.5.11", "playwright": "1.64.1" },
+  "scripts": { "test": "node database.cjs && node client.cjs", "test:browser": "node browser.cjs", "test:edges": "node browser-edges.cjs" }
+}

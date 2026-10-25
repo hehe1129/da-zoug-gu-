@@ -41,6 +41,8 @@ let noticeUntil = 0, phase = -1;
 let damageUntil = 0, shownLives = -1;
 let burstIndex = 0, perfectBurstIndex = 0;
 let sessionLanes = [];
+let onlineRunId=null;
+let nicknameResizeUntil=0;
 let stageCueUntil = 0, themeAt = 0, themeBefore = stages[0];
 const scenery=document.createElement('canvas');
 const coarsePointer=matchMedia('(pointer: coarse)').matches;
@@ -463,6 +465,7 @@ function beginCountdown(seconds,resuming=false) {
 function resetGame() {
   stopAllSound(); clearPointers(); cancelAnimationFrame(resultFrame);
   sessionLanes=[];audio.resetVariations();judgementHistory.length=0;
+  onlineRunId=window.DazouguOnline?.newRunId()||null;
   notes=[]; effects=[]; particles=[]; burstIndex=perfectBurstIndex=0; score=misses=combo=maxCombo=hits=perfects=0; elapsed=0; nextIndex=noteId=0;
   phase=-1; noticeUntil=0; damageUntil=0; shownLives=-1; waitingAudio=false; hud();
   $('damageFeedback').hidden=true; $('field').classList.remove('damage-shake','damage-active');
@@ -473,6 +476,7 @@ function resetGame() {
 function start() {
   if(['loading','transition','countdown','playing'].includes(state)) return;
   if(audio.status!=='ready'){audio.unlock(true);loadGameAssets(true);return;}
+  if(window.onlineLeaderboard&&!window.onlineLeaderboard.nickname){audio.unlock();window.onlineLeaderboard.requestNickname(()=>{nicknameResizeUntil=performance.now()+800;start();});return;}
   audio.unlock(); // gesture synchronous, before any animation timeout
   clearTimeout(transitionTimer); resetGame(); audio.startTransport();
   $('error').hidden=true; const fromHome=!$('home').hidden; setState('transition');
@@ -517,10 +521,11 @@ function end(reason='三次失误',completed=false) {
   $('finalCombo').innerHTML=`${maxCombo}<small> COMBO</small>`; $('finalHits').innerHTML=`${hits}<small> 个</small>`;
   $('finalLevel').textContent=`LEVEL ${String(phase+1).padStart(2,'0')} / 06 · ${stages[Math.max(0,phase)].name} · 完美 ${perfects} 次`;
   let best=0; try { best=Number(localStorage.getItem('dazougu-best-v1'))||0; if(score>best) localStorage.setItem('dazougu-best-v1',String(score)); } catch {}
-  $('bestLabel').textContent=score>best?'个人新纪录 · 好有鼓气！':`个人最佳 ${Math.max(best,score)} · 下场再响一点`;
+  $('bestLabel').textContent=score>best?'本机新纪录 · 好有鼓气！':`本机最佳 ${Math.max(best,score)} · 下场再响一点`;
   const started=performance.now(), target=score; cancelAnimationFrame(resultFrame);
   const count=()=>{ const p=reducedMotion?1:Math.min(1,(performance.now()-started)/700); $('finalScore').textContent=Math.round(target*(1-Math.pow(1-p,3))); if(p<1 && state==='over') resultFrame=requestAnimationFrame(count); };
   count(); $('resultTitle').focus({preventScroll:true});
+  window.onlineLeaderboard?.onGameEnd({runId:onlineRunId,score,hits,perfects,chartRevision:RECORDING_SCORE.revision});
 }
 
 canvas.addEventListener('pointerdown',e=>{
@@ -559,7 +564,7 @@ function cancelPointer(e) { const n=holds.get(e.pointerId); if(n && state==='pla
 canvas.addEventListener('pointerup',release); canvas.addEventListener('pointercancel',cancelPointer); canvas.addEventListener('lostpointercapture',cancelPointer);
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // Suppress native selection/callouts without registering a second game input.
-for(const type of ['selectstart','dragstart','contextmenu'])$('app').addEventListener(type,e=>e.preventDefault());
+for(const type of ['selectstart','dragstart','contextmenu'])$('app').addEventListener(type,e=>{if(!e.target.closest?.('input,textarea'))e.preventDefault();});
 for(const type of ['touchstart','touchmove'])canvas.addEventListener(type,e=>{if(state==='playing'||state==='countdown')e.preventDefault();},{passive:false});
 $('start').onclick=start; $('retry').onclick=()=>{ $('game').inert=false; start(); }; $('pause').onclick=pause; $('resume').onclick=resume; $('quit').onclick=home; $('back').onclick=home;
 function soundButtons() { document.querySelectorAll('.sound-toggle').forEach(el=>{ el.innerHTML=uiSVG(audio.muted?'muted':'volume'); el.setAttribute('aria-label',audio.muted?'开启声音':'关闭声音'); el.setAttribute('aria-pressed',String(audio.muted)); }); }
@@ -570,9 +575,15 @@ audio.onInterrupted=()=>pause();
 audio.onAssetError=()=>{clearTimeout(messageTimer);$('error').textContent='声音未能载入，请重新载入游戏';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},6500);};
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) pause(); });
 window.addEventListener('blur',()=>pause());
-window.addEventListener('resize',()=>{ if(state==='playing'||state==='countdown') pause(); if(state==='paused'){ dimensions(); draw(elapsed); } });
+window.addEventListener('resize',()=>{
+  // A mobile keyboard closing after first-time naming must not pause the fresh
+  // countdown. Only this short entrance window resizes without pausing play.
+  if(state==='countdown'&&performance.now()<nicknameResizeUntil){dimensions();draw(elapsed);return;}
+  if(state==='playing'||state==='countdown')pause();if(state==='paused'){dimensions();draw(elapsed);}
+});
 // Trap focus in the active dialog and provide Escape as an optional desktop pause.
 document.addEventListener('keydown',e=>{
+  if(window.onlineLeaderboard?.hasDialog)return;
   if(e.key==='Escape') { if(state==='playing'||state==='countdown') pause(); else if(state==='paused') resume(); }
   if(e.key!=='Tab' || !['paused','over'].includes(state)) return;
   const buttons=Array.from($(state==='paused'?'paused':'over').querySelectorAll('button'));
