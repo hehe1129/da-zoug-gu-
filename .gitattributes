@@ -1,0 +1,2 @@
+# Keep the audited upstream SDK byte-for-byte, including its original spacing.
+assets/vendor/supabase-2.118.0.js -text -whitespace linguist-vendored=true
