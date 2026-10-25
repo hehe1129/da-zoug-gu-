@@ -1,6 +1,6 @@
 # 在线排行榜：配置与上线
 
-当前状态：代码、SQL 建表/权限脚本和本地联调已完成。`leaderboard-config.js` 的公开配置仍为空，尚未连接你自己的 Supabase 项目，也没有把未配置版发布到原网站。线上仍为 V25；本地工作分支是 `feature/online-leaderboard-v26`，回退点为 V25 `4148a1d`。
+当前状态（2026-10-26）：真实 Free 项目 `kqrwcupkmtydzjyvshny` 已创建且健康；建表脚本和私有表权限已安装，8项检查全部通过。`leaderboard-config.js` 已自动填写项目 URL 和公开 publishable key；真实只读排行榜接口返回200和空榜单。匿名登录尚未开启，因此尚未进行云端玩家提交联调，也未发布新版。线上仍为 V25；本地工作分支是 `feature/online-leaderboard-v26`，回退点为 V25 `4148a1d`。
 
 生产网址一直保留：**https://hehe1129.github.io/da-zoug-gu-/**。不改用户名、仓库名、Pages 路径或二维码。
 
@@ -66,7 +66,7 @@ node tools/check-leaderboard-config.cjs --require-config
 5. 在网页和音频已加载后模拟断网，已加载的游戏继续运行；结算显示未同步，恢复网络后点“重试”应完成补交，不重复创建成绩。
 6. 有超过50位玩家时，只展示前50名；当前玩家不在前50名内时仍在底部显示自己的名次和最高分。
 
-本地自动化测试使用独立 GoTrue 协议测试服务和真实 PostgreSQL WASM 引擎，测试数据只在本机，不是线上玩家。真实 Supabase Auth、项目权限、区域连通性还需要这一步；目前没有宣称已完成云端验证。
+本地自动化测试使用独立 GoTrue 协议测试服务和真实 PostgreSQL WASM 引擎，测试数据只在本机，不是线上玩家。真实 Supabase 的安装权限检查和只读接口已在2026-10-26核验；匿名认证、成绩写入及真实多玩家共享仍需开启匿名登录后继续验证。
 
 ## 6. 更新原 GitHub Pages
 

@@ -4,7 +4,18 @@
 
 ## 当前连接状态
 
-`leaderboard-config.js` 仍为空。未创建真实 Supabase 云项目、未启用付费服务、未提交任何管理员凭据，也未替换当前线上 V25。以下是本地代码、真实 PostgreSQL 引擎及浏览器协议联调结果，不冒充云端联调或真实线上玩家数据。创建项目与填写公开配置后，还需完成 ONLINE-LEADERBOARD.md 中的云端核验才能发布。
+2026-10-26更新：用户已创建真实 Free 项目 `kqrwcupkmtydzjyvshny`，状态 ACTIVE_HEALTHY，新加坡区域，PostgreSQL 17.11。通过已连接的 Supabase 插件完成建表、权限和配置；未使用管理员密钥填充前端，未启用付费服务，也未替换线上 V25。下面的本地测试和新增云端安装检查分别记录，不冒充完整云端玩家联调。
+
+### 云端安装检查（2026-10-26）
+
+- 确认目标组织 `dazougu` 是 Free，项目 public / dazougu_private 原无业务表。
+- 应用 `dazougu_online_leaderboard_v26`，完成两张私有表、RLS、最高分触发器及两个受限公开 RPC 的部署。
+- 实际云端运行 `verify-leaderboard.sql`，8项全部 true；只读 SQL 返回空榜单。
+- 应用 `restrict_internal_rls_event_trigger`，撤销项目自动创建的内部事件触发函数 `public.rls_auto_enable()` 对 API 角色的无用执行授权，不移除自动 RLS 功能。可复用脚本为 `supabase/harden-project-defaults.sql`。
+- 从项目接口取得现代 publishable key 和 URL，自动填写本地配置；配置检查通过，没有取得或写入 service_role / secret key。
+- 使用公开 key 实际读取 `/auth/v1/settings` 和 `/rest/v1/rpc/dzg_leaderboard`，均返回200；榜单0条，匿名登录标志为false。没有创建云端测试玩家或提交测试分数。
+- 安全 Advisor 余下的提示对应有意授权的两个 SECURITY DEFINER RPC：只读排行榜允许公开调用，写分函数只允许 authenticated 且主人来自 auth.uid()。它们固定空 search_path、全限定表名、明确撤销默认 PUBLIC 权限；没有为了消除提示而开放私有表。有关提示的官方说明：[公开调用](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable)、[认证调用](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)。
+- 尚待用户在 Dashboard 开启匿名登录；之后继续真实匿名身份、提交、最高分与共享榜单测试，再发布。
 
 ## 数据库
 
@@ -66,4 +77,4 @@
 
 现有 `tests/chart-recording.cjs`、`tests/input-timing.cjs`、`tests/audio-clock.cjs`、`tests/audio-loading.cjs` 通过。原录音与谱面没有修改；没有把网络请求加入渲染循环。
 
-未进行实体手机、微信、真实 Supabase 项目、真实跨境网络或计费配额的实测。线上共享功能需要配置后验证；纯前端仍能被伪造成绩，没有宣称完全防作弊。
+未进行实体手机、微信或免费配额容量的实测。已核验真实项目安装权限与只读接口，匿名认证/玩家写入仍待后台开启后验证；纯前端仍能被伪造成绩，没有宣称完全防作弊。
