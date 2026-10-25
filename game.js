@@ -79,7 +79,7 @@ function readyFont(retry){
   const faces=Array.from(document.fonts).filter(face=>face.family==='ClassicSong');
   if(faces.some(face=>face.status==='loaded'))return Promise.resolve();
   const loading=retry&&faces.some(face=>face.status==='error')&&window.FontFace
-    ?new FontFace('ClassicSong',"url('assets/fonts/aa-classic-song-ui-v21.woff2?retry="+Date.now()+"')").load().then(face=>document.fonts.add(face))
+    ?new FontFace('ClassicSong',"url('assets/fonts/aa-classic-song-ui-v27.woff2?retry="+Date.now()+"')").load().then(face=>document.fonts.add(face))
     :document.fonts.load('16px ClassicSong').then(faces=>{if(!faces.length)throw new Error('font missing');});
   return withTimeout(loading.catch(()=>{throw new Error('字体未能载入，请重试');}),'字体未能载入，请重试');
 }
@@ -89,7 +89,8 @@ function loadVisuals(tracker,retry){
     readyImage(perfectSheet,()=>perfectArt.length===5,retry),
     visualImage('assets/modal-frame-v22.webp',retry),
     visualImage('assets/cover-painting-v19.webp',retry),
-    visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry)
+    visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry),
+    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v27.webp',retry)
   ];
   tracker.total=tasks.length;
   return Promise.all(tasks.map(task=>task.then(value=>{tracker.done++;return value;})));
@@ -517,11 +518,11 @@ function home() {
 function end(reason='三次失误',completed=false) {
   elapsed=now(); setState('over'); cancelAnimationFrame(raf); stopAllSound(); clearPointers();
   $('game').inert=true; $('over').hidden=false; $('countdown').hidden=true;
-  $('over').querySelector('.result-eyebrow').textContent = completed ? '全曲完成 · 谢谢你的演奏' : `${reason} · 三次失误，本场结束`;
+  $('over').querySelector('.result-eyebrow').textContent = completed ? '全曲完成 · 谢谢你的演奏' : `${reason} · 三次失误，演奏结束`;
   $('finalCombo').innerHTML=`${maxCombo}<small> COMBO</small>`; $('finalHits').innerHTML=`${hits}<small> 个</small>`;
   $('finalLevel').textContent=`LEVEL ${String(phase+1).padStart(2,'0')} / 06 · ${stages[Math.max(0,phase)].name} · 完美 ${perfects} 次`;
   let best=0; try { best=Number(localStorage.getItem('dazougu-best-v1'))||0; if(score>best) localStorage.setItem('dazougu-best-v1',String(score)); } catch {}
-  $('bestLabel').textContent=score>best?'本机新纪录 · 好有鼓气！':`本机最佳 ${Math.max(best,score)} · 下场再响一点`;
+  $('bestLabel').textContent=score>best?'个人新纪录 · 好有鼓气！':`个人最佳 ${Math.max(best,score)} · 下场再响一点`;
   const started=performance.now(), target=score; cancelAnimationFrame(resultFrame);
   const count=()=>{ const p=reducedMotion?1:Math.min(1,(performance.now()-started)/700); $('finalScore').textContent=Math.round(target*(1-Math.pow(1-p,3))); if(p<1 && state==='over') resultFrame=requestAnimationFrame(count); };
   count(); $('resultTitle').focus({preventScroll:true});

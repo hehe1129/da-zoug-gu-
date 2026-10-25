@@ -46,7 +46,12 @@
   byId('nicknameCancel').onclick=()=>{continuation=null;close();};
   function rowElement(row){
     const tr=document.createElement('tr');if(row.is_current){tr.className='current-player';tr.setAttribute('aria-current','true');}
-    for(const value of [row.rank,row.nickname,row.best_score]){const td=document.createElement('td');td.textContent=String(value);tr.append(td);}
+    for(const [index,value] of [row.rank,row.nickname,row.best_score].entries()){
+      const td=document.createElement('td');
+      if(index===0&&row.rank<=3){const medal=document.createElement('span');medal.className='rank-medal';medal.textContent=String(value);td.append(medal);}
+      else td.textContent=String(value);
+      tr.append(td);
+    }
     return tr;
   }
   let requestGeneration=0;
@@ -65,7 +70,9 @@
     }catch{if(generation===requestGeneration){byId('rankStatus').textContent='暂时连不上，稍后再试';byId('rankRetry').hidden=false;}}
     finally{if(generation===requestGeneration){byId('rankRefresh').disabled=false;byId('rankBody').setAttribute('aria-busy','false');}}
   }
-  for(const id of ['homeLeaderboard','resultLeaderboard'])byId(id).onclick=()=>{if(open('leaderboardDialog'))refresh();};
+  for(const id of ['homeLeaderboard','resultLeaderboard'])byId(id).onclick=()=>{if(open('leaderboardDialog')){byId('rankPlay').textContent=app.dataset.state==='over'?'再敲一场':'鸣鼓开场';refresh();}};
+  byId('rankPlay').onclick=()=>{requestGeneration++;close();byId(app.dataset.state==='over'?'retry':'start').click();};
+  byId('rankHome').onclick=()=>{requestGeneration++;close();if(app.dataset.state==='over')byId('back').click();else byId('start').focus({preventScroll:true});};
   byId('rankClose').onclick=()=>{requestGeneration++;close();};byId('rankRetry').onclick=refresh;byId('rankRefresh').onclick=refresh;
   byId('scoreSyncRetry').onclick=()=>{byId('scoreSyncRetry').disabled=true;client.flush().finally(()=>renderSubmission());};
   document.addEventListener('keydown',event=>{

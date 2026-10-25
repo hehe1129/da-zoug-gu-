@@ -1,0 +1,59 @@
+/* Reference-led refinement: round drum entries, tall paper arch and blue waves. */
+.loading-mark{font-size:clamp(42px,8.5vh,68px);letter-spacing:6px}
+.cover-brand{left:17%;top:6%;width:52%;height:44%}
+.cover-brand h1{font-size:clamp(52px,9.5vh,82px)}
+.cover-brand h1 span:nth-child(1){left:0;top:0}
+.cover-brand h1 span:nth-child(2){left:22%;top:23%}
+.cover-brand h1 span:nth-child(3){left:6%;top:48%}
+.cover-brand h1 span:nth-child(4){left:29%;top:73%}
+#app .community-entry{display:flex;align-items:center;justify-content:center;background:transparent url('assets/rank-drum-v27.webp') center/100% 100% no-repeat;color:#124e98;font-size:22px;font-weight:700;font-synthesis:weight;text-decoration:none;border:0;border-radius:50%;padding:0;line-height:1.2;letter-spacing:0}
+.home-rank{top:12%;right:5%;width:94px;height:94px;min-width:0;min-height:0}
+.result-rank{top:5%;right:23%;width:78px;height:78px;min-height:0;z-index:3}
+#app .result-rank{font-size:18px}
+.score-sync{top:13%;left:17%;width:36%;font-size:11px;min-height:32px;line-height:1.5}
+.score-sync button{font-size:12px;padding:4px;min-height:32px}
+#over .final-level{top:23%;font-size:10px}
+#over .result-score{top:29%}
+#over .result-score strong{font-size:clamp(48px,8vh,65px);margin:5px 0}
+#over .result-stats{top:54%}
+#over .result-eyebrow{top:63%}
+#app .community-entry:active{transform:scale(.96)}
+#app .community-entry:focus-visible{outline:2px solid #1559ac;outline-offset:3px}
+#app .nickname-sheet h2{font-size:25px;line-height:1.55;text-wrap:balance}
+.nickname-play{font-size:21px}
+.leaderboard-overlay{background:#041a39ed;padding:16px 4px}
+.leaderboard-sheet{height:min(850px,100%);max-width:460px;min-height:0;padding:0;border-radius:0;background:transparent;overflow:visible;isolation:isolate}
+.leaderboard-sheet:before{inset:0;width:auto;height:auto;border-radius:0;background:transparent url('assets/ranking-panel-v27.webp') center/100% 100% no-repeat;z-index:-1}
+.leaderboard-sheet:after{content:'';position:absolute;left:14.5%;right:14.5%;top:4.5%;bottom:22%;border-radius:50% 50% 0 0 / 28% 28% 0 0;background:#fbf7e6;z-index:-2;pointer-events:none}
+.leaderboard-sheet .community-heading{position:absolute;top:13%;left:21%;right:21%;margin:0;gap:0;height:8%;align-items:center}
+.leaderboard-sheet .community-heading h2{font-size:clamp(30px,4.7vh,42px);line-height:1.1;letter-spacing:1px}
+.leaderboard-sheet .community-close{width:44px;height:44px;flex:0 0 44px;align-self:flex-end}
+.leaderboard-sheet .rank-toolbar{position:absolute;left:21%;right:21%;top:21%;height:5%;margin:0;font-size:15px}
+.leaderboard-sheet .rank-toolbar button{font-size:17px;min-width:44px;padding:4px}
+.leaderboard-sheet .rank-scroll{position:absolute;top:28%;bottom:40%;left:20%;right:20%;scrollbar-color:#a8b8bb #fff6df;background:transparent;outline-offset:2px}
+.leaderboard-sheet .rank-scroll th{padding:7px 3px;font-size:14px;background:#fbf6e5;color:#174d88;border-color:#c5c8b9}
+.leaderboard-sheet .rank-scroll td{padding:8px 3px;font-size:19px;line-height:1.4;border-color:#c7ccbf}
+.leaderboard-sheet .rank-scroll th:first-child,.leaderboard-sheet .rank-scroll td:first-child{width:40px}
+.leaderboard-sheet .rank-scroll th:last-child,.leaderboard-sheet .rank-scroll td:last-child{width:65px}
+.leaderboard-sheet .rank-scroll td:nth-child(2),#app #myNickname,#app #nicknameInput{font-family:ClassicSong,ClassicSongNames,SimSun,"Songti SC",serif!important}
+.leaderboard-sheet .rank-scroll tr.current-player{background:#efb9c7b0}
+.rank-medal{display:inline-flex;align-items:center;justify-content:center;width:30px;height:32px;background:transparent url('assets/rank-drum-v27.webp') center/100% 100% no-repeat;color:#684006;font-size:20px}
+.leaderboard-sheet .rank-mine{position:absolute;top:61%;left:20%;right:20%;margin:0;padding-top:10px}
+.leaderboard-sheet .rank-mine>span{font-size:14px;margin-bottom:8px;color:#174d88}
+.leaderboard-sheet .rank-mine>div{grid-template-columns:40px minmax(0,1fr) 65px;gap:3px;font-size:18px}
+.rank-actions{position:absolute;inset:0;pointer-events:none}
+.rank-actions button{position:absolute;pointer-events:auto;background:transparent;border:0;color:#fff5db;line-height:1.2;text-decoration:none}
+#rankPlay{top:80%;height:11%;left:23%;width:61%;padding:0;font-size:clamp(29px,4.8vh,42px);letter-spacing:2px}
+#rankHome{top:90%;height:8%;min-height:44px;left:30%;width:45%;padding:0;font-size:21px;letter-spacing:2px}
+.leaderboard-sheet .rank-state{padding:20px 2px 12px;font-size:16px}
+.leaderboard-sheet .rank-retry{padding:8px 16px;min-height:44px;font-size:16px}
+@media(max-height:650px){
+ .home-rank{width:80px;height:80px;top:12%}#app .home-rank{font-size:19px}
+ .result-rank{width:64px;height:64px}#app .result-rank{font-size:16px}
+ #over .result-score strong{font-size:47px}#over .result-score .micro{font-size:17px}
+ .leaderboard-overlay{padding:6px 3px}.leaderboard-sheet .community-heading h2{font-size:29px}
+ .leaderboard-sheet .rank-toolbar{font-size:13px}.leaderboard-sheet .rank-toolbar button{font-size:15px}
+ .leaderboard-sheet .rank-scroll td{padding:6px 2px;font-size:17px}.leaderboard-sheet .rank-scroll th{font-size:13px;padding:5px 2px}
+ .leaderboard-sheet .rank-scroll{bottom:45%}.leaderboard-sheet .rank-mine{top:57.5%;padding-top:6px}.leaderboard-sheet .rank-mine>span{font-size:12px;margin-bottom:4px}.leaderboard-sheet .rank-mine>div{font-size:16px}
+ .rank-medal{height:28px;width:27px;font-size:18px}#rankPlay{font-size:30px}#rankHome{font-size:18px}
+}
