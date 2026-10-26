@@ -17,6 +17,7 @@ class RhythmAudio {
     // Preload and decode before the cover; audible output unlocks on a gesture.
     this.raw={};this.transfers={};this.fetchErrors={};this.primed=false;this.status='idle';this.failed=[];this.clock=null;this.boost=null;
     this.rain=null;this.rainLayers=new Set();this.rainLoops={};this.rainType=null;
+    this.outputReady=false;this.unlockAttempts=0;
   }
   preload(retry=false) {
     for(const [kind,meta] of Object.entries(AUDIO_SOURCES)) {
@@ -65,7 +66,18 @@ class RhythmAudio {
     const comp=this.ctx.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=4;comp.knee.value=12;
     this.analyser=this.ctx.createAnalyser();this.analyser.fftSize=256;
     this.master.connect(comp);comp.connect(this.analyser);this.analyser.connect(this.ctx.destination);
-    this.ctx.addEventListener('statechange',()=>{if(this.clock&&this.ctx.state!=='running')this.onInterrupted?.();});
+    // Rain has its own filtered, levelled bus; it never changes the music gain,
+    // sound-effect gain, source timing or transport lifecycle.
+    this.ambienceBus=this.ctx.createGain();
+    const low=this.ctx.createBiquadFilter(),high=this.ctx.createBiquadFilter(),leveler=this.ctx.createDynamicsCompressor();
+    high.type='highpass';high.frequency.value=240;high.Q.value=.5;
+    low.type='lowpass';low.frequency.value=3000;low.Q.value=.5;
+    leveler.threshold.value=-20;leveler.ratio.value=2;leveler.knee.value=18;leveler.attack.value=.06;leveler.release.value=.4;
+    this.ambienceBus.connect(high);high.connect(low);low.connect(leveler);leveler.connect(this.master);
+    this.ctx.addEventListener('statechange',()=>{
+      if(this.ctx.state==='running')this.markOutputReady();
+      else{this.outputReady=false;this.onActivationChange?.();if(this.clock)this.onInterrupted?.();}
+    });
   }
   prepare(retry=false) {
     if(this.loading&&(!retry||this.status==='loading'))return this.loading;
@@ -89,17 +101,30 @@ class RhythmAudio {
     });
     return this.loading;
   }
+  markOutputReady() {
+    if(this.ctx?.state!=='running')return;
+    this.unlocking=false;const first=!this.outputReady;this.outputReady=true;
+    if(first)this.onReady?.();this.onActivationChange?.();
+  }
   unlock(retry=false) {
     try {
       this.setup();this.prepare(retry);
-      // Prime the mobile output route inside the user's gesture, with silence.
-      if(!this.primed){const source=this.ctx.createBufferSource();source.buffer=this.ctx.createBuffer(1,1,this.ctx.sampleRate);source.connect(this.master);source.onended=()=>source.disconnect();source.start();this.primed=true;}
-      if(this.ctx.state==='running'||this.unlocking)return;
-      this.unlocking=true;
-      const timer=setTimeout(()=>{if(this.ctx.state!=='running'&&!this.muted)this.onError?.();},1800);
-      this.ctx.resume().then(()=>{if(this.ctx.state==='running')this.onReady?.();})
-        .catch(()=>this.onError?.()).finally(()=>{clearTimeout(timer);this.unlocking=false;});
-    }catch{if(!this.muted)this.onError?.();}
+      // Declare one music-playback session where the browser supports it.
+      // Do this only inside real activation, never on the initial page load.
+      try{const nav=window.navigator;if(nav?.userActivation?.isActive&&nav.audioSession&&nav.audioSession.type!=='playback')nav.audioSession.type='playback';}catch{}
+      if(this.ctx.state==='running'){this.markOutputReady();return true;}
+      // A pre-gesture resume may stay pending on iOS. Never let that request
+      // suppress a new resume issued synchronously by touchend / click.
+      const ctx=this.ctx;this.unlocking=true;this.unlockAttempts++;
+      const source=ctx.createBufferSource();source.buffer=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*.02),ctx.sampleRate);
+      source.connect(this.master);source.onended=()=>source.disconnect();source.start();this.primed=true;
+      Promise.resolve(ctx.resume()).then(()=>{
+        if(this.ctx===ctx){this.unlocking=false;this.markOutputReady();}
+      }).catch(error=>{
+        if(this.ctx===ctx){this.lastUnlockError=error;this.unlocking=false;this.onActivationChange?.();}
+      });
+      this.onActivationChange?.();return false;
+    }catch(error){this.lastUnlockError=error;this.unlocking=false;this.onActivationChange?.();return false;}
   }
   setMuted(muted) {this.muted=muted;if(this.ctx)this.master.gain.setTargetAtTime(muted?0:.72,this.ctx.currentTime,.025);}
   rainLoop(kind) {
@@ -118,11 +143,11 @@ class RhythmAudio {
     }
     this.rainLoops[kind]=loop;return loop;
   }
-  setRain(type,cover=false) {
+  setRain(type,cover=false,amount=null) {
     if(!this.ctx||!this.master)return;
     const kind=type==='heavy'?'rainHeavy':type==='light'?'rainLight':null;
     const wanted=kind&&this.ctx.state==='running'?kind:null;
-    const level=cover?.65:wanted==='rainHeavy'?.5:.24;
+    const level=amount??(cover?.48:wanted==='rainHeavy'?.3:.14);
     const now=this.ctx.currentTime;
     if(wanted===this.rainType){if(this.rain)this.rain.gain.gain.setTargetAtTime(level,now,.18);return;}
     const previous=this.rain;this.rain=null;this.rainType=wanted;
@@ -135,7 +160,7 @@ class RhythmAudio {
     const buffer=this.rainLoop(wanted);if(!buffer){this.rainType=null;return;}
     const source=this.ctx.createBufferSource(),gain=this.ctx.createGain();source.buffer=buffer;source.loop=true;
     source.loopEnd=buffer.duration;gain.gain.setValueAtTime(0,now);gain.gain.setTargetAtTime(level,now,.18);
-    source.connect(gain);gain.connect(this.master);
+    source.connect(gain);gain.connect(this.ambienceBus||this.master);
     const layer={source,gain};this.rainLayers.add(layer);this.rain=layer;
     source.onended=()=>{this.rainLayers.delete(layer);source.disconnect();gain.disconnect();};
     source.start(now);

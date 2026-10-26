@@ -1,1 +1,1 @@
-{"version":"V32","baseCommit":"37b45df","releaseDate":"2026-10-26","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"小雨裁剪平滑循环、第六阶段大雨；鼓气榜全员分页、50字个人心愿与六字展开；包含V31同向分层雨和纯色面板","status":"release"}
+{"version":"V33","baseCommit":"ba7c698","releaseDate":"2026-10-26","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"修复手机声音解锁与倒计时误暂停；雨量一至五阶段递减、六阶段停止；独立雨声混音；结算鼓气榜位置调整；榜单预载、缓存即时显示及后台刷新","status":"release"}

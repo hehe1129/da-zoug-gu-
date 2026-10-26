@@ -1,0 +1,6 @@
+/* The entry sits beside the score at the supplied right-hand paper location. */
+#over .result-rank{top:32%;right:10.5%}
+.cover-audio-hint{position:absolute;z-index:6;top:3.8%;right:21%;min-height:32px;padding:3px 8px;background:#fff8e7;color:#15549c;border-radius:16px;font:12px ClassicSong,SimSun,serif}
+.cover-audio-hint:focus-visible{outline:2px solid #15549c;outline-offset:2px}
+.leaderboard-sheet .rank-toolbar{justify-content:space-between}
+#rankFreshness{font-size:10px;line-height:1.3}

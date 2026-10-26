@@ -22,12 +22,13 @@
   coverLayer('.cover-rain-back',44,false);
   coverLayer('.cover-rain-front',40,true);
 
-  const dry=Object.freeze({drops:0,speed:0,length:0,opacity:0});
-  const levels=Object.freeze([dry,dry,
-    Object.freeze({drops:18,speed:.44,length:18,opacity:.15}),
-    Object.freeze({drops:32,speed:.58,length:25,opacity:.19}),
-    Object.freeze({drops:50,speed:.76,length:34,opacity:.23}),
-    Object.freeze({drops:72,speed:.94,length:45,opacity:.27})
+  const dry=Object.freeze({drops:0,speed:0,length:0,opacity:0,sound:null,gain:0});
+  const levels=Object.freeze([
+    Object.freeze({drops:72,speed:.94,length:45,opacity:.27,sound:'heavy',gain:.32}),
+    Object.freeze({drops:54,speed:.80,length:36,opacity:.24,sound:'heavy',gain:.25}),
+    Object.freeze({drops:38,speed:.65,length:28,opacity:.20,sound:'light',gain:.18}),
+    Object.freeze({drops:24,speed:.52,length:22,opacity:.17,sound:'light',gain:.13}),
+    Object.freeze({drops:12,speed:.42,length:16,opacity:.14,sound:'light',gain:.09}),dry
   ]);
   const fieldDrops=Array.from({length:72},(_,i)=>({x:Math.random(),y:Math.random(),speed:between(.72,1.3),length:between(.65,1.25),slope:rainSlope(),front:i%3===0}));
   let fieldTime=null,fieldTravel=0;

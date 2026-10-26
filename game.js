@@ -48,7 +48,7 @@ const scenery=document.createElement('canvas');
 const coarsePointer=matchMedia('(pointer: coarse)').matches;
 function textIfChanged(el,text){if(el.textContent!==text)el.textContent=text;}
 let countStarted = 0, countDuration = 3, lastCount = -1, transitionTimer = 0, resultFrame = 0, messageTimer = 0;
-let waitingAudio = false, loadStarted = 0, resumeCountdown = false;
+let waitingAudio = false, waitingOutput=false, loadStarted = 0, resumeCountdown = false;
 
 // Load and decode all required resources BEFORE revealing the cover.
 let loadingGeneration=0,loadFrame=0;
@@ -124,10 +124,12 @@ window.retryGameLoad=()=>{audio.unlock(true);loadGameAssets(true);};
 
 function syncWeatherAudio() {
   const cover=state==='home'||state==='transition';
-  const wet=cover||(['playing','countdown','paused','over'].includes(state)&&phase>=2);
-  audio.setRain(document.hidden||!wet?null:!cover&&phase===5?'heavy':'light',cover);
+  const weather=window.DazouguWeather?.forLevel(phase+1);
+  const visible=['playing','countdown','paused','over'].includes(state);
+  const type=document.hidden?null:cover?'light':visible?weather?.sound:null;
+  audio.setRain(type,cover,cover?.48:weather?.gain??0);
 }
-function setState(value) { state = value; $('app').dataset.state = value; syncWeatherAudio(); }
+function setState(value) { state = value; $('app').dataset.state = value; syncWeatherAudio();if(value==='home'&&!audio.muted)audio.unlock(); }
 function now() { return state === 'playing' ? audio.gameTime() ?? (performance.now() - startClock) / 1000 : elapsed; }
 function restartAnimation(el, className) { el.classList.remove(className); void el.offsetWidth; el.classList.add(className); }
 function feedback(text, kind = '', duration = .8) { $('notice').textContent = text; $('notice').dataset.kind = kind; noticeUntil = now() + duration; if (!reducedMotion) restartAnimation($('notice'), 'bump'); }
@@ -447,9 +449,16 @@ function frame() {
       waitingAudio=false;countStarted=performance.now();$('countLabel').textContent='准备好了吗';$('countHint').textContent='跟着原曲，方块碰线时点击';
       if(audio.status!=='ready'){home();loadGameAssets(true);return;}
     }
+    // No countdown or song time elapses while the browser awaits activation.
+    // A real tap can retry resume even if an earlier resume promise is pending.
+    if(audio.ctx?.state!=='running'){
+      countStarted=performance.now();waitingOutput=true;lastCount=-1;
+      $('countLabel').textContent='轻触屏幕，接通鼓乐';$('countHint').textContent='声音就绪后自动倒计时';$('countNumber').textContent='3';
+      draw(elapsed);raf=requestAnimationFrame(frame);return;
+    }
+    if(waitingOutput){waitingOutput=false;countStarted=performance.now();$('countLabel').textContent=resumeCountdown?'回到拍点上':'准备好了吗';$('countHint').textContent='方块碰线时，点击方块';}
     const left=countDuration-(performance.now()-countStarted)/1000;
     if(left <= 0) {
-      if(audio.ctx?.state!=='running'){pause();audio.onError?.();return;}
       $('countdown').hidden=true; setState('playing'); startClock=performance.now()-elapsed*1000; audio.startSong(elapsed);
       for(const n of notes)if(n.held&&!n.done){n.holdStarted=elapsed;n.voice=audio.voice();}
       feedback('开敲！','combo',.6);
@@ -471,7 +480,7 @@ function beginCountdown(seconds,resuming=false) {
   resumeCountdown=resuming;waitingAudio=!resuming&&audio.status==='loading';loadStarted=performance.now();
   if(!resuming&&!waitingAudio&&audio.status!=='ready')audio.onAssetError?.();
   if(waitingAudio){$('countLabel').textContent='乐曲载入中';$('countNumber').textContent='♪';$('countHint').textContent='正在准备原曲与乐器声音';}
-  lastCount=-1; countDuration=seconds; countStarted=performance.now(); frame();
+  waitingOutput=audio.ctx?.state!=='running';lastCount=-1; countDuration=seconds; countStarted=performance.now(); frame();
 }
 function resetGame() {
   stopAllSound(); clearPointers(); cancelAnimationFrame(resultFrame);
@@ -578,20 +587,48 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 for(const type of ['selectstart','dragstart','contextmenu'])$('app').addEventListener(type,e=>{if(!e.target.closest?.('input,textarea'))e.preventDefault();});
 for(const type of ['touchstart','touchmove'])canvas.addEventListener(type,e=>{if(state==='playing'||state==='countdown')e.preventDefault();},{passive:false});
 $('start').onclick=start; $('retry').onclick=()=>{ $('game').inert=false; start(); }; $('pause').onclick=pause; $('resume').onclick=resume; $('quit').onclick=home; $('back').onclick=home;
-function soundButtons() { document.querySelectorAll('.sound-toggle').forEach(el=>{ el.innerHTML=uiSVG(audio.muted?'muted':'volume'); el.setAttribute('aria-label',audio.muted?'开启声音':'关闭声音'); el.setAttribute('aria-pressed',String(audio.muted)); }); }
-document.addEventListener('pointerdown',()=>{if(state==='home'&&!audio.muted){audio.unlock();syncWeatherAudio();}},{capture:true});
-document.addEventListener('keydown',event=>{if(state==='home'&&!audio.muted&&!event.ctrlKey&&!event.metaKey){audio.unlock();syncWeatherAudio();}},{capture:true});
-document.querySelectorAll('.sound-toggle').forEach(el=>{ el.onclick=()=>{ audio.setMuted(!audio.muted); if(!audio.muted){audio.unlock();if(audio.failed.length)audio.prepare(true).then(()=>{if(audio.failed.length)audio.onAssetError?.();});} syncWeatherAudio();soundButtons(); }; });
-audio.onError=()=>{ clearTimeout(messageTimer); $('error').textContent='声音未开启，可点右上角声音按钮重试'; $('error').hidden=false; messageTimer=setTimeout(()=>{ $('error').hidden=true; },4000); };
+function soundButtons() {
+  const waiting=!audio.muted&&(!audio.outputReady||audio.ctx?.state!=='running');
+  document.querySelectorAll('.sound-toggle').forEach(el=>{
+    el.innerHTML=uiSVG(audio.muted?'muted':'volume');el.setAttribute('aria-label',audio.muted?'开启声音':waiting?'启用雨声与鼓乐':'关闭声音');
+    el.setAttribute('aria-pressed',String(audio.muted));el.dataset.soundState=waiting?'waiting':audio.muted?'muted':'ready';
+  });
+  $('coverAudioHint').hidden=!waiting||state!=='home';
+}
+function gestureAudio(event){
+  // Do not turn an enable gesture into a mute by unlocking the sound button
+  // before its click handler has decided what the player meant.
+  if(event.target.closest?.('.sound-toggle')||event.ctrlKey||event.metaKey)return;
+  if(['home','countdown','paused','over'].includes(state)&&!audio.muted){audio.unlock();syncWeatherAudio();}
+}
+for(const type of ['touchend','pointerup','click','keydown'])document.addEventListener(type,gestureAudio,{capture:true,passive:true});
+document.querySelectorAll('.sound-toggle').forEach(el=>{
+  let enableIntent=null;
+  const captureIntent=()=>{enableIntent=audio.muted||!audio.outputReady||audio.ctx?.state!=='running';};
+  el.addEventListener('pointerdown',captureIntent);
+  el.addEventListener('touchstart',captureIntent,{passive:true});
+  el.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' ')captureIntent();});
+  el.onclick=()=>{
+    // Safari can resolve the pending resume between finger-down and click.
+    // Honor the intent before that transition, rather than toggling it off.
+    const enable=enableIntent??(audio.muted||!audio.outputReady||audio.ctx?.state!=='running');enableIntent=null;
+    if(enable){audio.setMuted(false);audio.unlock();}else audio.setMuted(true);
+    syncWeatherAudio();soundButtons();
+  };
+});
+audio.onActivationChange=soundButtons;
+audio.onError=()=>{clearTimeout(messageTimer);$('error').textContent='音频暂时中断，轻触屏幕可重试';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},4000);};
 audio.onReady=()=>{ if(audio.status==='partial')audio.onAssetError?.();else $('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
 audio.onInterrupted=()=>pause();
 audio.onAssetError=()=>{clearTimeout(messageTimer);$('error').textContent='声音未能载入，请重新载入游戏';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},6500);};
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) pause();syncWeatherAudio(); });
-window.addEventListener('blur',()=>pause());
+window.addEventListener('blur',()=>{if(!coarsePointer)pause();});
+let viewportWidth=innerWidth;
 window.addEventListener('resize',()=>{
-  // A mobile keyboard closing after first-time naming must not pause the fresh
-  // countdown. Only this short entrance window resizes without pausing play.
-  if(state==='countdown'&&performance.now()<nicknameResizeUntil){dimensions();draw(elapsed);return;}
+  // Height-only changes from the mobile keyboard / browser chrome are reflows,
+  // not interruptions. A substantial width change still pauses fairly.
+  const widthChanged=Math.abs(innerWidth-viewportWidth)>24;viewportWidth=innerWidth;
+  if(!widthChanged){if(['playing','countdown','paused'].includes(state)){dimensions();draw(now());}return;}
   if(state==='playing'||state==='countdown')pause();if(state==='paused'){dimensions();draw(elapsed);}
 });
 // Trap focus in the active dialog and provide Escape as an optional desktop pause.

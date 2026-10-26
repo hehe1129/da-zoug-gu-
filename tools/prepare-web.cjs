@@ -10,7 +10,7 @@ const css=flatten('styles-v18.css')+fs.readFileSync(path.join(root,'styles-v21.c
 .cover-painting{background-image:url('assets/cover-painting-v19.webp'),url('data:image/webp;base64,${preview}')}
 .modal-card:before{background-image:url('assets/modal-frame-v22.webp')}
 #startup button{color:inherit;background:transparent;text-decoration:underline;padding:4px 8px}
-`+fs.readFileSync(path.join(root,'styles-v27.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v29.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v30.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v31.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v32.css'),'utf8');
+`+fs.readFileSync(path.join(root,'styles-v27.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v29.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v30.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v31.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v32.css'),'utf8')+fs.readFileSync(path.join(root,'styles-v33.css'),'utf8');
 const file=path.join(root,'index.html'),html=fs.readFileSync(file,'utf8');
 fs.writeFileSync(file,html.replace(/<!-- styles:start -->[\s\S]*?<!-- styles:end -->/,'<!-- styles:start -->\n  <style>'+css+'</style>\n  <!-- styles:end -->'));
 console.log('Inline CSS bytes',Buffer.byteLength(css));
