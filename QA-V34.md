@@ -16,7 +16,7 @@
 ## 验证
 
 - `tests/recovery-v34.cjs`：14 项通过。真实浏览器 + 本地 PostgreSQL，SDK 阻断时公开榜可用、持久缓存约 6 ms 展示、明确离线标记、恢复单一匿名身份、真实 AudioContext suspend 后继续恢复声波/原曲/雨声、running 输出重新激活、断网最高分自动补传、身份留存、较低分不覆盖、共享榜/本人高亮、字体分片、无未捕获异常。
-- `tests/leaderboard/transport-v34.cjs`：独立公开读、401 回退、失效令牌相同收据/同一身份重交通过。
+- `tests/leaderboard/transport-v34.cjs`：独立公开读、401 回退、失效令牌相同收据/同一身份重交通过；收到成功响应头但 JSON 正文卡住时，超时依然会中断，允许重试。公开读取六秒、其余请求八秒的期限覆盖完整传输。
 - 雨丝改用兼容旧版手机的 Canvas `arcTo` 路径。将 `CanvasRenderingContext2D.prototype.roundRect` 移除后重跑 `tests/recovery-v34.cjs`，十四项仍通过；天气脚本缓存版本为 `34.1`。
 - `tests/leaderboard/prefetch.cjs`：慢请求/离线缓存/重试/重载副本/网络故障不挡游戏等七项通过。
 - `tests/leaderboard/wishes.cjs`、`wishes-browser.cjs`：所有玩家分页、心愿长度与权限、安全显示、断网草稿、本人行，以及 320/375/430/1440 视口通过。

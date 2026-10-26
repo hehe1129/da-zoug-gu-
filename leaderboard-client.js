@@ -55,7 +55,17 @@
       const controller=new AbortController(),abort=()=>controller.abort();
       if(init.signal?.aborted)abort();else init.signal?.addEventListener('abort',abort,{once:true});
       const timer=setTimeout(abort,timeout);
-      try{return await this.fetcher(input,{...init,signal:controller.signal});}
+      try{
+        const response=await this.fetcher(input,{...init,signal:controller.signal});
+        // Keep the deadline active through the small JSON body's transfer.
+        // fetch() alone resolves at headers, which used to leave a stalled
+        // mobile response waiting forever before any retry could begin.
+        if(response.arrayBuffer&&typeof Response==='function'){
+          const bytes=await response.arrayBuffer();
+          return new Response([204,205,304].includes(response.status)?null:bytes,{status:response.status,statusText:response.statusText,headers:response.headers});
+        }
+        return response;
+      }
       finally{clearTimeout(timer);init.signal?.removeEventListener('abort',abort);}
     }
     acceptSession(session){
