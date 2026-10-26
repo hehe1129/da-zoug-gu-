@@ -10,7 +10,7 @@ const out=path.resolve(__dirname,'../output/playwright/v34');fs.mkdirSync(out,{r
   const seed=crypto.randomUUID();await api.db.query('insert into auth.users(id) values($1)',[seed]);await api.db.query('insert into dazougu_private.player_bests(player_id,nickname,best_score,wish) values($1,$2,$3,$4)',[seed,'共享鼓友',1200,'愿日日安康']);
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),p=await context.newPage();let blockSDK=true,blockReads=false;const requested=[];
   p.on('pageerror',e=>errors.push(String(e)));p.on('request',r=>requested.push(r.url()));
-  await p.addInitScript(()=>localStorage.setItem('dazougu.nickname.v1','恢复鼓友'));
+  await p.addInitScript(()=>{localStorage.setItem('dazougu.nickname.v1','恢复鼓友');delete CanvasRenderingContext2D.prototype.roundRect;});
   await p.route('**/leaderboard-config.js*',r=>r.fulfill({contentType:'application/javascript',body:'window.DAZOUGU_LEADERBOARD_CONFIG='+JSON.stringify({supabaseUrl:api.origin,publishableKey:'sb_publishable_local_test_only'})}));
   await p.route('**/assets/vendor/supabase-*.js',r=>blockSDK?r.abort():r.continue());
   await p.route('**/rest/v1/rpc/dzg_leaderboard_page',r=>blockReads?r.abort():r.continue());

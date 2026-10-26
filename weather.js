@@ -37,7 +37,7 @@
     const sprite=document.createElement('canvas');sprite.width=12;sprite.height=132;
     const c=sprite.getContext('2d'),gradient=c.createLinearGradient(0,2,0,130);
     gradient.addColorStop(0,'#4b91c900');gradient.addColorStop(.45,'#4b91c9');gradient.addColorStop(1,'#2167a5');
-    c.fillStyle=gradient;c.beginPath();c.roundRect(4,2,4,128,2);c.fill();return sprite;
+    c.fillStyle=gradient;c.beginPath();c.moveTo(6,2);c.arcTo(8,2,8,130,2);c.arcTo(8,130,4,130,2);c.arcTo(4,130,4,2,2);c.arcTo(4,2,8,2,2);c.closePath();c.fill();return sprite;
   });
   const fieldDrops=Array.from({length:72},(_,i)=>{
     const front=i%3===0;
