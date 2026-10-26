@@ -6,7 +6,7 @@
   function loadSDK(){
     if(window.supabase?.createClient)return Promise.resolve(window.supabase);
     if(!sdkPromise)sdkPromise=new Promise((resolve,reject)=>{
-      const script=document.createElement('script'),timer=setTimeout(()=>{script.remove();reject(new Error('sdk-timeout'));},12000);
+      const script=document.createElement('script'),timer=setTimeout(()=>{script.remove();reject(new Error('sdk-timeout'));},8000);
       script.src='assets/vendor/supabase-2.118.0.js';script.async=true;script.dataset.optional='leaderboard';
       script.onload=()=>{clearTimeout(timer);window.supabase?.createClient?resolve(window.supabase):reject(new Error('sdk-unavailable'));};
       script.onerror=()=>{clearTimeout(timer);script.remove();reject(new Error('sdk-load-failed'));};document.head.append(script);
@@ -14,45 +14,56 @@
   }
   const client=new api.LeaderboardClient({config:window.DAZOUGU_LEADERBOARD_CONFIG,loadSDK,onStatus:renderSubmission});
   const rankCache=new Map(),rankRequests=new Map(),previewKey=client.key+'.rank-preview';let cacheRevision=0,lastSynced=null;
+  const freshFor=30000;let retryTimer=0,retryAttempt=0;
   function publicSnapshot(data){return{...data,entries:data.entries.map(row=>({...row,is_current:false})),current_player:null};}
   function visibleSnapshot(entry){return entry.owner===client.playerId?entry.data:publicSnapshot(entry.data);}
   function restorePreview(){
     try{
-      const saved=JSON.parse(sessionStorage.getItem(previewKey));const data=saved?.data;
+      const saved=JSON.parse(localStorage.getItem(previewKey)||sessionStorage.getItem(previewKey));const data=saved?.data;
       const rowOK=row=>row&&Number.isInteger(row.rank)&&row.rank>0&&api.validNickname(row.nickname)&&api.validWish(row.wish)&&Number.isInteger(row.best_score)&&row.best_score>=0&&row.best_score<=api.MAX_SCORE;
-      if(Date.now()-saved.at<300000&&data.page===1&&data.page_size===20&&Number.isInteger(data.total)&&Array.isArray(data.entries)&&data.entries.length<=20&&data.entries.every(rowOK)){
-        rankCache.set(1,{data:publicSnapshot(data),owner:null,at:saved.at,revision:cacheRevision});
+      if(saved.at<=Date.now()&&Date.now()-saved.at<7*86400000&&data.page===1&&data.page_size===20&&Number.isInteger(data.total)&&data.total>=0&&Array.isArray(data.entries)&&data.entries.length<=20&&data.entries.every(rowOK)){
+        rankCache.set(1,{data:publicSnapshot(data),owner:null,at:0,revision:cacheRevision});
       }
     }catch{}
   }
-  function invalidateRankCache(){cacheRevision++;rankCache.clear();try{sessionStorage.removeItem(previewKey);}catch{}}
+  function invalidateRankCache(){cacheRevision++;for(const entry of rankCache.values())entry.at=0;}
   function fetchRank(page){
-    const revision=cacheRevision,key=revision+':'+page;
+    const revision=cacheRevision,key=revision+':'+(client.playerId||'public')+':'+page;
     if(rankRequests.has(key))return rankRequests.get(key);
     const task=(async()=>{
-      if(client.nickname)await client.identity();const owner=client.playerId;
+      const owner=client.session?.access_token?client.playerId:null;
       const data=await client.rankings(page),entry={data,owner,at:Date.now(),revision};
       if(owner!==client.playerId){entry.data=publicSnapshot(data);entry.owner=null;}
-      if(revision===cacheRevision){
+      const newer=rankCache.get(data.page);
+      if(revision===cacheRevision&&!(newer?.owner&&newer.owner===client.playerId&&entry.owner!==client.playerId)){
         rankCache.set(data.page,entry);while(rankCache.size>8)rankCache.delete(rankCache.keys().next().value);
-        if(data.page===1)try{sessionStorage.setItem(previewKey,JSON.stringify({at:entry.at,data:publicSnapshot(data)}));}catch{}
-        const text=data.entries.map(row=>row.nickname+row.wish).join('');
-        if(text&&!navigator.connection?.saveData&&!['playing','countdown'].includes(app.dataset.state))document.fonts?.load('12px ClassicSongNames',text).catch(()=>{});
+        if(data.page===1)try{const value=JSON.stringify({at:entry.at,data:publicSnapshot(data)});localStorage.setItem(previewKey,value);sessionStorage.setItem(previewKey,value);}catch{}
       }
       return entry;
     })().finally(()=>rankRequests.delete(key));rankRequests.set(key,task);return task;
   }
-  function prefetchRank(){if(client.config.ready)return fetchRank(1).catch(()=>null);return Promise.resolve(null);}
+  function prefetchRank(){
+    if(!client.config.ready)return Promise.resolve(null);
+    const cached=rankCache.get(1);if(cached&&Date.now()-cached.at<freshFor&&cached.owner===client.playerId)return Promise.resolve(cached);
+    return fetchRank(1).catch(()=>null);
+  }
+  function scheduleRetry(){
+    if(retryTimer||!client.pending()||document.hidden||navigator.onLine===false||retryAttempt>=5)return;
+    const delay=[2000,6000,15000,35000,60000][retryAttempt++]+Math.random()*500;
+    retryTimer=setTimeout(()=>{retryTimer=0;client.flush().finally(()=>renderSubmission());},delay);
+  }
   restorePreview();
   function renderSubmission(status=client.status){
-    const messages={idle:'',unconfigured:'排行榜暂未开放',sending:'最高分同步中',synced:'最高分已同步',failed:'最高分未同步',identity_changed:'旧成绩未同步',invalid:'成绩未提交'};
+    const messages={idle:'',unconfigured:'排行榜暂未开放',sending:'最高分同步中',synced:'最高分已同步',failed:'成绩已保留，待同步',identity_changed:'旧成绩未同步',invalid:'成绩未提交'};
     byId('scoreSyncText').textContent=messages[status.state]||'';
     const retry=['failed','identity_changed'].includes(status.state)&&!!client.pending();
     byId('scoreSyncRetry').hidden=!retry;byId('scoreSyncRetry').disabled=!!client.inflight;
     byId('scoreSync').dataset.status=status.state;
+    if(status.state==='failed')scheduleRetry();
+    if(status.state==='synced'){clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;}
     if(status.state==='synced'){
       const signature=client.playerId+':'+status.bestScore;
-      if(signature!==lastSynced){lastSynced=signature;invalidateRankCache();if(active===byId('leaderboardDialog'))refresh();else prefetchRank();}
+      if(signature!==lastSynced){lastSynced=signature;invalidateRankCache();if(active===byId('leaderboardDialog'))refresh(currentPage,true);else prefetchRank();}
     }
   }
   function open(id){
@@ -112,7 +123,7 @@
     event.preventDefault();if(byId('wishSave').disabled)return;
     if(!api.validWish(byId('wishInput').value)){byId('wishError').textContent='心愿最多50个字';return;}
     byId('wishSave').disabled=true;byId('wishInput').disabled=true;byId('wishError').textContent='';
-    try{await client.saveWish(byId('wishInput').value,wishOwner);invalidateRankCache();closeWish();await refresh(currentPage);}
+    try{await client.saveWish(byId('wishInput').value,wishOwner);invalidateRankCache();closeWish();await refresh(currentPage,true);}
     catch{byId('wishError').textContent='未能保存，请重试';byId('wishSave').textContent='重试保存';}
     finally{byId('wishSave').disabled=false;byId('wishInput').disabled=false;}
   });
@@ -140,7 +151,7 @@
     }
   }
   let requestGeneration=0;
-  async function refresh(page=currentPage){
+  async function refresh(page=currentPage,force=false){
     const generation=++requestGeneration,cached=rankCache.get(page);
     byId('rankRetry').hidden=true;byId('rankFreshness').textContent=cached?'更新中':'';
     if(cached)renderRanks(visibleSnapshot(cached));
@@ -148,6 +159,7 @@
       byId('rankRows').replaceChildren();byId('rankTable').hidden=true;byId('rankMine').hidden=true;
       byId('rankStatus').hidden=false;byId('rankStatus').textContent=client.config.ready?'正在听取好成绩…':'排行榜暂未开放';
     }
+    if(cached&&!force&&Date.now()-cached.at<freshFor&&cached.owner===client.playerId){byId('rankFreshness').textContent='';byId('rankRefresh').disabled=false;byId('rankBody').setAttribute('aria-busy','false');return;}
     byId('rankRefresh').disabled=true;byId('rankPrevious').disabled=true;byId('rankNext').disabled=true;byId('rankBody').setAttribute('aria-busy','true');
     if(!client.config.ready){byId('rankBody').setAttribute('aria-busy','false');byId('rankRefresh').disabled=false;return;}
     try{
@@ -157,11 +169,11 @@
     }catch{if(generation===requestGeneration){byId('rankFreshness').textContent=cached?'暂离线 · 上次榜单':'';byId('rankStatus').textContent='暂时连不上，稍后再试';if(!cached)byId('rankStatus').hidden=false;byId('rankRetry').hidden=false;}}
     finally{if(generation===requestGeneration){byId('rankRefresh').disabled=false;byId('rankBody').setAttribute('aria-busy','false');}}
   }
-  for(const id of ['homeLeaderboard','resultLeaderboard'])byId(id).onclick=()=>{if(open('leaderboardDialog')){currentPage=1;refresh(1);}};
+  for(const id of ['homeLeaderboard','resultLeaderboard'])byId(id).onclick=()=>{if(open('leaderboardDialog')){currentPage=1;refresh(1);client.warm();}};
   byId('rankHome').onclick=()=>{requestGeneration++;closeWish();close();if(app.dataset.state==='over')byId('back').click();else byId('start').focus({preventScroll:true});};
-  byId('rankRetry').onclick=()=>refresh();byId('rankRefresh').onclick=()=>refresh();
+  byId('rankRetry').onclick=()=>refresh(currentPage,true);byId('rankRefresh').onclick=()=>refresh(currentPage,true);
   byId('rankPrevious').onclick=()=>refresh(Math.max(1,currentPage-1));byId('rankNext').onclick=()=>refresh(Math.min(totalPages,currentPage+1));
-  byId('scoreSyncRetry').onclick=()=>{byId('scoreSyncRetry').disabled=true;client.flush().finally(()=>renderSubmission());};
+  byId('scoreSyncRetry').onclick=()=>{clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;byId('scoreSyncRetry').disabled=true;client.flush().finally(()=>renderSubmission());};
   document.addEventListener('keydown',event=>{
     if(!active)return;
     if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();if(!byId('wishDialog').hidden){closeWish();return;}requestGeneration++;continuation=null;close();return;}
@@ -173,17 +185,33 @@
     if(event.shiftKey&&(document.activeElement===first||!controls.includes(document.activeElement))){event.preventDefault();last.focus();}
     else if(!event.shiftKey&&(document.activeElement===last||!controls.includes(document.activeElement))){event.preventDefault();first.focus();}
   },true);
-  window.addEventListener('online',()=>{if(client.pending())client.flush().finally(()=>renderSubmission());});
+  function reconnect(){
+    if(document.hidden||!client.config.ready)return;clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;
+    if(client.pending())client.flush().finally(()=>renderSubmission());else client.warm();
+    if(active===byId('leaderboardDialog'))refresh(currentPage,true);else prefetchRank();
+  }
+  window.addEventListener('online',reconnect);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(retryTimer);retryTimer=0;}else reconnect();});
+  window.addEventListener('pageshow',event=>{if(event.persisted)reconnect();});
+  client.onIdentity=()=>{
+    // Called synchronously by Supabase's auth listener: defer ALL work to avoid
+    // starting another auth operation while its internal lock is held.
+    setTimeout(()=>{if(active===byId('leaderboardDialog'))refresh(currentPage,true);else prefetchRank();},0);
+  };
   window.addEventListener('storage',event=>{if(event.key===client.nicknameKey&&api.validNickname(event.newValue))client.nickname=api.cleanNickname(event.newValue);});
   const restored=new MutationObserver(()=>{if(app.dataset.state==='home'){restored.disconnect();if(client.pending())client.flush().finally(()=>renderSubmission());}});
   restored.observe(app,{attributes:true,attributeFilter:['data-state']});
   let warmScheduled=false;
   const warmObserver=new MutationObserver(()=>{
     if(app.dataset.state!=='home'||warmScheduled)return;warmScheduled=true;warmObserver.disconnect();
-    if(window.requestIdleCallback)requestIdleCallback(()=>prefetchRank(),{timeout:700});else setTimeout(()=>prefetchRank(),120);
+    client.warm();
   });
   warmObserver.observe(app,{attributes:true,attributeFilter:['data-state']});
-  if(app.dataset.state==='home'){warmScheduled=true;warmObserver.disconnect();setTimeout(()=>prefetchRank(),120);}
+  if(app.dataset.state==='home'){warmScheduled=true;warmObserver.disconnect();client.warm();}
+  // Fetch the small public page during startup, independently of authentication.
+  // Optional artwork is already in CSS; no SDK or multi-megabyte name font on
+  // this critical path. Cache stays visible while fresh network data arrives.
+  prefetchRank();
   window.onlineLeaderboard={
     get nickname(){return client.nickname;},get hasDialog(){return!!active;},
     requestNickname,

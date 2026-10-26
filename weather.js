@@ -30,7 +30,20 @@
     Object.freeze({drops:24,speed:.52,length:22,opacity:.17,sound:'light',gain:.13}),
     Object.freeze({drops:12,speed:.42,length:16,opacity:.14,sound:'light',gain:.09}),dry
   ]);
-  const fieldDrops=Array.from({length:72},(_,i)=>({x:Math.random(),y:Math.random(),speed:between(.72,1.3),length:between(.65,1.25),slope:rainSlope(),front:i%3===0}));
+  // Match the cover: a translucent tapered blue streak, separate foreground /
+  // background depths, individually seeded durations, with one common wind.
+  // Tiny offscreen textures are prepared once; no per-frame gradient or DOM.
+  const streaks=Array.from({length:8},(_,index)=>{
+    const sprite=document.createElement('canvas');sprite.width=12;sprite.height=132;
+    const c=sprite.getContext('2d'),gradient=c.createLinearGradient(0,2,0,130);
+    gradient.addColorStop(0,'#4b91c900');gradient.addColorStop(.45,'#4b91c9');gradient.addColorStop(1,'#2167a5');
+    c.fillStyle=gradient;c.beginPath();c.roundRect(4,2,4,128,2);c.fill();return sprite;
+  });
+  const fieldDrops=Array.from({length:72},(_,i)=>{
+    const front=i%3===0;
+    return{x:between(-.04,1.1),y:Math.random(),speed:between(front?.95:.52,front?1.65:.92),length:between(front?.7:.45,front?1.4:.9),
+      width:between(front?1.2:.65,front?2.7:1.45),opacity:between(front?.55:.4,front?1:.78),slope:rainSlope(),front,sprite:streaks[i%8]};
+  });
   let fieldTime=null,fieldTravel=0;
   function forLevel(level){return levels[Math.max(0,Math.min(5,Math.floor(level)-1))]||dry;}
   function drawFieldRain(context,time,width,height,phase,reduce=false,layer='back'){
@@ -43,19 +56,20 @@
     }
     if(!settings.drops){fieldTravel=0;return;}
     if(reduce||motion.matches||!width||!height)return;
-    // Two batched paths share the original 72-drop pool, with no new RAF.
-    // The subtle front layer crosses tiles; the timing line stays on top.
-    const cycle=height+100;
+    // Same drop pool / game RAF; neither layer can alter the music timeline.
+    const cycle=height+150;
     const front=layer==='front';
-    context.save();context.strokeStyle=front?'#80b5db':'#b9e0ff';context.globalAlpha=settings.opacity*(front?.85:1);
-    context.lineWidth=front?1.4:1.1;context.lineCap='round';context.beginPath();
+    context.save();
     for(let i=0;i<settings.drops;i++){
       const drop=fieldDrops[i];if(drop.front!==front)continue;
-      const y=((drop.y*cycle+fieldTravel*height*drop.speed)%cycle+cycle)%cycle-60;
+      const position=((drop.y*cycle+fieldTravel*height*.52*drop.speed)%cycle+cycle)%cycle;
+      const y=position-85,fade=Math.min(1,position/(cycle*.06),(cycle-position)/(cycle*.09));
       const length=settings.length*drop.length*(front?1.08:.92),x=drop.x*width+drop.slope*(y+60);
-      context.moveTo(x,y);context.lineTo(x+drop.slope*length,y+length);
+      context.save();context.globalAlpha=settings.opacity*drop.opacity*fade*1.35;
+      context.translate(x,y);context.rotate(Math.atan(-drop.slope));
+      context.drawImage(drop.sprite,0,0,12,132,-drop.width*1.5,0,drop.width*3,length);context.restore();
     }
-    context.stroke();context.restore();
+    context.restore();
   }
   window.DazouguWeather=Object.freeze({forLevel,drawFieldRain});
 })();

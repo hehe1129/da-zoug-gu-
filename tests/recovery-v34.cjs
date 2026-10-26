@@ -1,0 +1,54 @@
+'use strict';
+const {chromium}=require(process.env.DAZOUGU_PLAYWRIGHT_MODULE||'playwright');
+const {startLocalAPI}=require('./leaderboard/local-api.cjs');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const out=path.resolve(__dirname,'../output/playwright/v34');fs.mkdirSync(out,{recursive:true});
+(async()=>{
+ const api=await startLocalAPI(),browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--js-flags=--max-old-space-size=192 --max-semi-space-size=2','--disable-gpu']});
+ const results=[],errors=[];const check=(name,ok,data)=>{assert.ok(ok,name+' '+JSON.stringify(data));results.push({name,data});console.log('PASS',name,JSON.stringify(data??''));};
+ try{
+  const seed=crypto.randomUUID();await api.db.query('insert into auth.users(id) values($1)',[seed]);await api.db.query('insert into dazougu_private.player_bests(player_id,nickname,best_score,wish) values($1,$2,$3,$4)',[seed,'共享鼓友',1200,'愿日日安康']);
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),p=await context.newPage();let blockSDK=true,blockReads=false;const requested=[];
+  p.on('pageerror',e=>errors.push(String(e)));p.on('request',r=>requested.push(r.url()));
+  await p.addInitScript(()=>localStorage.setItem('dazougu.nickname.v1','恢复鼓友'));
+  await p.route('**/leaderboard-config.js*',r=>r.fulfill({contentType:'application/javascript',body:'window.DAZOUGU_LEADERBOARD_CONFIG='+JSON.stringify({supabaseUrl:api.origin,publishableKey:'sb_publishable_local_test_only'})}));
+  await p.route('**/assets/vendor/supabase-*.js',r=>blockSDK?r.abort():r.continue());
+  await p.route('**/rest/v1/rpc/dzg_leaderboard_page',r=>blockReads?r.abort():r.continue());
+  await p.goto('http://127.0.0.1:4177/?v=34');await p.waitForFunction(()=>state==='home');await p.waitForFunction(()=>Object.keys(localStorage).some(k=>k.endsWith('.rank-preview')));
+  check('public shared ranking preloads even with SDK/auth unavailable',api.stats.reads>=1&&api.stats.signups===0);
+  const firstReads=api.stats.reads;
+  await p.tap('#homeLeaderboard');await p.waitForSelector('#rankRows tr');await p.waitForTimeout(100);
+  check('fresh first page opens immediately without another network request',await p.locator('#rankRows').textContent().then(t=>t.includes('共享鼓友'))&&api.stats.reads===firstReads);
+  await p.tap('#rankHome');blockReads=true;await p.reload();await p.waitForFunction(()=>state==='home');
+  const opened=await p.evaluate(()=>{const time=performance.now();$('homeLeaderboard').click();return performance.now()-time;});
+  check('reloaded/offline page paints the persistent public cache synchronously',opened<100&&await p.locator('#rankRows tr').count()===1,{showMS:opened});
+  await p.waitForFunction(()=>$('rankFreshness').textContent.includes('上次榜单'));
+  check('offline cached results are labelled as previous server data',await p.locator('#rankRetry').isVisible());
+  blockReads=false;blockSDK=false;await p.tap('#rankRetry');await p.waitForFunction(()=>!$('rankRefresh').disabled&&$('rankFreshness').textContent==='');await p.tap('#rankHome');
+  await p.tap('#start');await p.waitForFunction(()=>state==='playing');await p.evaluate(()=>cancelAnimationFrame(raf));await p.evaluate(()=>onlineLeaderboard.client.identity());
+  const player=await p.evaluate(()=>onlineLeaderboard.client.playerId);
+  check('network recovery creates one real anonymous identity and play is independent',!!player&&api.stats.signups===1);
+  // Real AudioContext suspension + the same visibility events used on mobile.
+  const frozen=await p.evaluate(async()=>{window.testHidden=true;Object.defineProperty(document,'hidden',{configurable:true,get:()=>window.testHidden});document.dispatchEvent(new Event('visibilitychange'));await audio.ctx.suspend();return{state,elapsed,misses};});
+  await p.evaluate(()=>{window.testHidden=false;document.dispatchEvent(new Event('visibilitychange'));});
+  await p.tap('#resume');await p.waitForFunction(()=>state==='playing');await p.evaluate(()=>cancelAnimationFrame(raf));await p.waitForTimeout(180);
+  const recovered=await p.evaluate(()=>{const a=new Float32Array(audio.analyser.fftSize);audio.analyser.getFloatTimeDomainData(a);return{state:audio.ctx.state,song:!!audio.song,clock:!!audio.clock,rain:audio.rainType,peak:Math.max(...a.map(Math.abs)),misses,elapsed};});
+  check('background return + continue restores actual sound and transport',recovered.state==='running'&&recovered.song&&recovered.clock&&recovered.rain==='rainHeavy'&&recovered.peak>.001&&recovered.misses===frozen.misses,recovered);
+  const route=await p.evaluate(()=>{audio.backgrounded();audio.recoverOutput();return audio.unlockAttempts;});await p.waitForTimeout(50);
+  check('even a running but backgrounded output route is explicitly re-primed',route>0&&await p.evaluate(()=>audio.outputReady&&!audio.needsWake));
+  api.flags.offline=true;
+  await p.evaluate(()=>{score=1800;hits=80;perfects=10;end('测试');});await p.waitForFunction(()=>onlineLeaderboard.client.status.state==='failed');
+  check('failed score stays durably queued under its anonymous owner',await p.evaluate(id=>onlineLeaderboard.client.pending()?.score===1800&&onlineLeaderboard.client.pending()?.ownerId===id,player));
+  api.flags.offline=false;await p.waitForFunction(()=>onlineLeaderboard.client.status.state==='synced',null,{timeout:20000});
+  check('bounded automatic retries sync without requiring a manual click',await p.evaluate(()=>!onlineLeaderboard.client.pending()&&onlineLeaderboard.client.status.bestScore===1800));
+  await p.reload();await p.waitForFunction(()=>state==='home');await p.evaluate(()=>onlineLeaderboard.client.identity());check('identity survives reload',await p.evaluate(id=>onlineLeaderboard.client.playerId===id,player));
+  await p.tap('#start');await p.waitForFunction(()=>state==='playing');await p.evaluate(()=>{score=600;hits=30;perfects=0;end('测试');});await p.waitForFunction(()=>onlineLeaderboard.client.status.state==='synced');
+  check('a lower result never replaces the shared personal best',await p.evaluate(()=>onlineLeaderboard.client.status.bestScore===1800));
+  await p.tap('#resultLeaderboard');await p.waitForFunction(()=>!$('rankRefresh').disabled&&!!document.querySelector('#rankRows tr[aria-current]'));
+  check('real shared ranking includes both players and highlights current identity',await p.locator('#rankRows tr').count()===2&&await p.locator('#myBestScore').textContent()==='1800');
+  await p.waitForTimeout(650);await p.screenshot({path:out+'/ranking.png'});await p.tap('#rankHome');await p.tap('#start');await p.waitForFunction(()=>state==='playing');await p.waitForTimeout(700);await p.evaluate(()=>{cancelAnimationFrame(raf);enterStage(0);draw(now());});await p.screenshot({path:out+'/rain.png'});
+  check('small font ranges replace the old 4.3-MB name font',requested.some(u=>u.includes('/names-v34/'))&&!requested.some(u=>u.includes('aa-classic-song-names-v27.woff2')));
+  check('no uncaught errors',errors.length===0,errors);
+  fs.writeFileSync(out+'/recovery.json',JSON.stringify({results,errors,stats:api.stats},null,2));
+ }finally{await browser.close();await api.close();}
+})().catch(e=>{console.error(e.stack);process.exitCode=1;});

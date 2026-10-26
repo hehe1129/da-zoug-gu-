@@ -1,7 +1,7 @@
 /* Supplied recordings only. No oscillator / noise stand-ins. */
 'use strict';
 const AUDIO_SOURCES = {
-  ensemble:{bytes:4413225,file:'ensemble.mp3'},
+  ensemble:{bytes:2589682,file:'ensemble-v34.mp3'},
   drum:{bytes:48479,file:'drum.mp3',offset:.294,length:.64,gain:.62},
   cymbal:{bytes:68541,file:'cymbal.mp3',offset:.541,length:1.35,gain:1.25},
   gong:{bytes:35313,file:'gong.mp3',offset:.085,length:.72,gain:1.6},
@@ -17,7 +17,7 @@ class RhythmAudio {
     // Preload and decode before the cover; audible output unlocks on a gesture.
     this.raw={};this.transfers={};this.fetchErrors={};this.primed=false;this.status='idle';this.failed=[];this.clock=null;this.boost=null;
     this.rain=null;this.rainLayers=new Set();this.rainLoops={};this.rainType=null;
-    this.outputReady=false;this.unlockAttempts=0;
+    this.outputReady=false;this.unlockAttempts=0;this.needsWake=false;
   }
   preload(retry=false) {
     for(const [kind,meta] of Object.entries(AUDIO_SOURCES)) {
@@ -58,6 +58,10 @@ class RhythmAudio {
     });
   }
   setup() {
+    if(this.ctx?.state==='closed'){
+      this.ctx=null;this.master=null;this.session=null;this.clock=null;this.song=null;
+      this.rain=null;this.rainType=null;this.rainLayers.clear();this.outputReady=false;
+    }
     if(this.ctx)return;
     const Context=window.AudioContext||window.webkitAudioContext;
     if(!Context)throw new Error('Web Audio unavailable');
@@ -103,7 +107,7 @@ class RhythmAudio {
   }
   markOutputReady() {
     if(this.ctx?.state!=='running')return;
-    this.unlocking=false;const first=!this.outputReady;this.outputReady=true;
+    this.unlocking=false;this.needsWake=false;const first=!this.outputReady;this.outputReady=true;
     if(first)this.onReady?.();this.onActivationChange?.();
   }
   unlock(retry=false) {
@@ -112,7 +116,7 @@ class RhythmAudio {
       // Declare one music-playback session where the browser supports it.
       // Do this only inside real activation, never on the initial page load.
       try{const nav=window.navigator;if(nav?.userActivation?.isActive&&nav.audioSession&&nav.audioSession.type!=='playback')nav.audioSession.type='playback';}catch{}
-      if(this.ctx.state==='running'){this.markOutputReady();return true;}
+      if(this.ctx.state==='running'&&!this.needsWake){this.markOutputReady();return true;}
       // A pre-gesture resume may stay pending on iOS. Never let that request
       // suppress a new resume issued synchronously by touchend / click.
       const ctx=this.ctx;this.unlocking=true;this.unlockAttempts++;
@@ -125,6 +129,14 @@ class RhythmAudio {
       });
       this.onActivationChange?.();return false;
     }catch(error){this.lastUnlockError=error;this.unlocking=false;this.onActivationChange?.();return false;}
+  }
+  backgrounded(){
+    // A mobile browser may keep reporting `running` while its output route was
+    // suspended by the OS. Prime that route again on return / the next gesture.
+    this.needsWake=true;this.outputReady=false;this.setRain(null);this.onActivationChange?.();
+  }
+  recoverOutput(){
+    if(!this.muted)this.unlock();
   }
   setMuted(muted) {this.muted=muted;if(this.ctx)this.master.gain.setTargetAtTime(muted?0:.72,this.ctx.currentTime,.025);}
   rainLoop(kind) {

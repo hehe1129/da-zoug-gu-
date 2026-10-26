@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),asse
 function harness(mode){
  const calls={},decodes={};let fail=true;
  const sandbox={console,Set,Map,Math,Uint8Array,ArrayBuffer,Promise,AbortController,setTimeout,clearTimeout,performance:{now:()=>0},window:{},RECORDING_SCORE:{duration:183.817}};
- sandbox.fetch=async url=>{const kind=url.split('/').at(-1).split('.')[0];calls[kind]=(calls[kind]||0)+1;if(fail&&kind==='ensemble'&&['prefetch-fail','partial'].includes(mode)){fail=false;throw new Error('network interrupted');}return{ok:true,arrayBuffer:async()=>new Uint8Array([Object.keys(calls).indexOf(kind)+1]).buffer};};
+ sandbox.fetch=async url=>{const kind=url.split('/').at(-1).split('.')[0].replace(/-v\d+$/,'');calls[kind]=(calls[kind]||0)+1;if(fail&&kind==='ensemble'&&['prefetch-fail','partial'].includes(mode)){fail=false;throw new Error('network interrupted');}return{ok:true,arrayBuffer:async()=>new Uint8Array([Object.keys(calls).indexOf(kind)+1]).buffer};};
  vm.createContext(sandbox);vm.runInContext(fs.readFileSync(path.join(__dirname,'../audio.js'),'utf8')+'\nglobalThis.TestAudio=RhythmAudio;',sandbox);
  const a=new sandbox.TestAudio();a.ctx={decodeAudioData(bytes,ok,bad){const key=String(new Uint8Array(bytes)[0]);decodes[key]=(decodes[key]||0)+1;const buffer={length:100,duration:184};queueMicrotask(()=>ok(buffer));if(mode==='callback-only')return;return Promise.resolve(buffer);}};
  return{a,calls};
@@ -14,7 +14,7 @@ async function slowDownload(stalled=false){
  const schedule=(callback,ms)=>{const id=++identifier;timers.set(id,{at:now+ms,callback});return id;},cancel=id=>timers.delete(id);
  const sandbox={console,Set,Map,Math,Uint8Array,ArrayBuffer,Promise,AbortController,setTimeout:schedule,clearTimeout:cancel,performance:{now:()=>now},window:{},RECORDING_SCORE:{duration:183.817}};
  sandbox.fetch=async(url,options)=>{
-   if(!url.endsWith('ensemble.mp3'))return{ok:true,arrayBuffer:async()=>new Uint8Array([1]).buffer};
+   if(!/ensemble(?:-v\d+)?\.mp3$/.test(url))return{ok:true,arrayBuffer:async()=>new Uint8Array([1]).buffer};
    let chunks=0;
    return{ok:true,headers:{get:()=>4},body:{getReader:()=>({read:()=>{
      if(chunks>=4)return Promise.resolve({done:true});

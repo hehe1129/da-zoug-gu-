@@ -87,12 +87,11 @@ function loadVisuals(tracker,retry){
   const tasks=[
     readyImage(instrumentSheet,()=>Object.keys(instrumentArt).length===5,retry),
     readyImage(perfectSheet,()=>perfectArt.length===5,retry),
-    visualImage('assets/modal-frame-v22.webp',retry),
+    visualImage('assets/modal-frame-v34.webp',retry),
     visualImage('assets/cover-painting-v19.webp',retry),
     visualImage('assets/cover-foreground-mask-v30.webp',retry),
     visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry),
-    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v31.webp',retry),
-    visualImage('assets/ranking-panel-v27.webp',retry) // original alpha contour for the blue reference artwork
+    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v31.webp',retry)
   ];
   tracker.total=tasks.length;
   return Promise.all(tasks.map(task=>task.then(value=>{tracker.done++;return value;})));
@@ -621,7 +620,16 @@ audio.onError=()=>{clearTimeout(messageTimer);$('error').textContent='音频暂�
 audio.onReady=()=>{ if(audio.status==='partial')audio.onAssetError?.();else $('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
 audio.onInterrupted=()=>pause();
 audio.onAssetError=()=>{clearTimeout(messageTimer);$('error').textContent='声音未能载入，请重新载入游戏';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},6500);};
-document.addEventListener('visibilitychange',()=>{ if(document.hidden) pause();syncWeatherAudio(); });
+function recoverPageAudio(){
+  if(document.hidden)return;
+  audio.recoverOutput();syncWeatherAudio();soundButtons();
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){pause();audio.backgrounded();}
+  else recoverPageAudio();
+});
+window.addEventListener('pageshow',event=>{if(event.persisted)recoverPageAudio();});
+window.addEventListener('focus',recoverPageAudio);
 window.addEventListener('blur',()=>{if(!coarsePointer)pause();});
 let viewportWidth=innerWidth;
 window.addEventListener('resize',()=>{
