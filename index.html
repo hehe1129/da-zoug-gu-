@@ -717,7 +717,7 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 .guest-login{margin-top:12px;background:transparent;color:#18549e;border:1px solid #98b5d0;font-size:18px}
 .account-card button:disabled,.settings-card button:disabled{opacity:.55;cursor:wait}
 #openSettings{background:transparent!important;color:#1556a5!important;border:0;width:48px;height:48px;min-width:44px}
-#openSettings svg{display:block!important;width:31px;height:31px;stroke:currentColor;fill:none}
+#openSettings svg{display:block!important;visibility:visible;width:34px;height:34px;stroke:currentColor;fill:none}
 #coverAudioHint{display:none!important}
 .settings-dialog{position:absolute;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;padding:24px;background:#061d39bd}
 .settings-card{width:100%;max-width:360px;max-height:94%;overflow:auto;background:#fff8e7;border:1px solid #d4bc88;border-radius:34px 34px 16px 16px;padding:24px;color:#134f98;box-shadow:0 14px 38px #041a3950}
@@ -734,10 +734,42 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 #game .game-top,#game .game-info,#game .feedback-band,#game .combo-bar,#game .stage-path{position:relative;z-index:4}
 #game .game-info{position:absolute}
 @media(max-height:680px){.account-screen{padding:12px 22px}.account-card{padding:31px 24px 18px}.account-lead{margin-bottom:13px}.account-tabs{margin-bottom:10px}.account-card label{margin-bottom:9px}.account-card h1{font-size:32px}.settings-card{padding:15px 24px}.settings-identity{margin-bottom:14px}}
+
+/* V36: the same ivory drum arch, pink rivets and Song type as the game panels. */
+.account-screen{background:#124d99;padding:30px 22px}
+.account-card{padding:58px 28px 27px;border:1px solid #e5c682;box-shadow:0 14px 36px #07295238;border-radius:47% 47% 18px 18px / 20% 20% 18px 18px}
+.account-card h1{font-size:43px;letter-spacing:3px;margin-bottom:7px}
+.account-lead{color:#315b88;margin-bottom:28px;letter-spacing:1px}
+.account-tabs{gap:0;border-bottom:1px solid #cbd4d9;margin-bottom:22px}
+.account-tabs button{flex:1;color:#4b6885;border-radius:0;padding:9px 4px 12px;font-size:19px}
+.account-tabs button[aria-selected="true"]{color:#114c99;border-bottom:3px solid #ee5e99;margin-bottom:-1px}
+.account-card label{margin-bottom:18px}
+.account-card input,.settings-card input[type="text"]{border-color:#9fb8cb;border-radius:7px;background:#fffdf7;min-height:46px;padding:11px 12px}
+.account-error{min-height:31px;margin:0 0 9px}
+.account-submit,.name-save{border-radius:9px;background:#1456a6;letter-spacing:2px;min-height:46px}
+.guest-login{border-radius:9px;border-color:#b0c2ce;letter-spacing:2px;min-height:46px}
+.account-card button:focus-visible,.settings-card button:focus-visible{outline:2px solid #d8387d;outline-offset:4px}
+.account-submit:hover,.name-save:hover{background:#10488e}.guest-login:hover{background:#f6ecd5}
+.account-submit:active,.guest-login:active,.name-save:active{transform:translateY(1px)}
+#openSettings{display:grid;place-items:center;right:4%;top:2%;width:52px;height:52px;opacity:1;visibility:visible;z-index:6}
+.settings-card{position:relative;border-radius:44% 44% 16px 16px / 12% 12% 16px 16px;padding:38px 26px 20px;border-color:#dfc185;box-shadow:0 16px 40px #031d3950}
+.settings-heading{margin-bottom:4px}.settings-heading h2{font-size:32px;letter-spacing:3px}
+.settings-close{padding:0 0 0 12px;font-size:16px}
+.settings-identity{margin-bottom:24px;line-height:1.5;color:#3e658b}
+.settings-card label{margin-bottom:17px}.volume-heading{font-size:18px}.volume-heading output{color:#3e658b}
+.settings-card input[type="range"]{appearance:none;-webkit-appearance:none;background:transparent;height:32px;margin:8px 0 0}
+.settings-card input[type="range"]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:#c0ccce}
+.settings-card input[type="range"]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:20px;height:20px;margin-top:-7.5px;border-radius:50%;background:#1456a6;border:3px solid #fff8e7;box-shadow:0 0 0 1px #1456a6}
+.settings-card input[type="range"]::-moz-range-track{height:5px;border-radius:3px;background:#c0ccce}
+.settings-card input[type="range"]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#1456a6;border:3px solid #fff8e7}
+#settingsNameForm{border-top:1px solid #cfcec0;padding-top:21px;margin-top:8px}
+.settings-card .name-save{font-size:18px}.settings-message{min-height:22px;margin:10px 0 4px}
+.logout-button{border-top:1px solid #cfcec0;margin-top:8px;padding-top:15px;min-height:48px;font-size:17px}
+@media(max-height:680px){.account-screen{padding:12px 20px}.account-card{padding:35px 23px 20px}.account-card h1{font-size:35px}.account-lead{margin-bottom:15px}.account-tabs{margin-bottom:14px}.account-card label{margin-bottom:12px}.account-error{min-height:24px}.settings-card{padding:26px 24px 16px}.settings-identity{margin-bottom:15px}.settings-card label{margin-bottom:11px}#settingsNameForm{padding-top:14px}.settings-message{min-height:20px;margin:6px 0 0}}
 </style>
   <!-- styles:end -->
   <link rel="preload" href="assets/cover-painting-v19.webp" as="image" fetchpriority="high">
-  <script src="icons.js?v=22" defer></script><script src="perfect-art-v22.js?v=22" defer></script><script src="score.js?v=25" defer></script><script src="audio.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard-config.js?v=26" defer></script><script data-optional="leaderboard" src="leaderboard-client.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard.js?v=35" defer></script><script src="weather.js?v=35" defer></script><script src="accounts.js?v=35" defer></script><script src="game.js?v=35" defer></script>
+  <script src="icons.js?v=22" defer></script><script src="perfect-art-v22.js?v=22" defer></script><script src="score.js?v=25" defer></script><script src="audio.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard-config.js?v=26" defer></script><script data-optional="leaderboard" src="leaderboard-client.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard.js?v=35" defer></script><script src="weather.js?v=36" defer></script><script src="accounts.js?v=35" defer></script><script src="game.js?v=35" defer></script>
   <script>
     // A slow or failed script must leave a visible cover and a usable retry.
     window.startupWait=function(failed){var loading=document.getElementById('loading');if(loading&&!loading.hidden){document.getElementById('loadingStatus').textContent=failed?'游戏未能载入，请重试':'游戏正在载入，请稍候';document.getElementById('loadRetry').hidden=!failed;return;}var box=document.getElementById('startup');if(!box)return;box.hidden=false;box.querySelector('span').textContent=failed?'载入遇到问题，请重试':'游戏正在载入，请稍后再点一次';box.querySelector('button').hidden=false;};

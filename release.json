@@ -1,1 +1,1 @@
-{"version":"V35","baseCommit":"850f521","releaseDate":"2026-10-28","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"新增游戏专属用户名与六位数字密码账号、游客入口、独立显示名称及账号最高分；蓝色设置按钮、游戏与雨声独立音量、退出登录；前五阶段双倍全屏雨；原榜单及重点玩家备份保护","status":"release"}
+{"version":"V36","baseCommit":"ffd8303","releaseDate":"2026-10-28","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"修复蓝色设置齿轮隐藏；前五阶段全屏雨再增强数量、长度和对比度；登录、注册及设置面板优化；两位预留玩家在原有身份上配置账号，原榜单成绩与心愿保持","status":"release"}
