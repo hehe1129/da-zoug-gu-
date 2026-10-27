@@ -1,0 +1,35 @@
+/* Extend the approved Song / blue / drum-paper world to account and settings. */
+.account-screen,.settings-dialog{color:#114b91;font-family:ClassicSong,ClassicSongNames,SimSun,serif}
+.account-screen{background:#174f99;display:flex;align-items:flex-start;justify-content:center;padding:28px 23px;overflow:auto}
+.account-card{position:relative;width:100%;max-width:370px;margin:auto 0;flex-shrink:0;background:#fff8e7;border-radius:45% 45% 20px 20px / 17% 17% 20px 20px;padding:50px 28px 26px;box-shadow:0 12px 36px #082c6140;border:2px solid #e9c46f}
+.account-card:before{content:'';position:absolute;right:24px;top:67px;width:10px;height:10px;background:#f24494;border-radius:50%;box-shadow:-12px -22px 0 #f78bb8,-28px -39px 0 #fab3c9}
+.account-card h1{font:36px/1.4 ClassicSong,SimSun,serif;margin:0 0 8px;text-align:center;color:#1154a3}
+.account-lead{margin:0 0 26px;text-align:center;font-size:15px;line-height:1.7;color:#376391}
+.account-tabs{display:flex;justify-content:center;gap:22px;margin-bottom:18px}
+.account-tabs button{min-height:42px;padding:7px 13px;background:transparent;color:#536e8e;font:19px ClassicSong,SimSun,serif;border-bottom:2px solid transparent}
+.account-tabs button[aria-selected="true"]{color:#124f9e;border-bottom-color:#f24494}
+.account-card label,.settings-card label{display:block;font-size:16px;line-height:1.5;margin-bottom:14px}
+.account-card input,.settings-card input[type="text"]{display:block;width:100%;min-height:44px;margin-top:6px;padding:9px 12px;border:1px solid #a6bbcf;border-radius:10px;background:#fffdf6;color:#123e71;font:17px ClassicSong,ClassicSongNames,SimSun,serif;user-select:text;-webkit-user-select:text;touch-action:manipulation}
+.account-card input::placeholder{color:#59738a;opacity:1;font-size:13px}
+.account-error{min-height:34px;margin:3px 0 10px;color:#8c315d;font-size:13px;line-height:1.5}
+.account-submit,.guest-login,.name-save{width:100%;min-height:44px;padding:10px 16px;border-radius:22px;color:#fff8e7;background:#1559ad;font:20px ClassicSong,SimSun,serif}
+.guest-login{margin-top:12px;background:transparent;color:#18549e;border:1px solid #98b5d0;font-size:18px}
+.account-card button:disabled,.settings-card button:disabled{opacity:.55;cursor:wait}
+#openSettings{background:transparent!important;color:#1556a5!important;border:0;width:48px;height:48px;min-width:44px}
+#openSettings svg{display:block!important;width:31px;height:31px;stroke:currentColor;fill:none}
+#coverAudioHint{display:none!important}
+.settings-dialog{position:absolute;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;padding:24px;background:#061d39bd}
+.settings-card{width:100%;max-width:360px;max-height:94%;overflow:auto;background:#fff8e7;border:1px solid #d4bc88;border-radius:34px 34px 16px 16px;padding:24px;color:#134f98;box-shadow:0 14px 38px #041a3950}
+.settings-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}.settings-heading h2{margin:0;font-size:28px;font-weight:400}
+.settings-close{min-width:44px;min-height:44px;background:transparent;color:#1554a0;font:17px ClassicSong,SimSun,serif}
+.settings-identity{font-size:14px;color:#41668c;margin:0 0 22px;overflow-wrap:anywhere}
+.volume-heading{display:flex;justify-content:space-between;align-items:center;font-size:17px}.volume-heading output{font-size:15px;font-variant-numeric:tabular-nums}
+.settings-card input[type="range"]{display:block;width:100%;height:32px;margin:5px 0 16px;accent-color:#1658aa;touch-action:pan-x}
+.settings-card input:focus-visible,.account-card input:focus-visible{outline:2px solid #f24494;outline-offset:3px}
+.settings-card .name-save{font-size:17px}.settings-message{min-height:24px;font-size:13px;color:#844b63;margin:10px 0 5px;line-height:1.5}
+.logout-button{width:100%;min-height:44px;background:transparent;color:#18549c;font:18px ClassicSong,SimSun,serif}
+.game-rain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#gameRainBack{z-index:0}#gameRainFront{z-index:2}#game #field{z-index:1}#game #perfectFeedback{z-index:3}
+#game .game-top,#game .game-info,#game .feedback-band,#game .combo-bar,#game .stage-path{position:relative;z-index:4}
+#game .game-info{position:absolute}
+@media(max-height:680px){.account-screen{padding:12px 22px}.account-card{padding:31px 24px 18px}.account-lead{margin-bottom:13px}.account-tabs{margin-bottom:10px}.account-card label{margin-bottom:9px}.account-card h1{font-size:32px}.settings-card{padding:15px 24px}.settings-identity{margin-bottom:14px}}

@@ -1,1 +1,1 @@
-{"version":"V34","baseCommit":"aa00204","releaseDate":"2026-10-26","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"公开鼓气榜独立预取、持久缓存与快速打开；最高分自动补传及会话恢复；后台返回音频重新激活；游戏雨丝与封面一致；录音、弹窗与昵称字体按需配送优化","status":"release"}
+{"version":"V35","baseCommit":"850f521","releaseDate":"2026-10-28","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"新增游戏专属用户名与六位数字密码账号、游客入口、独立显示名称及账号最高分；蓝色设置按钮、游戏与雨声独立音量、退出登录；前五阶段双倍全屏雨；原榜单及重点玩家备份保护","status":"release"}

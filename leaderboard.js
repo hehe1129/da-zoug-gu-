@@ -12,7 +12,7 @@
       script.onerror=()=>{clearTimeout(timer);script.remove();reject(new Error('sdk-load-failed'));};document.head.append(script);
     }).catch(error=>{sdkPromise=null;throw error;});return sdkPromise;
   }
-  const client=new api.LeaderboardClient({config:window.DAZOUGU_LEADERBOARD_CONFIG,loadSDK,onStatus:renderSubmission});
+  const guestClient=new api.LeaderboardClient({config:window.DAZOUGU_LEADERBOARD_CONFIG,loadSDK});let client=guestClient;
   const rankCache=new Map(),rankRequests=new Map(),previewKey=client.key+'.rank-preview';let cacheRevision=0,lastSynced=null;
   const freshFor=30000;let retryTimer=0,retryAttempt=0;
   function publicSnapshot(data){return{...data,entries:data.entries.map(row=>({...row,is_current:false})),current_player:null};}
@@ -187,17 +187,26 @@
   },true);
   function reconnect(){
     if(document.hidden||!client.config.ready)return;clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;
+    if(['loading','login'].includes(app.dataset.state)){prefetchRank();return;}
     if(client.pending())client.flush().finally(()=>renderSubmission());else client.warm();
+    client.syncDisplayName?.();
     if(active===byId('leaderboardDialog'))refresh(currentPage,true);else prefetchRank();
   }
   window.addEventListener('online',reconnect);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(retryTimer);retryTimer=0;}else reconnect();});
   window.addEventListener('pageshow',event=>{if(event.persisted)reconnect();});
-  client.onIdentity=()=>{
+  function identityChanged(){
     // Called synchronously by Supabase's auth listener: defer ALL work to avoid
     // starting another auth operation while its internal lock is held.
     setTimeout(()=>{if(active===byId('leaderboardDialog'))refresh(currentPage,true);else prefetchRank();},0);
-  };
+  }
+  function selectClient(next){
+    clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;lastSynced=null;
+    client=next;client.onStatus=status=>{if(client===next)renderSubmission(status);};
+    client.onIdentity=()=>{if(client!==next)return;identityChanged();if(next.isAccount&&!next.playerId)window.gameSession?.sessionExpired();};
+    invalidateRankCache();renderSubmission();prefetchRank();
+  }
+  selectClient(guestClient);
   window.addEventListener('storage',event=>{if(event.key===client.nicknameKey&&api.validNickname(event.newValue))client.nickname=api.cleanNickname(event.newValue);});
   const restored=new MutationObserver(()=>{if(app.dataset.state==='home'){restored.disconnect();if(client.pending())client.flush().finally(()=>renderSubmission());}});
   restored.observe(app,{attributes:true,attributeFilter:['data-state']});
@@ -215,9 +224,15 @@
   window.onlineLeaderboard={
     get nickname(){return client.nickname;},get hasDialog(){return!!active;},
     requestNickname,
+    selectClient,
+    guestClient,
+    createAccountClient:()=>new api.LeaderboardClient({config:window.DAZOUGU_LEADERBOARD_CONFIG,loadSDK,account:true}),
+    refreshProfile(){invalidateRankCache();if(active===byId('leaderboardDialog'))refresh(currentPage,true);else prefetchRank();},
+    getBestScore:()=>client.localBest(),
+    rememberScore:score=>client.rememberBest(score),
     onGameEnd(result){client.capture(result).finally(()=>renderSubmission());},
     prefetch:prefetchRank,
-    client // diagnostics expose no admin credentials; auth stays in Supabase
+    get client(){return client;} // active identity only; never administrator keys
   };
   renderSubmission();
 })();

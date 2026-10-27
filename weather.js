@@ -24,11 +24,11 @@
 
   const dry=Object.freeze({drops:0,speed:0,length:0,opacity:0,sound:null,gain:0});
   const levels=Object.freeze([
-    Object.freeze({drops:72,speed:.94,length:45,opacity:.27,sound:'heavy',gain:.32}),
-    Object.freeze({drops:54,speed:.80,length:36,opacity:.24,sound:'heavy',gain:.25}),
-    Object.freeze({drops:38,speed:.65,length:28,opacity:.20,sound:'light',gain:.18}),
-    Object.freeze({drops:24,speed:.52,length:22,opacity:.17,sound:'light',gain:.13}),
-    Object.freeze({drops:12,speed:.42,length:16,opacity:.14,sound:'light',gain:.09}),dry
+    Object.freeze({drops:144,speed:.94,length:56,opacity:.30,sound:'heavy',gain:.32}),
+    Object.freeze({drops:108,speed:.80,length:45,opacity:.27,sound:'heavy',gain:.25}),
+    Object.freeze({drops:76,speed:.65,length:35,opacity:.23,sound:'light',gain:.18}),
+    Object.freeze({drops:48,speed:.52,length:28,opacity:.20,sound:'light',gain:.13}),
+    Object.freeze({drops:24,speed:.42,length:20,opacity:.17,sound:'light',gain:.09}),dry
   ]);
   // Match the cover: a translucent tapered blue streak, separate foreground /
   // background depths, individually seeded durations, with one common wind.
@@ -39,7 +39,7 @@
     gradient.addColorStop(0,'#4b91c900');gradient.addColorStop(.45,'#4b91c9');gradient.addColorStop(1,'#2167a5');
     c.fillStyle=gradient;c.beginPath();c.moveTo(6,2);c.arcTo(8,2,8,130,2);c.arcTo(8,130,4,130,2);c.arcTo(4,130,4,2,2);c.arcTo(4,2,8,2,2);c.closePath();c.fill();return sprite;
   });
-  const fieldDrops=Array.from({length:72},(_,i)=>{
+  const fieldDrops=Array.from({length:144},(_,i)=>{
     const front=i%3===0;
     return{x:between(-.04,1.1),y:Math.random(),speed:between(front?.95:.52,front?1.65:.92),length:between(front?.7:.45,front?1.4:.9),
       width:between(front?1.2:.65,front?2.7:1.45),opacity:between(front?.55:.4,front?1:.78),slope:rainSlope(),front,sprite:streaks[i%8]};

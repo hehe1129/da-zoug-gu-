@@ -18,6 +18,7 @@ class RhythmAudio {
     this.raw={};this.transfers={};this.fetchErrors={};this.primed=false;this.status='idle';this.failed=[];this.clock=null;this.boost=null;
     this.rain=null;this.rainLayers=new Set();this.rainLoops={};this.rainType=null;
     this.outputReady=false;this.unlockAttempts=0;this.needsWake=false;
+    this.volumes={game:1,rain:1};try{const saved=JSON.parse(localStorage.getItem('dazougu.volumes.v35'));for(const key of ['game','rain'])if(Number.isFinite(saved?.[key]))this.volumes[key]=Math.max(0,Math.min(1,saved[key]));}catch{}
   }
   preload(retry=false) {
     for(const [kind,meta] of Object.entries(AUDIO_SOURCES)) {
@@ -67,12 +68,14 @@ class RhythmAudio {
     if(!Context)throw new Error('Web Audio unavailable');
     this.ctx=new Context({latencyHint:'interactive'});
     this.master=this.ctx.createGain();this.master.gain.value=this.muted?0:.72;
+    this.gameBus=this.ctx.createGain();this.gameBus.gain.value=this.volumes.game;this.gameBus.connect(this.master);
     const comp=this.ctx.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=4;comp.knee.value=12;
     this.analyser=this.ctx.createAnalyser();this.analyser.fftSize=256;
     this.master.connect(comp);comp.connect(this.analyser);this.analyser.connect(this.ctx.destination);
     // Rain has its own filtered, levelled bus; it never changes the music gain,
     // sound-effect gain, source timing or transport lifecycle.
     this.ambienceBus=this.ctx.createGain();
+    this.ambienceBus.gain.value=this.volumes.rain;
     const low=this.ctx.createBiquadFilter(),high=this.ctx.createBiquadFilter(),leveler=this.ctx.createDynamicsCompressor();
     high.type='highpass';high.frequency.value=240;high.Q.value=.5;
     low.type='lowpass';low.frequency.value=3000;low.Q.value=.5;
@@ -139,6 +142,11 @@ class RhythmAudio {
     if(!this.muted)this.unlock();
   }
   setMuted(muted) {this.muted=muted;if(this.ctx)this.master.gain.setTargetAtTime(muted?0:.72,this.ctx.currentTime,.025);}
+  setVolumes(game,rain){
+    this.volumes={game:Math.max(0,Math.min(1,Number(game)||0)),rain:Math.max(0,Math.min(1,Number(rain)||0))};
+    try{localStorage.setItem('dazougu.volumes.v35',JSON.stringify(this.volumes));}catch{}
+    if(this.ctx){this.gameBus?.gain.setTargetAtTime(this.volumes.game,this.ctx.currentTime,.025);this.ambienceBus?.gain.setTargetAtTime(this.volumes.rain,this.ctx.currentTime,.025);}
+  }
   rainLoop(kind) {
     if(this.rainLoops[kind])return this.rainLoops[kind];
     const input=this.buffers[kind];if(!input?.getChannelData||!this.ctx?.createBuffer)return null;
@@ -179,7 +187,7 @@ class RhythmAudio {
   }
   startTransport() {
     this.stopTransport();if(!this.ctx)return;
-    this.session=this.ctx.createGain();this.session.connect(this.master);
+    this.session=this.ctx.createGain();this.session.connect(this.gameBus||this.master);
     this.bg=this.ctx.createGain();this.bg.gain.value=.66;this.bg.connect(this.session);
     const filter=this.ctx.createBiquadFilter();filter.type='bandpass';filter.frequency.value=1400;filter.Q.value=.65;
     this.boost=this.ctx.createGain();this.boost.gain.value=0;filter.connect(this.boost);this.boost.connect(this.session);this.melodyFilter=filter;
@@ -297,7 +305,7 @@ class RhythmAudio {
     s.onended=()=>{this.nodes.delete(s);s.disconnect();f.disconnect();g.disconnect();};s.start(t,.51,duration);
   }
   tick(accent=false) {this.sound('wood',undefined,this.session,accent?.55:.35);}
-  miss() {this.sound('drum',undefined,this.master,.2);}
+  miss() {this.sound('drum',undefined,this.gameBus||this.master,.2);}
   suonaSustain() {
     const source=this.buffers.suona;
     if(!source?.getChannelData||!this.ctx?.createBuffer)return null;

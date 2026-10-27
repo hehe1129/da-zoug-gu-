@@ -7,6 +7,9 @@
   const REVISION='v25-attack-calibration-1',MAX_SCORE=17800,MAX_HITS=445;
   function cleanNickname(value){return String(value??'').normalize('NFC').replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g,'').replace(/\s+/g,' ').trim();}
   function validNickname(value){const name=cleanNickname(value);return name.length>0&&Array.from(name).length<=12;}
+  function cleanUsername(value){return String(value??'').normalize('NFKC').trim();}
+  function validUsername(value){return /^[A-Za-z0-9_\u4e00-\u9fff]{2,12}$/.test(cleanUsername(value));}
+  function validPassword(value){return typeof value==='string'&&/^\d{6}$/.test(value);}
   const cleanWish=cleanNickname;
   function validWish(value){return typeof value==='string'&&Array.from(cleanWish(value)).length<=50;}
   function newRunId(){
@@ -37,18 +40,19 @@
   }
   class LeaderboardClient{
     constructor(options={}){
-      this.config=checkConfig(options.config);let storage=options.storage;try{storage??=root.localStorage;}catch{}
+      this.config=checkConfig(options.config);this.isAccount=!!options.account;this.queueOwner=null;this.accountProfile=null;this.bestScore=0;let storage=options.storage;try{storage??=root.localStorage;}catch{}
       this.storage=storageAdapter(storage);this.onStatus=options.onStatus||(()=>{});this.loadSDK=options.loadSDK;
       this.fetcher=options.fetch||((...args)=>root.fetch(...args));this.locks=options.locks??root.navigator?.locks;
-      this.key='dazougu.online.'+(this.config.namespace||'unconfigured');this.nicknameKey='dazougu.nickname.v1';
+      this.key='dazougu.online.'+(this.config.namespace||'unconfigured');this.nicknameKey=this.isAccount?this.key+'.account-name-cache':'dazougu.nickname.v1';
       const saved=cleanNickname(this.storage.getItem(this.nicknameKey));this.nickname=validNickname(saved)?saved:'';
       this.status={state:this.config.ready?'idle':'unconfigured'};this.playerId=null;this.session=null;this.seen=new Set();
     }
     setStatus(state,extra={}){this.status={state,...extra};try{this.onStatus(this.status);}catch{}}
     setNickname(value){const name=cleanNickname(value);if(!validNickname(name))throw new Error('invalid-nickname');this.nickname=name;this.storage.setItem(this.nicknameKey,name);return name;}
-    queue(){try{const value=JSON.parse(this.storage.getItem(this.key+'.outbox'));return(Array.isArray(value)?value:value?[value]:[]).filter(item=>validResult(item)&&validNickname(item.nickname));}catch{return[];}}
+    outboxKey(){return this.isAccount?this.key+'.account-outbox.'+(this.queueOwner||'unbound'):this.key+'.outbox';}
+    queue(key=this.outboxKey()){try{const value=JSON.parse(this.storage.getItem(key));return(Array.isArray(value)?value:value?[value]:[]).filter(item=>validResult(item)&&validNickname(item.nickname));}catch{return[];}}
     pending(){return this.queue()[0]||null;}
-    saveQueue(items){if(items.length)this.storage.setItem(this.key+'.outbox',JSON.stringify(items));else this.storage.removeItem(this.key+'.outbox');}
+    saveQueue(items,key=this.outboxKey()){if(items.length)this.storage.setItem(key,JSON.stringify(items));else this.storage.removeItem(key);}
     orphaned(){try{return JSON.parse(this.storage.getItem(this.key+'.orphaned'))||[];}catch{return[];}}
     archiveOrphans(items){if(items.length)this.storage.setItem(this.key+'.orphaned',JSON.stringify([...this.orphaned(),...items].slice(-10)));}
     async request(input,init={},timeout=8000){
@@ -69,6 +73,11 @@
       finally{clearTimeout(timer);init.signal?.removeEventListener('abort',abort);}
     }
     acceptSession(session){
+      if(this.isAccount&&this.queueOwner&&session?.user?.id&&session.user.id!==this.queueOwner){
+        // Another tab signed in to a different account. Freeze this client at
+        // its own outbox/profile; never relabel its running round as that user.
+        this.session=null;this.playerId=null;this.onIdentity?.(null);return;
+      }
       const before=this.playerId;this.session=session||null;this.playerId=session?.user?.id||null;
       if(before!==this.playerId)this.onIdentity?.(this.playerId);
     }
@@ -77,7 +86,7 @@
       if(!this.clientPromise)this.clientPromise=(async()=>{
         const sdk=await this.loadSDK();
         const boundedFetch=(input,init={})=>this.request(input,init);
-        const client=sdk.createClient(this.config.url,this.config.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:this.key+'.auth',storage:this.storage,lockAcquireTimeout:12000},global:{fetch:boundedFetch}});
+        const client=sdk.createClient(this.config.url,this.config.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:this.key+(this.isAccount?'.account-auth.v35':'.auth'),storage:this.storage,lockAcquireTimeout:12000},global:{fetch:boundedFetch}});
         client.auth.onAuthStateChange((event,session)=>{if(session?.user?.id||event==='SIGNED_OUT')this.acceptSession(session);});
         return client;
       })().catch(error=>{this.clientPromise=null;throw error;});
@@ -87,10 +96,38 @@
       const client=await this.getClient(),restored=await client.auth.getSession();
       if(restored.error)throw restored.error;
       let session=restored.data?.session;
-      if(!session){const signed=await client.auth.signInAnonymously();if(signed.error)throw signed.error;session=signed.data?.session;}
+      if(!session){if(this.isAccount)throw new Error('account-login-required');const signed=await client.auth.signInAnonymously();if(signed.error)throw signed.error;session=signed.data?.session;}
       if(!session?.user?.id||!session.access_token)throw new Error('anonymous-auth-unavailable');
+      if(this.isAccount&&this.queueOwner&&session.user.id!==this.queueOwner)throw new Error('account-session-changed');
       this.acceptSession(session);return{client,playerId:this.playerId,accessToken:session.access_token};
     }
+    async login(action,username,password){
+      if(!this.isAccount||!validUsername(username)||!validPassword(password))throw Object.assign(new Error('invalid_input'),{code:'invalid_input'});
+      const response=await this.request(this.config.url+'/functions/v1/game-accounts',{method:'POST',headers:{'apikey':this.config.key,'Content-Type':'application/json'},body:JSON.stringify({action,username:cleanUsername(username),password})},15000);
+      const result=await response.json();if(!response.ok||!result.session)throw Object.assign(new Error(result.code||'temporarily_unavailable'),{code:result.code||'temporarily_unavailable'});
+      const sdk=await this.getClient(),session=result.session;
+      const saved=await sdk.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});if(saved.error)throw saved.error;
+      this.acceptSession(saved.data.session);this.queueOwner=this.playerId;
+      const profile=await sdk.rpc('dzg_account_profile');if(profile.error||!profile.data||!validNickname(profile.data.display_name))throw profile.error||new Error('account-profile-unavailable');
+      this.accountProfile=profile.data;this.bestScore=profile.data.best_score;this.nicknameKey=this.key+'.account-name.'+this.playerId;this.setNickname(profile.data.display_name);
+      return this.accountProfile;
+    }
+    async setDisplayName(value){
+      if(!validNickname(value))throw new Error('invalid-nickname');
+      const name=cleanNickname(value);
+      if(!this.isAccount)this.setNickname(name);
+      try{
+        const {client,accessToken}=await this.identity();
+        const result=await client.rpc('dzg_set_display_name',{p_name:name}).setHeader('Authorization','Bearer '+accessToken);
+        if(result.error)throw result.error;
+        this.setNickname(result.data.display_name);if(this.accountProfile)this.accountProfile.display_name=this.nickname;
+        this.storage.removeItem(this.nicknameKey+'.pending');return true;
+      }catch(error){if(this.isAccount)throw error;this.storage.setItem(this.nicknameKey+'.pending',name);return false;}
+    }
+    async syncDisplayName(){const name=this.storage.getItem(this.nicknameKey+'.pending');if(name&&validNickname(name))return this.setDisplayName(name);}
+    localBest(){return this.isAccount?Math.max(this.bestScore,...this.queue().map(x=>x.score)):Number(this.storage.getItem('dazougu-best-v1'))||0;}
+    rememberBest(score){if(this.isAccount)this.bestScore=Math.max(this.bestScore,score);else this.storage.setItem('dazougu-best-v1',String(Math.max(this.localBest(),score)));}
+    async logout(){if(!this.isAccount)return;const sdk=await this.getClient();sdk.auth.stopAutoRefresh?.();try{await sdk.auth.signOut({scope:'local'});}finally{this.storage.removeItem(this.key+'.account-auth.v35');this.acceptSession(null);}}
     async identity(){
       if(!this.identityPromise){
         const task=()=>this.identityTask();
@@ -98,7 +135,7 @@
         const controller=new AbortController();let timer;
         const locked=()=>{clearTimeout(timer);return task();};
         if(this.locks?.request)timer=setTimeout(()=>controller.abort(),8000);
-        this.identityPromise=(this.locks?.request?this.locks.request(this.key+'.identity',{mode:'exclusive',signal:controller.signal},locked):this.identityLease(task)).finally(()=>{clearTimeout(timer);this.identityPromise=null;});
+        this.identityPromise=(this.locks?.request?this.locks.request(this.key+(this.isAccount?'.account-identity':'.identity'),{mode:'exclusive',signal:controller.signal},locked):this.identityLease(task)).finally(()=>{clearTimeout(timer);this.identityPromise=null;});
       }
       return this.identityPromise;
     }
@@ -139,13 +176,13 @@
         try{
           const identity=await this.identity(),{client,playerId}=identity;let accessToken=identity.accessToken,best;
           if(this.playerId!==playerId)throw new Error('identity-changed-during-submit');
-          const queued=this.queue(),orphans=queued.filter(item=>item.ownerId&&item.ownerId!==playerId);
+          const queueKey=this.outboxKey(),queued=this.queue(queueKey),orphans=queued.filter(item=>item.ownerId&&item.ownerId!==playerId);
           this.archiveOrphans(orphans);
           const own=queued.filter(item=>!item.ownerId||item.ownerId===playerId).sort((a,b)=>b.score-a.score);
-          this.saveQueue(own.length?[{...own[0],ownerId:playerId}]:[]);
+          this.saveQueue(own.length?[{...own[0],ownerId:playerId}]:[],queueKey);
           if(!own.length&&orphans.length){this.setStatus('identity_changed');return false;}
           for(let i=0;i<4;i++){
-            const item=this.pending();if(!item)break;
+            const item=this.queue(queueKey)[0];if(!item)break;
             if(this.playerId!==playerId||(item.ownerId&&item.ownerId!==playerId))throw new Error('identity-changed-during-submit');
             // Pin the exact anonymous session used to bind this outbox item.
             // A concurrent tab switching auth cannot relabel this request.
@@ -160,10 +197,10 @@
             if(error)throw error;
             if(!Number.isInteger(data?.best_score)||data.best_score<item.score||data.best_score>MAX_SCORE)throw new Error('invalid-acknowledgement');
             best=data.best_score;
-            this.saveQueue(this.queue().filter(queued=>queued.runId!==item.runId));
+            this.saveQueue(this.queue(queueKey).filter(queued=>queued.runId!==item.runId),queueKey);
           }
           if(this.pending()){this.setStatus('failed');return false;}
-          this.setStatus('synced',{bestScore:best});return true;
+          if(Number.isInteger(best))this.rememberBest(best);this.setStatus('synced',{bestScore:best});return true;
         }catch(error){this.lastError=error;this.setStatus('failed');return false;}
       })().finally(()=>{this.inflight=null;});return this.inflight;
     }
@@ -195,5 +232,5 @@
       return data;
     }
   }
-  return{LeaderboardClient,cleanNickname,validNickname,cleanWish,validWish,validResult,checkConfig,newRunId,REVISION,MAX_SCORE};
+  return{LeaderboardClient,cleanNickname,validNickname,cleanUsername,validUsername,validPassword,cleanWish,validWish,validResult,checkConfig,newRunId,REVISION,MAX_SCORE};
 });

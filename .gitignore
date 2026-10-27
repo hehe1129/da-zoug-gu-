@@ -1,3 +1,4 @@
 output/
 .playwright-cli/
 tests/leaderboard/node_modules/
+supabase/.temp/

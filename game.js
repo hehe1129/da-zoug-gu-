@@ -4,6 +4,7 @@
 const $ = id => document.getElementById(id);
 const canvas = $('board'), pen = canvas.getContext('2d');
 const feedbackCanvas=$('perfectFeedback'),feedbackPen=feedbackCanvas.getContext('2d');
+const rainBackCanvas=$('gameRainBack'),rainFrontCanvas=$('gameRainFront'),rainBackPen=rainBackCanvas.getContext('2d'),rainFrontPen=rainFrontCanvas.getContext('2d');
 let feedbackOffset={x:0,y:0},feedbackWidth=0,feedbackHeight=0,feedbackDirty=false;
 const names = {drum:'大鼓',gong:'小锣',cymbal:'铜钹',wood:'木鱼',suona:'唢呐'};
 const colors = ['#ffedbf','#fff0c9','#ffe9b3'];
@@ -112,7 +113,7 @@ async function loadGameAssets(retry=false){
     cancelAnimationFrame(loadFrame);textIfChanged($('loadingPercent'),'100%');$('loadingProgress').setAttribute('aria-valuenow','100');$('loadingProgress').firstElementChild.style.transform='scaleX(1)';
     textIfChanged($('loadingStatus'),'准备完成');$('loading').setAttribute('aria-busy','false');
     await new Promise(resolve=>setTimeout(resolve,reducedMotion?0:180));if(generation!==loadingGeneration)return;
-    $('loading').hidden=true;$('home').hidden=false;setState('home');if(!reducedMotion)restartAnimation($('home'),'entering');
+    $('loading').hidden=true;window.gameSession.showLogin();
   }catch(error){
     if(generation!==loadingGeneration)return;
     cancelAnimationFrame(loadFrame);$('loading').classList.add('load-error');$('loading').setAttribute('aria-busy','false');
@@ -139,6 +140,7 @@ function dimensions() {
   feedbackWidth=screen.width;feedbackHeight=screen.height;
   feedbackCanvas.width=Math.round(screen.width*d);feedbackCanvas.height=Math.round(screen.height*d);
   feedbackPen.setTransform(d,0,0,d,0,0);feedbackOffset={x:r.left-screen.left,y:r.top-screen.top};
+  for(const [surface,context] of [[rainBackCanvas,rainBackPen],[rainFrontCanvas,rainFrontPen]]){surface.width=Math.round(screen.width*d);surface.height=Math.round(screen.height*d);context.setTransform(d,0,0,d,0,0);}
   line = h * .81; tile = Math.max(68, Math.min(94,h*.17));
   paintScenery(Math.max(0,phase));
 }
@@ -344,6 +346,11 @@ function roundRect(x,y,width,height,radius,fill,stroke) {
   if(fill) { pen.fillStyle=fill; pen.fill(); } if(stroke) { pen.strokeStyle=stroke; pen.stroke(); }
 }
 function draw(t) {
+  for(const [context,layer] of [[rainBackPen,'back'],[rainFrontPen,'front']]){
+    context.clearRect(0,0,feedbackWidth,feedbackHeight);window.DazouguWeather?.drawFieldRain(context,t,feedbackWidth,feedbackHeight,phase,reducedMotion,layer);
+  }
+  // The fullscreen front layer must never obscure the judgement reference.
+  rainFrontPen.clearRect(feedbackOffset.x,feedbackOffset.y+line-1.5,w,3);
   // This separate pointer-transparent surface spans the whole game screen.
   // The field keeps clipping falling tiles, but never clips a perfect figure.
   const perfectEffects=effects.filter(e=>e.kind==='hit'&&e.perfect);
@@ -371,7 +378,7 @@ function draw(t) {
   const wash=pen.createLinearGradient(0,h*.26,w*.4,h);
   wash.addColorStop(0,'#e2d9aa00');wash.addColorStop(1,'#eddeb449');pen.fillStyle=wash;pen.fillRect(0,0,w,h);
   pen.drawImage(scenery,0,0,w,h);
-  window.DazouguWeather?.drawFieldRain(pen,t,w,h,phase,reducedMotion,'back');
+  pen.save();pen.translate(-feedbackOffset.x,-feedbackOffset.y);window.DazouguWeather?.drawFieldRain(pen,t,feedbackWidth,feedbackHeight,phase,reducedMotion,'back');pen.restore();
   // Misses tint only their lane, below the notes. The HUD banner remains unobstructed.
   for(const e of effects) {
     const age=t-e.at, strength=Math.max(0,1-age/(e.kind==='miss' ? .85 : .42));
@@ -435,7 +442,6 @@ function draw(t) {
     if(e.kind==='miss') { pen.fillStyle='#f24494'; pen.font='20px ClassicSong'; pen.textAlign='center'; pen.fillText('−1',x,line+36); }
     pen.globalAlpha=1;
   }
-  window.DazouguWeather?.drawFieldRain(pen,t,w,h,phase,reducedMotion,'front');
   // Always on top of rain, confetti and tiles; the timing reference stays clear.
   pen.fillStyle=t<damageUntil?'#f04e94':'#ffdc35'; pen.fillRect(0,line-1.5,w,3);
 }
@@ -493,6 +499,7 @@ function resetGame() {
   $('notice').textContent='跟着拍点来'; $('notice').dataset.kind='';
 }
 function start() {
+  if(!window.gameSession?.ready)return;
   if(['loading','transition','countdown','playing'].includes(state)) return;
   if(audio.status!=='ready'){audio.unlock(true);loadGameAssets(true);return;}
   if(window.onlineLeaderboard&&!window.onlineLeaderboard.nickname){audio.unlock();window.onlineLeaderboard.requestNickname(()=>{nicknameResizeUntil=performance.now()+800;start();});return;}
@@ -533,13 +540,22 @@ function home() {
   $('game').hidden=true; $('game').inert=false; $('paused').hidden=true; $('over').hidden=true; $('countdown').hidden=true;
   $('home').hidden=false; $('home').classList.remove('leaving'); if(!reducedMotion) restartAnimation($('home'),'entering'); $('start').focus({preventScroll:true});
 }
+window.enterGameCover=()=>{
+  $('login').hidden=true;$('home').hidden=false;$('game').hidden=true;$('game').inert=false;setState('home');
+  if(!reducedMotion)restartAnimation($('home'),'entering');
+};
+window.returnToLogin=()=>{
+  clearTimeout(transitionTimer);cancelAnimationFrame(raf);cancelAnimationFrame(resultFrame);stopAllSound();clearPointers();setState('login');
+  for(const id of ['home','game','paused','over','countdown'])$(id).hidden=true;
+  $('game').inert=false;$('home').inert=false;$('login').hidden=false;$('error').hidden=true;
+};
 function end(reason='三次失误',completed=false) {
   elapsed=now(); setState('over'); cancelAnimationFrame(raf); stopAllSound(); clearPointers();
   $('game').inert=true; $('over').hidden=false; $('countdown').hidden=true;
   $('over').querySelector('.result-eyebrow').textContent = completed ? '全曲完成 · 谢谢你的演奏' : `${reason} · 三次失误，演奏结束`;
   $('finalCombo').innerHTML=`${maxCombo}<small> COMBO</small>`; $('finalHits').innerHTML=`${hits}<small> 个</small>`;
   $('finalLevel').textContent=`LEVEL ${String(phase+1).padStart(2,'0')} / 06 · ${stages[Math.max(0,phase)].name} · 完美 ${perfects} 次`;
-  let best=0; try { best=Number(localStorage.getItem('dazougu-best-v1'))||0; if(score>best) localStorage.setItem('dazougu-best-v1',String(score)); } catch {}
+  const best=window.onlineLeaderboard?.getBestScore()||0;window.onlineLeaderboard?.rememberScore(score);
   $('bestLabel').textContent=score>best?'个人新纪录 · 好有鼓气！':`个人最佳 ${Math.max(best,score)} · 下场再响一点`;
   const started=performance.now(), target=score; cancelAnimationFrame(resultFrame);
   const count=()=>{ const p=reducedMotion?1:Math.min(1,(performance.now()-started)/700); $('finalScore').textContent=Math.round(target*(1-Math.pow(1-p,3))); if(p<1 && state==='over') resultFrame=requestAnimationFrame(count); };
@@ -641,7 +657,7 @@ window.addEventListener('resize',()=>{
 });
 // Trap focus in the active dialog and provide Escape as an optional desktop pause.
 document.addEventListener('keydown',e=>{
-  if(window.onlineLeaderboard?.hasDialog)return;
+  if(window.onlineLeaderboard?.hasDialog||window.gameSession?.hasDialog)return;
   if(e.key==='Escape') { if(state==='playing'||state==='countdown') pause(); else if(state==='paused') resume(); }
   if(e.key!=='Tab' || !['paused','over'].includes(state)) return;
   const buttons=Array.from($(state==='paused'?'paused':'over').querySelectorAll('button'));
