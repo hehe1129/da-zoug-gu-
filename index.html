@@ -702,8 +702,7 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 @font-face{font-family:ClassicSongNames;src:url('assets/fonts/names-v34/00ff.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+FF00-FFFF}/* Extend the approved Song / blue / drum-paper world to account and settings. */
 .account-screen,.settings-dialog{color:#114b91;font-family:ClassicSong,ClassicSongNames,SimSun,serif}
 .account-screen{background:#174f99;display:flex;align-items:flex-start;justify-content:center;padding:28px 23px;overflow:auto}
-.account-card{position:relative;width:100%;max-width:370px;margin:auto 0;flex-shrink:0;background:#fff8e7;border-radius:45% 45% 20px 20px / 17% 17% 20px 20px;padding:50px 28px 26px;box-shadow:0 12px 36px #082c6140;border:2px solid #e9c46f}
-.account-card:before{content:'';position:absolute;right:24px;top:67px;width:10px;height:10px;background:#f24494;border-radius:50%;box-shadow:-12px -22px 0 #f78bb8,-28px -39px 0 #fab3c9}
+.account-card{position:relative;width:100%;max-width:370px;margin:auto 0;flex-shrink:0;background:#fff8e7;border-radius:0;padding:50px 28px 26px;box-shadow:0 12px 36px #082c6140;border:2px solid #e9c46f}
 .account-card h1{font:36px/1.4 ClassicSong,SimSun,serif;margin:0 0 8px;text-align:center;color:#1154a3}
 .account-lead{margin:0 0 26px;text-align:center;font-size:15px;line-height:1.7;color:#376391}
 .account-tabs{display:flex;justify-content:center;gap:22px;margin-bottom:18px}
@@ -720,7 +719,7 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 #openSettings svg{display:block!important;visibility:visible;width:34px;height:34px;stroke:currentColor;fill:none}
 #coverAudioHint{display:none!important}
 .settings-dialog{position:absolute;inset:0;z-index:65;display:flex;align-items:center;justify-content:center;padding:24px;background:#061d39bd}
-.settings-card{width:100%;max-width:360px;max-height:94%;overflow:auto;background:#fff8e7;border:1px solid #d4bc88;border-radius:34px 34px 16px 16px;padding:24px;color:#134f98;box-shadow:0 14px 38px #041a3950}
+.settings-card{width:100%;max-width:360px;max-height:94%;overflow:auto;background:#fff8e7;border:1px solid #d4bc88;border-radius:0;padding:24px;color:#134f98;box-shadow:0 14px 38px #041a3950}
 .settings-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}.settings-heading h2{margin:0;font-size:28px;font-weight:400}
 .settings-close{min-width:44px;min-height:44px;background:transparent;color:#1554a0;font:17px ClassicSong,SimSun,serif}
 .settings-identity{font-size:14px;color:#41668c;margin:0 0 22px;overflow-wrap:anywhere}
@@ -737,7 +736,7 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 
 /* V36: the same ivory drum arch, pink rivets and Song type as the game panels. */
 .account-screen{background:#124d99;padding:30px 22px}
-.account-card{padding:58px 28px 27px;border:1px solid #e5c682;box-shadow:0 14px 36px #07295238;border-radius:47% 47% 18px 18px / 20% 20% 18px 18px}
+.account-card{padding:58px 28px 27px;border:1px solid #e5c682;box-shadow:0 14px 36px #07295238;border-radius:0}
 .account-card h1{font-size:43px;letter-spacing:3px;margin-bottom:7px}
 .account-lead{color:#315b88;margin-bottom:28px;letter-spacing:1px}
 .account-tabs{gap:0;border-bottom:1px solid #cbd4d9;margin-bottom:22px}
@@ -752,7 +751,7 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 .account-submit:hover,.name-save:hover{background:#10488e}.guest-login:hover{background:#f6ecd5}
 .account-submit:active,.guest-login:active,.name-save:active{transform:translateY(1px)}
 #openSettings{display:grid;place-items:center;right:4%;top:2%;width:52px;height:52px;opacity:1;visibility:visible;z-index:6}
-.settings-card{position:relative;border-radius:44% 44% 16px 16px / 12% 12% 16px 16px;padding:38px 26px 20px;border-color:#dfc185;box-shadow:0 16px 40px #031d3950}
+.settings-card{position:relative;border-radius:0;padding:38px 26px 20px;border-color:#dfc185;box-shadow:0 16px 40px #031d3950}
 .settings-heading{margin-bottom:4px}.settings-heading h2{font-size:32px;letter-spacing:3px}
 .settings-close{padding:0 0 0 12px;font-size:16px}
 .settings-identity{margin-bottom:24px;line-height:1.5;color:#3e658b}
@@ -766,6 +765,24 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 .settings-card .name-save{font-size:18px}.settings-message{min-height:22px;margin:10px 0 4px}
 .logout-button{border-top:1px solid #cfcec0;margin-top:8px;padding-top:15px;min-height:48px;font-size:17px}
 @media(max-height:680px){.account-screen{padding:12px 20px}.account-card{padding:35px 23px 20px}.account-card h1{font-size:35px}.account-lead{margin-bottom:15px}.account-tabs{margin-bottom:14px}.account-card label{margin-bottom:12px}.account-error{min-height:24px}.settings-card{padding:26px 24px 16px}.settings-identity{margin-bottom:15px}.settings-card label{margin-bottom:11px}#settingsNameForm{padding-top:14px}.settings-message{min-height:20px;margin:6px 0 0}}
+
+/* V37: reference-led vertical layout on flat, rectangular surfaces. */
+.account-card{padding:34px 26px 22px;border-radius:0}
+.account-logo{display:block;width:72px;height:72px;object-fit:cover;margin:0 auto 15px;border-radius:12px}
+.account-card h1{font-size:34px;letter-spacing:3px;margin-bottom:8px}
+.account-lead{margin-bottom:33px;font-size:14px}
+.account-card .account-field{position:relative;margin:0 0 18px}
+.account-field svg{position:absolute;left:17px;top:15px;width:20px;height:20px;fill:none;stroke:#527591;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.account-card .account-field input{margin:0;border:1px solid #ccd5d9;border-radius:25px;height:50px;padding:12px 18px 12px 48px;background:#fffdf8;font-size:17px}
+.account-card .account-field input::placeholder{font-size:15px;color:#52708c}
+.account-error{min-height:32px;margin:0 3px 15px}
+.account-submit{border-radius:25px;min-height:50px;font-size:20px}
+.account-tabs{margin:16px 0 0;border:0;min-height:44px;gap:0}
+.account-tabs button{flex:0 1 auto;min-height:44px;border:0;padding:9px 18px;font-size:17px;color:#315b88}
+.account-tabs button[aria-selected="true"]{display:none}
+.guest-login{border:0;background:transparent;border-radius:0;font-size:17px;min-height:44px;margin:0;padding:8px;color:#164f99;letter-spacing:1px}
+.settings-card{border-radius:0;padding-top:26px}
+@media(max-height:680px){.account-card{padding:22px 23px 16px}.account-logo{width:56px;height:56px;margin-bottom:10px}.account-card h1{font-size:30px}.account-lead{margin-bottom:23px}.account-card .account-field{margin-bottom:14px}.account-error{min-height:24px;margin-bottom:9px}.account-tabs{margin-top:9px}.settings-card{padding-top:22px}}
 </style>
   <!-- styles:end -->
   <link rel="preload" href="assets/cover-painting-v19.webp" as="image" fetchpriority="high">
@@ -784,9 +801,9 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
   <main id="app" data-state="loading" data-level="1">
     <section id="loading" class="screen loading-screen" aria-label="游戏资源加载" aria-busy="true"><h1 class="loading-mark">大奏鼓</h1><h2>正在准备演奏</h2><strong id="loadingPercent">0%</strong><div id="loadingProgress" class="load-track" role="progressbar" aria-label="资源加载进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div><p id="loadingStatus" role="status">正在载入游戏</p><button id="loadRetry" class="load-retry" hidden onclick="window.retryGameLoad?window.retryGameLoad():location.reload()">重新载入</button></section>
     <section id="login" hidden class="screen account-screen" aria-label="登录大奏鼓">
-      <div class="account-card"><h1>大奏鼓</h1><p class="account-lead">登记雅称，再赴鼓乐。</p>
-        <div class="account-tabs" role="tablist" aria-label="登录或注册"><button id="loginTab" type="button" role="tab" aria-selected="true" aria-controls="accountForm">账号登录</button><button id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="accountForm">注册</button></div>
-        <form id="accountForm"><label>用户名<input id="accountUsername" type="text" name="username" autocomplete="username" minlength="2" maxlength="12" required placeholder="2–12字，中英文、数字或下划线"></label><label>六位数字密码<input id="accountPassword" type="password" name="password" inputmode="numeric" autocomplete="current-password" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="请输入6位数字"></label><label id="confirmPasswordRow" hidden>确认密码<input id="accountConfirm" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="再次输入密码"></label><p id="accountError" class="account-error" role="status" aria-live="polite"></p><button id="accountSubmit" class="account-submit" type="submit">登录登台</button></form>
+      <div class="account-card"><img class="account-logo" src="assets/game-icon-v27.png" width="72" height="72" alt=""><h1>一鼓作祈</h1><p class="account-lead">登记雅称，再赴鼓乐。</p>
+        <form id="accountForm"><label class="account-field"><span class="sr-only">用户名</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg><input id="accountUsername" type="text" name="username" autocomplete="username" minlength="2" maxlength="12" required placeholder="用户名（2–12字）"></label><label class="account-field"><span class="sr-only">六位数字密码</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg><input id="accountPassword" type="password" name="password" inputmode="numeric" autocomplete="current-password" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="六位数字密码"></label><label id="confirmPasswordRow" class="account-field" hidden><span class="sr-only">确认密码</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg><input id="accountConfirm" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="再次输入密码"></label><p id="accountError" class="account-error" role="status" aria-live="polite"></p><button id="accountSubmit" class="account-submit" type="submit">登录登台</button></form>
+        <div class="account-tabs" role="tablist" aria-label="登录或注册"><button id="loginTab" type="button" role="tab" aria-selected="true" aria-controls="accountForm">返回登录</button><button id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="accountForm">注册账号</button></div>
         <button id="guestLogin" class="guest-login" type="button">游客登台</button>
       </div>
     </section>
