@@ -1,0 +1,47 @@
+#openAr {
+  position:absolute; z-index:6; top:calc(12% + 56px); right:5%;
+  width:47px; height:47px; display:grid; place-items:center; padding:0;
+  color:#fff8e7; background:#1556a5; border:0; border-radius:50%;
+}
+#openAr svg, #arClose svg {
+  width:29px; height:29px; fill:none; stroke:currentColor;
+  stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+}
+#openAr:focus-visible, #arDialog button:focus-visible {
+  outline:2px solid #f6ca6b; outline-offset:3px;
+}
+#arDialog {
+  position:fixed; box-sizing:border-box; inset:0; margin:auto;
+  width:min(100%, 670px); height:100%; height:100dvh;
+  max-width:100%; max-height:100%; padding:0; border:0;
+  overflow:hidden; color:#fff8e7; background:#0e376e;
+  font-family:ClassicSong, SimSun, serif;
+}
+#arDialog::backdrop { background:#081a33e6; }
+.ar-view, #arCamera { position:absolute; inset:0; width:100%; height:100%; }
+#arCamera { object-fit:cover; background:#102e55; }
+#arFigure { position:absolute; top:0; left:0; transform-origin:0 0; max-width:none; pointer-events:none; }
+.ar-header, .ar-footer { position:absolute; right:0; left:0; padding:14px 20px; }
+.ar-header {
+  top:0; padding-top:max(12px,env(safe-area-inset-top)); display:flex;
+  align-items:center; justify-content:space-between; background:#0a244ccc;
+}
+.ar-header h2 { margin:0; font-size:22px; font-weight:normal; }
+#arClose { display:grid; place-items:center; width:44px; height:44px; padding:0; }
+#arClose, #arStart { border:0; color:#fff8e7; background:#1556a5; }
+.ar-footer {
+  bottom:0; padding-bottom:max(22px,env(safe-area-inset-bottom));
+  text-align:center; background:#0a244cde;
+}
+.ar-footer p { margin:4px 0 9px; font-size:17px; line-height:1.5; }
+#arStart { min-height:46px; padding:8px 30px; font:inherit; border:1px solid #a5c4e9; }
+#arStart:disabled { opacity:.6; }
+.ar-guides { position:absolute; inset:22% 16%; pointer-events:none; }
+.ar-guides i { position:absolute; width:28px; height:28px; border:0 solid #fff8e7b3; }
+.ar-guides i:nth-child(1) { top:0; left:0; border-width:2px 0 0 2px; border-radius:9px 0 0 0; }
+.ar-guides i:nth-child(2) { top:0; right:0; border-width:2px 2px 0 0; border-radius:0 9px 0 0; }
+.ar-guides i:nth-child(3) { bottom:0; left:0; border-width:0 0 2px 2px; border-radius:0 0 0 9px; }
+.ar-guides i:nth-child(4) { bottom:0; right:0; border-width:0 2px 2px 0; border-radius:0 0 9px 0; }
+@media(max-height:650px) {
+  #openAr { top:calc(12% + 47px); width:44px; height:44px; right:calc(5% - 2px); }
+}

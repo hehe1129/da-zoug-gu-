@@ -126,9 +126,10 @@ function syncWeatherAudio() {
   const cover=state==='home'||state==='transition';
   const weather=window.DazouguWeather?.forLevel(phase+1);
   const visible=['playing','countdown','paused','over'].includes(state);
-  const type=document.hidden?null:cover?'light':visible?weather?.sound:null;
+  const type=document.hidden||$('arDialog')?.open?null:cover?'light':visible?weather?.sound:null;
   audio.setRain(type,cover,cover?.48:weather?.gain??0);
 }
+window.addEventListener('dazougu-ar-change',syncWeatherAudio);
 function setState(value) { state = value; $('app').dataset.state = value; syncWeatherAudio();if(value==='home'&&!audio.muted)audio.unlock(); }
 function now() { return state === 'playing' ? audio.gameTime() ?? (performance.now() - startClock) / 1000 : elapsed; }
 function restartAnimation(el, className) { el.classList.remove(className); void el.offsetWidth; el.classList.add(className); }
@@ -499,6 +500,7 @@ function resetGame() {
   $('notice').textContent='跟着拍点来'; $('notice').dataset.kind='';
 }
 function start() {
+  if($('arDialog')?.open)return;
   if(!window.gameSession?.ready)return;
   if(['loading','transition','countdown','playing'].includes(state)) return;
   if(audio.status!=='ready'){audio.unlock(true);loadGameAssets(true);return;}
@@ -545,6 +547,7 @@ window.enterGameCover=()=>{
   if(!reducedMotion)restartAnimation($('home'),'entering');
 };
 window.returnToLogin=()=>{
+  window.dispatchEvent(new Event('dazougu-login'));
   clearTimeout(transitionTimer);cancelAnimationFrame(raf);cancelAnimationFrame(resultFrame);stopAllSound();clearPointers();setState('login');
   for(const id of ['home','game','paused','over','countdown'])$(id).hidden=true;
   $('game').inert=false;$('home').inert=false;$('login').hidden=false;$('error').hidden=true;
@@ -657,7 +660,7 @@ window.addEventListener('resize',()=>{
 });
 // Trap focus in the active dialog and provide Escape as an optional desktop pause.
 document.addEventListener('keydown',e=>{
-  if(window.onlineLeaderboard?.hasDialog||window.gameSession?.hasDialog)return;
+  if($('arDialog')?.open||window.onlineLeaderboard?.hasDialog||window.gameSession?.hasDialog)return;
   if(e.key==='Escape') { if(state==='playing'||state==='countdown') pause(); else if(state==='paused') resume(); }
   if(e.key!=='Tab' || !['paused','over'].includes(state)) return;
   const buttons=Array.from($(state==='paused'?'paused':'over').querySelectorAll('button'));

@@ -785,8 +785,10 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
 @media(max-height:680px){.account-card{padding:22px 23px 16px}.account-logo{width:56px;height:56px;margin-bottom:10px}.account-card h1{font-size:30px}.account-lead{margin-bottom:23px}.account-card .account-field{margin-bottom:14px}.account-error{min-height:24px;margin-bottom:9px}.account-tabs{margin-top:9px}.settings-card{padding-top:22px}}
 </style>
   <!-- styles:end -->
+  <link rel="stylesheet" href="ar.css?v=1">
+  <script src="ar.js?v=1" defer></script>
   <link rel="preload" href="assets/cover-painting-v19.webp" as="image" fetchpriority="high">
-  <script src="icons.js?v=22" defer></script><script src="perfect-art-v22.js?v=22" defer></script><script src="score.js?v=25" defer></script><script src="audio.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard-config.js?v=26" defer></script><script data-optional="leaderboard" src="leaderboard-client.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard.js?v=35" defer></script><script src="weather.js?v=36" defer></script><script src="accounts.js?v=35" defer></script><script src="game.js?v=35" defer></script>
+  <script src="icons.js?v=22" defer></script><script src="perfect-art-v22.js?v=22" defer></script><script src="score.js?v=25" defer></script><script src="audio.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard-config.js?v=26" defer></script><script data-optional="leaderboard" src="leaderboard-client.js?v=35" defer></script><script data-optional="leaderboard" src="leaderboard.js?v=35" defer></script><script src="weather.js?v=36" defer></script><script src="accounts.js?v=35" defer></script><script src="game.js?v=38" defer></script>
   <script>
     // A slow or failed script must leave a visible cover and a usable retry.
     window.startupWait=function(failed){var loading=document.getElementById('loading');if(loading&&!loading.hidden){document.getElementById('loadingStatus').textContent=failed?'游戏未能载入，请重试':'游戏正在载入，请稍候';document.getElementById('loadRetry').hidden=!failed;return;}var box=document.getElementById('startup');if(!box)return;box.hidden=false;box.querySelector('span').textContent=failed?'载入遇到问题，请重试':'游戏正在载入，请稍后再点一次';box.querySelector('button').hidden=false;};
@@ -808,6 +810,11 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
       </div>
     </section>
     <section id="home" hidden class="screen home-screen" aria-label="游戏首页">
+      <button id="openAr" type="button" aria-label="AR 扫描" aria-haspopup="dialog">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M5 12V8a3 3 0 0 1 3-3h4m8 0h4a3 3 0 0 1 3 3v4m0 8v4a3 3 0 0 1-3 3h-4m-8 0H8a3 3 0 0 1-3-3v-4M5 16h22"/>
+        </svg>
+      </button>
       <button id="homeLeaderboard" class="community-entry home-rank" type="button">鼓气榜</button><header class="cover-header"><div class="cover-brand"><h1 aria-label="大奏鼓"><span>大</span><span>奏</span><span>鼓</span></h1></div><button id="openSettings" class="icon-button" type="button" aria-label="设置"><svg viewBox="0 0 32 32" aria-hidden="true" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m13 3 6 0 1 4 3 2 4-1 3 5-3 3 0 3 3 3-3 5-4-1-3 2-1 4-6 0-1-4-3-2-4 1-3-5 3-3 0-3-3-3 3-5 4 1 3-2Z" transform="translate(0 -1) scale(.94)"/><circle cx="16" cy="16" r="4.5"/></svg></button></header><button id="coverAudioHint" class="cover-audio-hint" type="button" hidden>轻触听雨</button>
       <div class="cover-rain cover-rain-back" aria-hidden="true"></div><div class="cover-foreground" aria-hidden="true"></div><div class="cover-rain cover-rain-front" aria-hidden="true"></div><div class="cover-painting" aria-hidden="true"></div><div class="cover-drum" aria-hidden="true"></div><span class="cover-side" aria-hidden="true">WENLING · DA ZOU GU</span><div class="cover-scene" aria-hidden="true">
         <span class="scene-dot dot-yellow"></span><span class="scene-dot dot-pink"></span>
@@ -861,6 +868,23 @@ html,body,body *,button,input,select,textarea,#app,#app *{font-family:ClassicSon
     </section>
     <p id="startup" class="audio-message" role="status" hidden><span></span> <button type="button" onclick="location.reload()" hidden>重新载入</button></p>
     <section id="settingsDialog" class="settings-dialog" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="settings-card"><div class="settings-heading"><h2 id="settingsTitle">设置</h2><button id="settingsClose" class="settings-close" type="button">完成</button></div><p id="settingsIdentity" class="settings-identity"></p><label><span class="volume-heading">游戏音量<output id="gameVolumeLabel" for="gameVolume">100%</output></span><input id="gameVolume" type="range" min="0" max="100" value="100" aria-label="游戏音量"></label><label><span class="volume-heading">雨声音量<output id="rainVolumeLabel" for="rainVolume">100%</output></span><input id="rainVolume" type="range" min="0" max="100" value="100" aria-label="雨声音量"></label><form id="settingsNameForm"><label>显示名称<input id="settingsName" type="text" maxlength="24" autocomplete="nickname" required></label><button id="saveSettingsName" class="name-save" type="submit">保存名称</button></form><p id="settingsMessage" class="settings-message" role="status"></p><button id="logout" class="logout-button" type="button">退出登录</button></div></section>
+    <dialog id="arDialog" aria-labelledby="arTitle" data-camera="off">
+      <div class="ar-view">
+        <video id="arCamera" muted playsinline aria-hidden="true"></video>
+        <img id="arFigure" alt="" hidden>
+        <div class="ar-guides" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <header class="ar-header">
+        <h2 id="arTitle">祈福牌 AR</h2>
+        <button id="arClose" type="button" aria-label="关闭 AR" autofocus>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <div class="ar-footer">
+        <p id="arStatus" role="status">将镜头对准祈福牌</p>
+        <button id="arStart" type="button">开启相机</button>
+      </div>
+    </dialog>
     <p id="error" class="audio-message" role="status" hidden></p>
   </main>
 </body>
