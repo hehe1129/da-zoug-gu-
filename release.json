@@ -1,1 +1,1 @@
-{"version":"V38","baseCommit":"abf2cbc","releaseDate":"2026-11-17","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"新增祈福牌 AR 扫描入口、五款图案识别与静态角色锚定；关闭后释放相机并返回封面","status":"release"}
+{"version":"V39","baseCommit":"1dcc84a","releaseDate":"2026-11-17","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"拓宽祈福牌首次斜拍识别角度，增加印刷特征连续追踪，固定角色倾角和脚部锚点，首页三个入口等距对齐","status":"release"}

@@ -10,7 +10,7 @@
   const pen = sample.getContext('2d',{willReadFrequently:true});
   const root = new URL('assets/ar/',document.baseURI);
   let stream, worker, timer, watchdog, generation=0, prepared;
-  const lostAfter=420;
+  const lostAfter=300;
 
   function loadImage(path) {
     return new Promise((resolve,reject)=>{
@@ -30,7 +30,7 @@
     finally {clearTimeout(timeout);}
     if (!reply.ok) throw new Error('targets');
     const manifest=await reply.json();
-    const {spriteQuad,spriteTransform}=await import('./ar-pose.js?v=1');
+    const {spriteQuad,spriteTransform}=await import('./ar-pose.js?v=2');
     const entries=await Promise.all(manifest.map(async target=>{
       const [reference,art]=await Promise.all([loadImage(target.image),loadImage(target.sprite.image)]);
       const surface=document.createElement('canvas');
@@ -67,10 +67,10 @@
 
   function scan(assets,id) {
     const {entries,spriteQuad,spriteTransform}=assets;
-    const currentWorker=new Worker('ar-worker.js?v=1');
+    const currentWorker=new Worker('ar-worker.js?v=2');
     worker=currentWorker;
     let ready=false, waiting=false, deadline=0, lastSeen=-Infinity, pendingId, hits=0;
-    let activeId, displayed, drawQuad;
+    let activeId, displayed, drawQuad, lastVideoTime=-1;
     currentWorker.onerror=()=> {
       if(id===generation) fail('识别加载失败，请重试');
     };
@@ -78,13 +78,18 @@
       const target=entries.find(entry=>entry.id===hit.id);
       const width=figure.parentElement.clientWidth, height=figure.parentElement.clientHeight;
       const scale=Math.max(width/sample.width,height/sample.height);
+      const screen=([x,y])=>[x*scale+(width-sample.width*scale)/2,y*scale+(height-sample.height*scale)/2];
       const quad=spriteQuad(hit,target,sample.width,sample.height,target.art.width,target.art.height)
-        .map(p=>p && [p[0]*scale+(width-sample.width*scale)/2,p[1]*scale+(height-sample.height*scale)/2]);
+        .map(p=>p && screen(p));
       if(quad.some(p=>!p)) return;
-      if(activeId===hit.kind && drawQuad && Math.hypot(...quad[2].map((v,i)=>v-drawQuad[2][i]))<65) {
+      if(activeId===hit.id && drawQuad && Math.hypot(...quad[2].map((v,i)=>v-drawQuad[2][i]))<65) {
         drawQuad=quad.map((p,j)=>p.map((v,k)=>.28*drawQuad[j][k]+.72*v));
       } else drawQuad=quad;
-      const transform=spriteTransform(drawQuad,target.art.width,target.art.height);
+      const [x,y]=target.targetAnchor.map((v,i)=>v+target.sprite.offset[i]);
+      const [a,b,c,d,e,f,g,h,i]=hit.h;
+      const z=g*x+h*y+i;
+      const pin={sprite:target.sprite.anchor,screen:screen([(a*x+b*y+c)/z,(d*x+e*y+f)/z])};
+      const transform=spriteTransform(drawQuad,target.art.width,target.art.height,pin);
       if(!transform) return;
       if(displayed!==hit.kind){
         figure.src=target.art.src;
@@ -95,7 +100,7 @@
       }
       figure.style.transform=transform;
       figure.hidden=false;
-      activeId=hit.kind;
+      activeId=hit.id;
       lastSeen=performance.now();
     }
     currentWorker.onmessage=({data})=>{
@@ -105,7 +110,7 @@
       if(!data.hit){pendingId=undefined;hits=0;return;}
       if(pendingId===data.hit.kind) hits++;
       else {pendingId=data.hit.kind;hits=1;}
-      if(data.hit.kind===activeId || hits>=2) render(data.hit);
+      if(data.hit.id===activeId || hits>=2) render(data.hit);
     };
     currentWorker.postMessage({targets:entries.map(({id,kind,mask,frame})=>({id,kind,mask,frame}))});
     const readyBy=performance.now()+8000;
@@ -117,6 +122,8 @@
         return;
       }
       if(!ready || waiting || video.readyState<2 || !video.videoWidth) return;
+      if(video.currentTime===lastVideoTime) return;
+      lastVideoTime=video.currentTime;
       const ratio=Math.min(1,640/Math.max(video.videoWidth,video.videoHeight));
       const width=Math.round(video.videoWidth*ratio),height=Math.round(video.videoHeight*ratio);
       if(sample.width!==width || sample.height!==height){
@@ -128,7 +135,7 @@
       waiting=true;
       deadline=now+3500;
       currentWorker.postMessage({frame},[frame.data.buffer]);
-    },105);
+    },45);
   }
 
   startCamera.onclick=async()=>{

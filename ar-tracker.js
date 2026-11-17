@@ -59,6 +59,37 @@
     }
     return result;
   }
+  function obliqueView(frame, mask, axis, angle) {
+    const {width,height,data}=frame;
+    const cx=width/2, cy=height/2, focal=Math.max(width,height)*1.15;
+    const f=Math.cos(angle), s=Math.sin(angle);
+    const mapped=([x,y])=>{
+      const dx=x-cx, dy=y-cy;
+      const z=1+(axis==='x'?dx:dy)*s/focal;
+      return [cx+(axis==='x'?f*dx:dx)/z,cy+(axis==='y'?f*dy:dy)/z];
+    };
+    const unmap=(x,y)=>{
+      const dx=x-cx,dy=y-cy, along=axis==='x'?dx:dy;
+      const original=along/(f-along*s/focal);
+      const z=1+original*s/focal;
+      return [cx+(axis==='x'?original:dx*z),cy+(axis==='y'?original:dy*z)];
+    };
+    const warped=new Uint8ClampedArray(data.length);
+    for(let y=0;y<height;y++) for(let x=0;x<width;x++){
+      const [sx,sy]=unmap(x,y);
+      const ix=Math.floor(sx),iy=Math.floor(sy);
+      if(ix<0 || iy<0 || ix>=width-1 || iy>=height-1) continue;
+      const dx=sx-ix,dy=sy-iy,i=(iy*width+ix)*4,o=(y*width+x)*4;
+      for(let c=0;c<3;c++){
+        warped[o+c]=(1-dy)*((1-dx)*data[i+c]+dx*data[i+c+4])+
+          dy*((1-dx)*data[i+c+width*4]+dx*data[i+c+width*4+4]);
+      }
+    }
+    return features({width,height,data:warped},[1,.76],75,mask.map(mapped)).map(p=>{
+      const [x,y]=unmap(p.x,p.y);
+      return {x,y,bits:p.bits};
+    });
+  }
   function distance(a,b) {
     let n=0;
     for(let i=0;i<8;i++){
@@ -70,17 +101,58 @@
     return n;
   }
   function prepare(targets) {
-    return targets.map(({id,kind,frame,mask})=>({
-      id,kind,width:frame.width,height:frame.height,
-      points:features(frame,[1,.79,.62,.49],140,mask)
-    }));
+    return targets.map(({id,kind,frame,mask})=>{
+      const tilted=[];
+      for(const axis of ['x','y']) for(const angle of [-1.02,-.67,.67,1.02]){
+        tilted.push(...obliqueView(frame,mask,axis,angle));
+      }
+      return {id,kind,width:frame.width,height:frame.height,mask,tilted,
+        points:features(frame,[1,.79,.62,.49],140,mask)};
+    });
   }
-  function match(frame, targets) {
-    const scene=features(frame,[1,.79,.62],300);
+  function fit(target,pairs,{minimum=9,ratio=.32,error=3.5,coherent=false}={}) {
+    if(pairs.length<minimum) return null;
+    const model=new cv.matrix_t(3,3,cv.F32_t|cv.C1_t);
+    const inliers=new cv.matrix_t(pairs.length,1,type);
+    const kernel=new cv.motion_model.homography2d();
+    const params=new cv.ransac_params_t(4,error,.52,.9995);
+    const from=pairs.map(p=>p.a),to=pairs.map(p=>p.b);
+    let good=[];
+    if(coherent && kernel.run(from,to,model,pairs.length)){
+      good=pairs.filter(({a,b})=>{
+        const [x,y]=project(model.data,a.x,a.y);
+        return Math.hypot(x-b.x,y-b.y)<error;
+      });
+    }
+    if(good.length<Math.max(minimum,ratio*pairs.length)){
+      if(!cv.motion_estimator.ransac(params,kernel,from,to,pairs.length,model,inliers,520)) return null;
+      good=pairs.filter((_,i)=>inliers.data[i]);
+    }
+    if(good.length<minimum || good.length<ratio*pairs.length) return null;
+    const xs=good.map(p=>p.a.x),ys=good.map(p=>p.a.y);
+    if(Math.max(...xs)-Math.min(...xs)<target.width*.22 ||
+       Math.max(...ys)-Math.min(...ys)<target.height*.35) return null;
+    if(!kernel.run(good.map(p=>p.a),good.map(p=>p.b),model,good.length)) return null;
+    const h=Array.from(model.data.slice(0,9));
+    const bounds=[[0,0],[target.width,0],[target.width,target.height],[0,target.height]];
+    if(bounds.some(([x,y])=>h[6]*x+h[7]*y+h[8]<.12)) return null;
+    const quad=bounds.map(([x,y])=>project(h,x,y));
+    const valid=quad.every(([x,y],i)=>{
+      const [bx,by]=quad[(i+1)%4], [cx,cy]=quad[(i+2)%4];
+      return Number.isFinite(x+y) && (bx-x)*(cy-by)-(by-y)*(cx-bx)>160;
+    });
+    const meanError=good.reduce((sum,{a,b})=>{
+      const [x,y]=project(h,a.x,a.y);
+      return sum+Math.hypot(x-b.x,y-b.y);
+    },0)/good.length;
+    return valid && meanError<error*.92 ?
+      {id:target.id,kind:target.kind,h,quad,inliers:good.length,meanError,pairs:good} : null;
+  }
+  function identify(scene, targets, bank) {
     const candidates=[];
     for(const target of targets){
       const proposals=[];
-      for(const a of target.points){
+      for(const a of target[bank]){
         let first=null, second=null, best=256, next=256;
         for(const b of scene){
           const d=distance(a.bits,b.bits);
@@ -102,31 +174,8 @@
                           Math.hypot(p.a.x-q.a.x,p.a.y-q.a.y)<5)) pairs.push(p);
         if(pairs.length>=100) break;
       }
-      if(pairs.length<9) continue;
-      const model=new cv.matrix_t(3,3,cv.F32_t|cv.C1_t);
-      const inliers=new cv.matrix_t(pairs.length,1,type);
-      const kernel=new cv.motion_model.homography2d();
-      const params=new cv.ransac_params_t(4,3.5,.52,.9995);
-      if(!cv.motion_estimator.ransac(params,kernel,pairs.map(p=>p.a),pairs.map(p=>p.b),pairs.length,model,inliers,650)) continue;
-      const good=pairs.filter((_,i)=>inliers.data[i]);
-      if(good.length<9 || good.length<.32*pairs.length) continue;
-      const xs=good.map(p=>p.a.x),ys=good.map(p=>p.a.y);
-      if(Math.max(...xs)-Math.min(...xs)<target.width*.22 ||
-         Math.max(...ys)-Math.min(...ys)<target.height*.35) continue;
-      if(!kernel.run(good.map(p=>p.a),good.map(p=>p.b),model,good.length)) continue;
-      const h=Array.from(model.data.slice(0,9));
-      const corners=[[0,0],[target.width,0],[target.width,target.height],[0,target.height]];
-      if(corners.some(([x,y])=>h[6]*x+h[7]*y+h[8]<.12)) continue;
-      const quad=corners.map(([x,y])=>project(h,x,y));
-      const valid=quad.every(([x,y],i)=>{
-        const [bx,by]=quad[(i+1)%4], [cx,cy]=quad[(i+2)%4];
-        return Number.isFinite(x+y) && (bx-x)*(cy-by)-(by-y)*(cx-bx)>160;
-      });
-      const meanError=good.reduce((sum,{a,b})=>{
-        const [x,y]=project(h,a.x,a.y);
-        return sum+Math.hypot(x-b.x,y-b.y);
-      },0)/good.length;
-      if(valid && meanError<3.2) candidates.push({id:target.id,kind:target.kind,h,quad,inliers:good.length,meanError});
+      const hit=fit(target,pairs);
+      if(hit) candidates.push(hit);
     }
     candidates.sort((a,b)=>b.inliers-a.inliers || a.meanError-b.meanError);
     const [best]=candidates;
@@ -134,7 +183,18 @@
     const other=candidates.find(c=>c.kind!==best.kind);
     return !other || best.inliers>=other.inliers+3 ? best : null;
   }
-  const api={prepare,match,project};
+  function match(frame, targets) {
+    const scene=features(frame,[1,.79,.62],300);
+    const frontal=identify(scene,targets,'points');
+    if(frontal?.inliers>=19) return frontal;
+    const tilted=identify(scene,targets,'tilted');
+    if(!frontal || frontal.kind===tilted?.kind) {
+      return (tilted?.inliers || 0)>(frontal?.inliers || 0) ? tilted : frontal;
+    }
+    return !tilted || frontal.inliers>=tilted.inliers+4 ? frontal :
+      tilted.inliers>=frontal.inliers+4 ? tilted : null;
+  }
+  const api={prepare,match,project,fit,inside,features,cv};
   if(typeof module==='object') module.exports=api;
   else root.ArTracker=api;
 })(typeof self==='object' ? self : globalThis);
