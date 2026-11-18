@@ -10,7 +10,7 @@ Deno.serve(async(req:Request)=>{
  if(origins.has(origin))headers['Access-Control-Allow-Origin']=origin;
  const reply=(status:number,data:unknown)=>new Response(JSON.stringify(data),{status,headers});
  if(origin&&!origins.has(origin))return reply(403,{code:'origin_denied'});
- if(req.method==='OPTIONS')return new Response(null,{status:204,headers});
+ if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Max-Age':'600'}});
  if(req.method!=='POST')return reply(405,{code:'method_not_allowed'});
  try{
   if(Number(req.headers.get('content-length')||0)>2048)return reply(413,{code:'too_large'});
@@ -45,7 +45,13 @@ Deno.serve(async(req:Request)=>{
    account=found.data;if(!account){await new Promise(r=>setTimeout(r,150));return reply(401,{code:'invalid_credentials'});}
   }
   const auth=createClient(url,publicKey,options),signed=await auth.auth.signInWithPassword({email:account.auth_email,password});
-  if(signed.error||!signed.data.session)return reply(401,{code:'invalid_credentials'});
-  return reply(200,{session:signed.data.session});
+  if(signed.error?.code==='invalid_credentials')return reply(401,{code:'invalid_credentials'});
+  if(signed.error?.status===429)return reply(429,{code:'too_many_attempts'});
+  if(signed.error||!signed.data.session)return reply(503,{code:'temporarily_unavailable'});
+  const session=signed.data.session;
+  // Fetch the private profile in the same region, as the signed-in player.
+  let profile=null;
+  try{const result=await auth.rpc('dzg_account_profile').abortSignal(AbortSignal.timeout(1800));if(!result.error)profile=result.data;}catch{}
+  return reply(200,{session,profile});
  }catch{return reply(503,{code:'temporarily_unavailable'});}
 });

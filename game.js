@@ -562,6 +562,9 @@ function home() {
 window.enterGameCover=()=>{
   $('login').hidden=true;$('home').hidden=false;$('game').hidden=true;$('game').inert=false;setState('home');
   if(!reducedMotion)restartAnimation($('home'),'entering');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    if(state==='home')prepareRound().catch(()=>{}); // Round start handles resource errors.
+  }));
 };
 window.returnToLogin=()=>{
   hideRoundLoading();
@@ -657,7 +660,7 @@ audio.onError=()=>{clearTimeout(messageTimer);$('error').textContent='音频暂�
 audio.onReady=()=>{ if(audio.status==='ready')$('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
 audio.onInterrupted=()=>pause();
 function recoverPageAudio(){
-  if(document.hidden)return;
+  if(document.hidden||state==='loading'||state==='login')return;
   audio.recoverOutput();syncWeatherAudio();soundButtons();
 }
 document.addEventListener('visibilitychange',()=>{
@@ -687,10 +690,6 @@ document.addEventListener('keydown',e=>{
 });
 hud(); soundButtons();
 
-// Let the login paint before queuing the heavier round preparation.
 window.gameReady=true;window.dispatchEvent(new Event('game-ready'));
 window.gameSession.showLogin();
 $('loadBack').onclick=home;
-requestAnimationFrame(()=>requestAnimationFrame(()=>{
-  prepareRound().catch(()=>{}); // Report failures only when the user starts a round.
-}));

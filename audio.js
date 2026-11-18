@@ -113,9 +113,9 @@ class RhythmAudio {
     this.unlocking=false;this.needsWake=false;const first=!this.outputReady;this.outputReady=true;
     if(first)this.onReady?.();this.onActivationChange?.();
   }
-  unlock(retry=false) {
+  unlock(retry=false,prepareAssets=true) {
     try {
-      this.setup();this.prepare(retry);
+      this.setup();if(prepareAssets)this.prepare(retry);
       // Declare one music-playback session where the browser supports it.
       // Do this only inside real activation, never on the initial page load.
       try{const nav=window.navigator;if(nav?.userActivation?.isActive&&nav.audioSession&&nav.audioSession.type!=='playback')nav.audioSession.type='playback';}catch{}

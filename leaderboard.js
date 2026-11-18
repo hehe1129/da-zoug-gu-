@@ -43,7 +43,7 @@
     })().finally(()=>rankRequests.delete(key));rankRequests.set(key,task);return task;
   }
   function prefetchRank(){
-    if(!client.config.ready)return Promise.resolve(null);
+    if(!client.config.ready||['loading','login'].includes(app.dataset.state))return Promise.resolve(null);
     const cached=rankCache.get(1);if(cached&&Date.now()-cached.at<freshFor&&cached.owner===client.playerId)return Promise.resolve(cached);
     return fetchRank(1).catch(()=>null);
   }
@@ -187,7 +187,7 @@
   },true);
   function reconnect(){
     if(document.hidden||!client.config.ready)return;clearTimeout(retryTimer);retryTimer=0;retryAttempt=0;
-    if(['loading','login'].includes(app.dataset.state)){prefetchRank();return;}
+    if(['loading','login'].includes(app.dataset.state))return;
     if(client.pending())client.flush().finally(()=>renderSubmission());else client.warm();
     client.syncDisplayName?.();
     if(active===byId('leaderboardDialog'))refresh(currentPage,true);else prefetchRank();
@@ -217,10 +217,6 @@
   });
   warmObserver.observe(app,{attributes:true,attributeFilter:['data-state']});
   if(app.dataset.state==='home'){warmScheduled=true;warmObserver.disconnect();client.warm();}
-  // Fetch the small public page during startup, independently of authentication.
-  // Optional artwork is already in CSS; no SDK or multi-megabyte name font on
-  // this critical path. Cache stays visible while fresh network data arrives.
-  prefetchRank();
   window.onlineLeaderboard={
     get nickname(){return client.nickname;},get hasDialog(){return!!active;},
     requestNickname,

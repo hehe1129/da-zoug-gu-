@@ -85,7 +85,7 @@
       if(!this.config.ready)throw new Error('not-configured');
       if(!this.clientPromise)this.clientPromise=(async()=>{
         const sdk=await this.loadSDK();
-        const boundedFetch=(input,init={})=>this.request(input,init);
+        const boundedFetch=(input,init={})=>this.request(input,this.loginSignal?{...init,signal:this.loginSignal}:init);
         const client=sdk.createClient(this.config.url,this.config.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:this.key+(this.isAccount?'.account-auth.v35':'.auth'),storage:this.storage,lockAcquireTimeout:12000},global:{fetch:boundedFetch}});
         client.auth.onAuthStateChange((event,session)=>{if(session?.user?.id||event==='SIGNED_OUT')this.acceptSession(session);});
         return client;
@@ -101,16 +101,33 @@
       if(this.isAccount&&this.queueOwner&&session.user.id!==this.queueOwner)throw new Error('account-session-changed');
       this.acceptSession(session);return{client,playerId:this.playerId,accessToken:session.access_token};
     }
-    async login(action,username,password){
+    async login(action,username,password,signal){
       if(!this.isAccount||!validUsername(username)||!validPassword(password))throw Object.assign(new Error('invalid_input'),{code:'invalid_input'});
-      const response=await this.request(this.config.url+'/functions/v1/game-accounts',{method:'POST',headers:{'apikey':this.config.key,'Content-Type':'application/json'},body:JSON.stringify({action,username:cleanUsername(username),password})},15000);
+      const response=await this.request(this.config.url+'/functions/v1/game-accounts',{method:'POST',headers:{'apikey':this.config.key,'Content-Type':'application/json'},body:JSON.stringify({action,username:cleanUsername(username),password}),signal},12000);
       const result=await response.json();if(!response.ok||!result.session)throw Object.assign(new Error(result.code||'temporarily_unavailable'),{code:result.code||'temporarily_unavailable'});
+      if(signal?.aborted)throw new Error('account-login-cancelled');
+      this.loginSignal=signal;
       const sdk=await this.getClient(),session=result.session;
-      const saved=await sdk.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});if(saved.error)throw saved.error;
-      this.acceptSession(saved.data.session);this.queueOwner=this.playerId;
-      const profile=await sdk.rpc('dzg_account_profile');if(profile.error||!profile.data||!validNickname(profile.data.display_name))throw profile.error||new Error('account-profile-unavailable');
-      this.accountProfile=profile.data;this.bestScore=profile.data.best_score;this.nicknameKey=this.key+'.account-name.'+this.playerId;this.setNickname(profile.data.display_name);
-      return this.accountProfile;
+      try{
+        if(signal?.aborted)throw new Error('account-login-cancelled');
+        let profile=result.profile;
+        if(!profile){
+          const fetched=await sdk.rpc('dzg_account_profile').setHeader('Authorization','Bearer '+session.access_token);
+          if(fetched.error)throw fetched.error;
+          profile=fetched.data;
+        }
+        if(!profile||!validNickname(profile.display_name))throw new Error('account-profile-unavailable');
+        if(signal?.aborted)throw new Error('account-login-cancelled');
+        const saved=await sdk.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
+        if(saved.error)throw saved.error;
+        if(signal?.aborted)throw new Error('account-login-cancelled');
+        this.acceptSession(saved.data.session);this.queueOwner=this.playerId;
+        this.accountProfile=profile;this.bestScore=profile.best_score;this.nicknameKey=this.key+'.account-name.'+this.playerId;this.setNickname(profile.display_name);
+        return this.accountProfile;
+      }finally{
+        this.loginSignal=null;
+        if(!this.accountProfile)sdk.auth.stopAutoRefresh?.();
+      }
     }
     async setDisplayName(value){
       if(!validNickname(value))throw new Error('invalid-nickname');
