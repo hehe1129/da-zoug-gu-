@@ -1,1 +1,1 @@
-{"version":"V40","baseCommit":"c05bab7","releaseDate":"2026-11-18","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"立牌固定垂直于挂件，统一参考图坐标与相机裁切投影；扩充复合斜角识别并缩短追踪恢复；上移鼓气榜和 AR","status":"release"}
+{"version":"V41","baseCommit":"c77c8aa","releaseDate":"2026-11-18","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"登录与封面提前显示，后台准备音频和游戏贴图，资源就绪后开始倒计时；慢网可返回封面或重试","status":"release"}

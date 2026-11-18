@@ -49,11 +49,11 @@ const scenery=document.createElement('canvas');
 const coarsePointer=matchMedia('(pointer: coarse)').matches;
 function textIfChanged(el,text){if(el.textContent!==text)el.textContent=text;}
 let countStarted = 0, countDuration = 3, lastCount = -1, transitionTimer = 0, resultFrame = 0, messageTimer = 0;
-let waitingAudio = false, waitingOutput=false, loadStarted = 0, resumeCountdown = false;
+let waitingOutput=false, resumeCountdown=false;
 
-// Load and decode all required resources BEFORE revealing the cover.
-let loadingGeneration=0,loadFrame=0;
-const visualImages=new Map();
+// The login is usable while the recording loads. Start the countdown only
+// after the decoded audio and gameplay art are ready.
+let loadingGeneration=0,loadFrame=0,roundPreparation=null,roundReady=false;
 function withTimeout(promise,message,ms=90000){
   return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error(message)),ms);promise.then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});});
 }
@@ -70,57 +70,78 @@ function readyImage(image,check=()=>true,retry=false){
     }
   }),'图片载入超时，请重试');
 }
-function visualImage(url,retry){
-  let image=visualImages.get(url);
-  if(!image){image=new Image();image.src=url;visualImages.set(url,image);}
-  return readyImage(image,()=>true,retry);
-}
-function readyFont(retry){
-  if(!document.fonts)return Promise.resolve();
-  const faces=Array.from(document.fonts).filter(face=>face.family==='ClassicSong');
-  if(faces.some(face=>face.status==='loaded'))return Promise.resolve();
-  const loading=retry&&faces.some(face=>face.status==='error')&&window.FontFace
-    ?new FontFace('ClassicSong',"url('assets/fonts/aa-classic-song-ui-v27.woff2?retry="+Date.now()+"')").load().then(face=>document.fonts.add(face))
-    :document.fonts.load('16px ClassicSong').then(faces=>{if(!faces.length)throw new Error('font missing');});
-  return withTimeout(loading.catch(()=>{throw new Error('字体未能载入，请重试');}),'字体未能载入，请重试');
-}
-function loadVisuals(tracker,retry){
-  const tasks=[
+function prepareRound(retry=false){
+  if(roundReady)return Promise.resolve();
+  if(roundPreparation)return roundPreparation;
+  const sound=audio.prepare(retry).then(()=>{
+    if(audio.status==='ready')return;
+    const message=audio.failed.includes('ensemble') ? '背景音乐未能载入，请重试' :
+      '游戏声音未能准备完成，请重试';
+    throw new Error(message);
+  });
+  roundPreparation=Promise.allSettled([
+    sound,
     readyImage(instrumentSheet,()=>Object.keys(instrumentArt).length===5,retry),
-    readyImage(perfectSheet,()=>perfectArt.length===5,retry),
-    visualImage('assets/modal-frame-v34.webp',retry),
-    visualImage('assets/cover-painting-v19.webp',retry),
-    visualImage('assets/cover-foreground-mask-v30.webp',retry),
-    visualImage('assets/sound-reference-v21.jpg',retry),readyFont(retry),
-    visualImage('assets/rank-drum-v27.webp',retry),visualImage('assets/ranking-panel-v31.webp',retry)
-  ];
-  tracker.total=tasks.length;
-  return Promise.all(tasks.map(task=>task.then(value=>{tracker.done++;return value;})));
+    readyImage(perfectSheet,()=>perfectArt.length===5,retry)
+  ]).then(results=>{
+    const failed=results.find(result=>result.status==='rejected');
+    if(failed)throw failed.reason;
+    roundReady=true;
+    syncWeatherAudio();
+  }).finally(()=>{roundPreparation=null;});
+  return roundPreparation;
 }
-async function loadGameAssets(retry=false){
-  const generation=++loadingGeneration,tracker={done:0,total:6};cancelAnimationFrame(loadFrame);
-  setState('loading');$('loading').hidden=false;$('home').hidden=true;
-  $('loading').classList.remove('load-error');$('loading').setAttribute('aria-busy','true');$('loadRetry').hidden=true;
-  textIfChanged($('loadingStatus'),'正在准备乐曲、音效与画面');
+
+function hideRoundLoading(){
+  loadingGeneration++;
+  cancelAnimationFrame(loadFrame);
+  $('loading').hidden=true;
+}
+
+async function waitForRound(retry=false){
+  const generation=++loadingGeneration;
+  cancelAnimationFrame(loadFrame);
+  setState('preparing');
+  $('home').hidden=true;
+  $('over').hidden=true;
+  $('loading').hidden=false;
+  $('loading').classList.remove('load-error');
+  $('loading').setAttribute('aria-busy','true');
+  $('loadRetry').hidden=true;
+  $('loadBack').hidden=false;
+  textIfChanged($('loadingStatus'),'正在准备乐曲与演奏画面');
+  $('loadBack').focus({preventScroll:true});
   let shown=-1;
-  const progress=()=>{if(generation!==loadingGeneration)return;const value=Math.min(99,Math.floor((audio.loadProgress()*.9+tracker.done/tracker.total*.1)*100));if(value!==shown){shown=value;textIfChanged($('loadingPercent'),value+'%');$('loadingProgress').setAttribute('aria-valuenow',value);$('loadingProgress').firstElementChild.style.transform='scaleX('+value/100+')';}loadFrame=requestAnimationFrame(progress);};progress();
+  const progress=()=>{
+    const value=Math.min(99,Math.floor(audio.loadProgress()*100));
+    if(value!==shown){
+      shown=value;
+      textIfChanged($('loadingPercent'),value+'%');
+      $('loadingProgress').setAttribute('aria-valuenow',value);
+      $('loadingProgress').firstElementChild.style.transform='scaleX('+value/100+')';
+    }
+    loadFrame=requestAnimationFrame(progress);
+  };
+  progress();
   try{
-    const sound=audio.prepare(retry).then(()=>{
-      if(audio.status!=='ready')throw new Error(audio.failed.includes('ensemble')?'背景音乐未能载入，请重试':audio.status==='unavailable'?'声音未能准备完成，请点击重试':'乐器音效未能载入，请重试');
-    });
-    await Promise.all([sound,loadVisuals(tracker,retry)]);
+    await prepareRound(retry);
     if(generation!==loadingGeneration)return;
-    cancelAnimationFrame(loadFrame);textIfChanged($('loadingPercent'),'100%');$('loadingProgress').setAttribute('aria-valuenow','100');$('loadingProgress').firstElementChild.style.transform='scaleX(1)';
-    textIfChanged($('loadingStatus'),'准备完成');$('loading').setAttribute('aria-busy','false');
-    await new Promise(resolve=>setTimeout(resolve,reducedMotion?0:180));if(generation!==loadingGeneration)return;
-    $('loading').hidden=true;window.gameSession.showLogin();
+    hideRoundLoading();
+    beginRound();
   }catch(error){
     if(generation!==loadingGeneration)return;
-    cancelAnimationFrame(loadFrame);$('loading').classList.add('load-error');$('loading').setAttribute('aria-busy','false');
-    textIfChanged($('loadingStatus'),error.message||'资源未能载入，请重试');$('loadRetry').hidden=false;
+    cancelAnimationFrame(loadFrame);
+    $('loading').classList.add('load-error');
+    $('loading').setAttribute('aria-busy','false');
+    textIfChanged($('loadingStatus'),error.message||'资源未能载入，请重试');
+    $('loadRetry').hidden=false;
   }
 }
-window.retryGameLoad=()=>{audio.unlock(true);loadGameAssets(true);};
+window.retryGameLoad=()=>{
+  if(state!=='preparing'){location.reload();return;}
+  audio.unlock(true);
+  waitForRound(true);
+};
 
 function syncWeatherAudio() {
   const cover=state==='home'||state==='transition';
@@ -448,13 +469,6 @@ function draw(t) {
 }
 function frame() {
   if(state === 'countdown') {
-    if(waitingAudio) {
-      if(audio.status==='loading') {
-        draw(elapsed);raf=requestAnimationFrame(frame);return;
-      }
-      waitingAudio=false;countStarted=performance.now();$('countLabel').textContent='准备好了吗';$('countHint').textContent='跟着原曲，方块碰线时点击';
-      if(audio.status!=='ready'){home();loadGameAssets(true);return;}
-    }
     // No countdown or song time elapses while the browser awaits activation.
     // A real tap can retry resume even if an earlier resume promise is pending.
     if(audio.ctx?.state!=='running'){
@@ -483,9 +497,7 @@ function beginCountdown(seconds,resuming=false) {
   if(!sessionLanes.length)sessionLanes=makeLanePlan();
   $('countLabel').textContent=resuming?'回到拍点上':'准备好了吗';
   $('countHint').textContent=resuming?'稳住，马上继续':'方块碰线时，点击方块';
-  resumeCountdown=resuming;waitingAudio=!resuming&&audio.status==='loading';loadStarted=performance.now();
-  if(!resuming&&!waitingAudio&&audio.status!=='ready')audio.onAssetError?.();
-  if(waitingAudio){$('countLabel').textContent='乐曲载入中';$('countNumber').textContent='♪';$('countHint').textContent='正在准备原曲与乐器声音';}
+  resumeCountdown=resuming;
   waitingOutput=audio.ctx?.state!=='running';lastCount=-1; countDuration=seconds; countStarted=performance.now(); frame();
 }
 function resetGame() {
@@ -493,7 +505,7 @@ function resetGame() {
   sessionLanes=[];audio.resetVariations();judgementHistory.length=0;
   onlineRunId=window.DazouguOnline?.newRunId()||null;
   notes=[]; effects=[]; particles=[]; burstIndex=perfectBurstIndex=0; score=misses=combo=maxCombo=hits=perfects=0; elapsed=0; nextIndex=noteId=0;
-  phase=-1; noticeUntil=0; damageUntil=0; shownLives=-1; waitingAudio=false; hud();
+  phase=-1; noticeUntil=0; damageUntil=0; shownLives=-1; hud();
   $('damageFeedback').hidden=true; $('field').classList.remove('damage-shake','damage-active');
   stageCueUntil=0;$('stageCue').dataset.visible='false';$('stageCue').textContent='';
   enterStage(0,false);themeBefore=stages[0];
@@ -502,10 +514,14 @@ function resetGame() {
 function start() {
   if($('arDialog')?.open)return;
   if(!window.gameSession?.ready)return;
-  if(['loading','transition','countdown','playing'].includes(state)) return;
-  if(audio.status!=='ready'){audio.unlock(true);loadGameAssets(true);return;}
+  if(['loading','preparing','transition','countdown','playing'].includes(state)) return;
   if(window.onlineLeaderboard&&!window.onlineLeaderboard.nickname){audio.unlock();window.onlineLeaderboard.requestNickname(()=>{nicknameResizeUntil=performance.now()+800;start();});return;}
-  audio.unlock(); // gesture synchronous, before any animation timeout
+  const retry=audio.status==='partial'||audio.status==='unavailable';
+  audio.unlock(retry); // Keep the unlock inside the browser's tap gesture.
+  if(!roundReady){waitForRound(retry);return;}
+  beginRound();
+}
+function beginRound(){
   clearTimeout(transitionTimer); resetGame(); audio.startTransport();
   $('error').hidden=true; const fromHome=!$('home').hidden; setState('transition');
   $('over').hidden=true; $('paused').hidden=true;
@@ -538,6 +554,7 @@ function resume() {
   audio.startTransport(); $('paused').hidden=true; $('game').inert=false; beginCountdown(2,true);
 }
 function home() {
+  hideRoundLoading();
   clearTimeout(transitionTimer); cancelAnimationFrame(raf); cancelAnimationFrame(resultFrame); stopAllSound(); clearPointers(); setState('home');
   $('game').hidden=true; $('game').inert=false; $('paused').hidden=true; $('over').hidden=true; $('countdown').hidden=true;
   $('home').hidden=false; $('home').classList.remove('leaving'); if(!reducedMotion) restartAnimation($('home'),'entering'); $('start').focus({preventScroll:true});
@@ -547,6 +564,7 @@ window.enterGameCover=()=>{
   if(!reducedMotion)restartAnimation($('home'),'entering');
 };
 window.returnToLogin=()=>{
+  hideRoundLoading();
   window.dispatchEvent(new Event('dazougu-login'));
   clearTimeout(transitionTimer);cancelAnimationFrame(raf);cancelAnimationFrame(resultFrame);stopAllSound();clearPointers();setState('login');
   for(const id of ['home','game','paused','over','countdown'])$(id).hidden=true;
@@ -636,9 +654,8 @@ document.querySelectorAll('.sound-toggle').forEach(el=>{
 });
 audio.onActivationChange=soundButtons;
 audio.onError=()=>{clearTimeout(messageTimer);$('error').textContent='音频暂时中断，轻触屏幕可重试';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},4000);};
-audio.onReady=()=>{ if(audio.status==='partial')audio.onAssetError?.();else $('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
+audio.onReady=()=>{ if(audio.status==='ready')$('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
 audio.onInterrupted=()=>pause();
-audio.onAssetError=()=>{clearTimeout(messageTimer);$('error').textContent='声音未能载入，请重新载入游戏';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},6500);};
 function recoverPageAudio(){
   if(document.hidden)return;
   audio.recoverOutput();syncWeatherAudio();soundButtons();
@@ -670,7 +687,10 @@ document.addEventListener('keydown',e=>{
 });
 hud(); soundButtons();
 
-// Script readiness and resource readiness are separate: the cover appears only
-// after decoded recordings, prepared art and the supplied font are all ready.
+// Let the login paint before queuing the heavier round preparation.
 window.gameReady=true;window.dispatchEvent(new Event('game-ready'));
-loadGameAssets();
+window.gameSession.showLogin();
+$('loadBack').onclick=home;
+requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  prepareRound().catch(()=>{}); // Report failures only when the user starts a round.
+}));
