@@ -14,8 +14,8 @@ class RhythmAudio {
   constructor() {
     this.ctx=null;this.master=null;this.session=null;this.bg=null;this.song=null;
     this.muted=false;this.unlocking=false;this.buffers={};this.nodes=new Set();this.variations={};this.lastHit=null;this.lastGameRead=null;this.visualClock=null;
-    // Preload and decode before the cover; audible output unlocks on a gesture.
-    this.raw={};this.transfers={};this.fetchErrors={};this.primed=false;this.status='idle';this.failed=[];this.clock=null;this.boost=null;
+    // Preload before the countdown; audible output unlocks on a gesture.
+    this.raw={};this.downloads=new Map();this.transfers={};this.fetchErrors={};this.primed=false;this.status='idle';this.failed=[];this.clock=null;this.boost=null;
     this.rain=null;this.rainLayers=new Set();this.rainLoops={};this.rainType=null;
     this.outputReady=false;this.unlockAttempts=0;this.needsWake=false;
     this.volumes={game:1,rain:1};try{const saved=JSON.parse(localStorage.getItem('dazougu.volumes.v35'));for(const key of ['game','rain'])if(Number.isFinite(saved?.[key]))this.volumes[key]=Math.max(0,Math.min(1,saved[key]));}catch{}
@@ -25,13 +25,14 @@ class RhythmAudio {
       if(this.buffers[kind]||this.raw[kind])continue;
       const controller=new AbortController();
       // Allow a slow but progressing recording download; fail a stalled one.
-      let stallTimer;const refresh=()=>{clearTimeout(stallTimer);stallTimer=setTimeout(()=>controller.abort(),kind==='ensemble'?30000:20000);};
-      const deadline=setTimeout(()=>controller.abort(),kind==='ensemble'?180000:60000);refresh();
+      let stallTimer;const refresh=()=>{clearTimeout(stallTimer);stallTimer=setTimeout(()=>controller.abort(),12000);};
+      const deadline=setTimeout(()=>controller.abort(),kind==='ensemble'?120000:30000);refresh();
+      this.downloads.set(kind,controller);
       this.transfers[kind]=0;delete this.fetchErrors[kind];
       const request=fetch('assets/audio/'+meta.file,{signal:controller.signal,cache:retry?'reload':'default'})
         .then(async response=>{
           if(!response.ok)throw new Error('audio '+response.status);
-          if(!response.body?.getReader){clearTimeout(stallTimer);return response.arrayBuffer();}
+          if(!response.body?.getReader)return response.arrayBuffer();
           refresh();
           const reader=response.body.getReader(),chunks=[];let received=0;
           const expected=Number(response.headers.get('content-length'))||meta.bytes;
@@ -39,11 +40,14 @@ class RhythmAudio {
           const bytes=new Uint8Array(received);let offset=0;
           for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
           return bytes.buffer;
-        }).finally(()=>{clearTimeout(stallTimer);clearTimeout(deadline);});
+        }).finally(()=>{clearTimeout(stallTimer);clearTimeout(deadline);this.downloads.delete(kind);});
       this.raw[kind]=request;
       // A rejected prefetch must not poison the next load attempt forever.
       request.catch(error=>{if(this.raw[kind]===request)delete this.raw[kind];this.fetchErrors[kind]=error;});
     }
+  }
+  cancelDownloads() {
+    for(const controller of this.downloads.values())controller.abort();
   }
   loadProgress() {
     let loaded=0,total=0;
@@ -139,7 +143,7 @@ class RhythmAudio {
     this.needsWake=true;this.outputReady=false;this.setRain(null);this.onActivationChange?.();
   }
   recoverOutput(){
-    if(!this.muted)this.unlock();
+    if(!this.muted)this.unlock(false,false);
   }
   setMuted(muted) {this.muted=muted;if(this.ctx)this.master.gain.setTargetAtTime(muted?0:.72,this.ctx.currentTime,.025);}
   setVolumes(game,rain){
@@ -305,7 +309,7 @@ class RhythmAudio {
     s.onended=()=>{this.nodes.delete(s);s.disconnect();f.disconnect();g.disconnect();};s.start(t,.51,duration);
   }
   tick(accent=false) {this.sound('wood',undefined,this.session,accent?.55:.35);}
-  miss() {this.sound('drum',undefined,this.gameBus||this.master,.2);}
+  miss() {this.sound('drum',undefined,this.session,.2);}
   suonaSustain() {
     const source=this.buffers.suona;
     if(!source?.getChannelData||!this.ctx?.createBuffer)return null;

@@ -49,26 +49,22 @@ const scenery=document.createElement('canvas');
 const coarsePointer=matchMedia('(pointer: coarse)').matches;
 function textIfChanged(el,text){if(el.textContent!==text)el.textContent=text;}
 let countStarted = 0, countDuration = 3, lastCount = -1, transitionTimer = 0, resultFrame = 0, messageTimer = 0;
-let waitingOutput=false, resumeCountdown=false;
+let waitingOutput=false, resumeCountdown=false, silentRound=false;
 
 // The login is usable while the recording loads. Start the countdown only
 // after the decoded audio and gameplay art are ready.
-let loadingGeneration=0,loadFrame=0,roundPreparation=null,roundReady=false;
-function withTimeout(promise,message,ms=90000){
-  return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error(message)),ms);promise.then(value=>{clearTimeout(timer);resolve(value);},error=>{clearTimeout(timer);reject(error);});});
-}
-function readyImage(image,check=()=>true,retry=false){
-  if(image.complete&&image.naturalWidth&&check())return Promise.resolve(image);
-  return withTimeout(new Promise((resolve,reject)=>{
-    const clean=()=>{image.removeEventListener('load',loaded);image.removeEventListener('error',failed);};
-    const loaded=()=>{clean();if(image.naturalWidth&&check())resolve(image);else reject(new Error('贴图未能准备完成，请重试'));};
-    const failed=()=>{clean();reject(new Error('有图片未能载入，请重试'));};
+let loadingGeneration=0,loadFrame=0,loadHelpTimer=0,roundPreparation=null,roundReady=false;
+function readyImage(image,retry=false){
+  if(image.complete&&image.naturalWidth)return Promise.resolve(image);
+  return new Promise((resolve,reject)=>{
+    const timer=setTimeout(failed,12000);
+    const clean=()=>{clearTimeout(timer);image.removeEventListener('load',loaded);image.removeEventListener('error',failed);};
+    function loaded(){clean();resolve(image);}
+    function failed(){clean();reject(new Error('有图片未能载入，请重试'));}
     image.addEventListener('load',loaded,{once:true});image.addEventListener('error',failed,{once:true});
-    if(image.complete){
-      if(image.naturalWidth)setTimeout(loaded,0);
-      else image.src=image.src.split('?')[0]+(retry?'?retry='+Date.now():'');
-    }
-  }),'图片载入超时，请重试');
+    if(retry)image.src=image.src.split('?')[0]+'?retry='+Date.now();
+    else if(image.complete)failed();
+  });
 }
 function prepareRound(retry=false){
   if(roundReady)return Promise.resolve();
@@ -81,8 +77,8 @@ function prepareRound(retry=false){
   });
   roundPreparation=Promise.allSettled([
     sound,
-    readyImage(instrumentSheet,()=>Object.keys(instrumentArt).length===5,retry),
-    readyImage(perfectSheet,()=>perfectArt.length===5,retry)
+    readyImage(instrumentSheet,retry),
+    readyImage(perfectSheet,retry)
   ]).then(results=>{
     const failed=results.find(result=>result.status==='rejected');
     if(failed)throw failed.reason;
@@ -95,7 +91,13 @@ function prepareRound(retry=false){
 function hideRoundLoading(){
   loadingGeneration++;
   cancelAnimationFrame(loadFrame);
+  clearTimeout(loadHelpTimer);
   $('loading').hidden=true;
+}
+
+function showLoadAlternative(){
+  textIfChanged($('loadContinue'),audio.buffers.ensemble?'用已载入的资源开场':'暂时静音开场');
+  $('loadContinue').hidden=false;
 }
 
 async function waitForRound(retry=false){
@@ -108,9 +110,16 @@ async function waitForRound(retry=false){
   $('loading').classList.remove('load-error');
   $('loading').setAttribute('aria-busy','true');
   $('loadRetry').hidden=true;
+  $('loadContinue').hidden=true;
   $('loadBack').hidden=false;
   textIfChanged($('loadingStatus'),'正在准备乐曲与演奏画面');
   $('loadBack').focus({preventScroll:true});
+  clearTimeout(loadHelpTimer);
+  loadHelpTimer=setTimeout(()=>{
+    if(generation!==loadingGeneration)return;
+    textIfChanged($('loadingStatus'),'网络较慢，可以继续等待或先开始演奏');
+    showLoadAlternative();
+  },8000);
   let shown=-1;
   const progress=()=>{
     const value=Math.min(99,Math.floor(audio.loadProgress()*100));
@@ -120,21 +129,24 @@ async function waitForRound(retry=false){
       $('loadingProgress').setAttribute('aria-valuenow',value);
       $('loadingProgress').firstElementChild.style.transform='scaleX('+value/100+')';
     }
+    if(!$('loadContinue').hidden)showLoadAlternative();
     loadFrame=requestAnimationFrame(progress);
   };
   progress();
   try{
     await prepareRound(retry);
     if(generation!==loadingGeneration)return;
-    hideRoundLoading();
     beginRound();
+    hideRoundLoading();
   }catch(error){
     if(generation!==loadingGeneration)return;
     cancelAnimationFrame(loadFrame);
+    clearTimeout(loadHelpTimer);
     $('loading').classList.add('load-error');
     $('loading').setAttribute('aria-busy','false');
     textIfChanged($('loadingStatus'),error.message||'资源未能载入，请重试');
     $('loadRetry').hidden=false;
+    showLoadAlternative();
   }
 }
 window.retryGameLoad=()=>{
@@ -142,12 +154,20 @@ window.retryGameLoad=()=>{
   audio.unlock(true);
   waitForRound(true);
 };
+$('loadContinue').onclick=()=>{
+  if(state!=='preparing')return;
+  const silent=!audio.buffers.ensemble;
+  if(!silent)audio.unlock(false,false);
+  hideRoundLoading();
+  audio.cancelDownloads();
+  beginRound(silent);
+};
 
 function syncWeatherAudio() {
   const cover=state==='home'||state==='transition';
   const weather=window.DazouguWeather?.forLevel(phase+1);
   const visible=['playing','countdown','paused','over'].includes(state);
-  const type=document.hidden||$('arDialog')?.open?null:cover?'light':visible?weather?.sound:null;
+  const type=document.hidden||$('arDialog')?.open?null:cover?'light':visible&&!silentRound?weather?.sound:null;
   audio.setRain(type,cover,cover?.48:weather?.gain??0);
 }
 window.addEventListener('dazougu-ar-change',syncWeatherAudio);
@@ -455,7 +475,11 @@ function draw(t) {
       pen.restore();
     }
     const imageHeight=n.kind==='suona'?tile-24:Math.min(tile-24,r.height-12), imageY=n.held ? line-imageHeight-9 : r.bottom-imageHeight-9;
-    drawInstrument(pen,n.kind,r.x+6,imageY,r.width-12,imageHeight);
+    if(instrumentSheet.naturalWidth)drawInstrument(pen,n.kind,r.x+6,imageY,r.width-12,imageHeight);
+    else {
+      pen.fillStyle='#153e83';pen.font='16px ClassicSong,serif';pen.textAlign='center';
+      pen.fillText(names[n.kind],r.x+r.width/2,imageY+imageHeight/2,r.width-12);
+    }
 
   }
   for(const e of effects) {
@@ -471,12 +495,14 @@ function frame() {
   if(state === 'countdown') {
     // No countdown or song time elapses while the browser awaits activation.
     // A real tap can retry resume even if an earlier resume promise is pending.
-    if(audio.ctx?.state!=='running'){
-      countStarted=performance.now();waitingOutput=true;lastCount=-1;
-      $('countLabel').textContent='轻触屏幕，接通鼓乐';$('countHint').textContent='声音就绪后自动倒计时';$('countNumber').textContent='3';
+    if(!silentRound&&audio.ctx?.state!=='running'){
+      if(!waitingOutput){
+        waitingOutput=true;lastCount=-1;$('countAudioActions').hidden=false;
+        $('countLabel').textContent='声音还未接通';$('countHint').textContent='接通鼓乐后自动倒计时';$('countNumber').textContent=countDuration;
+      }
       draw(elapsed);raf=requestAnimationFrame(frame);return;
     }
-    if(waitingOutput){waitingOutput=false;countStarted=performance.now();$('countLabel').textContent=resumeCountdown?'回到拍点上':'准备好了吗';$('countHint').textContent='方块碰线时，点击方块';}
+    if(waitingOutput){waitingOutput=false;countStarted=performance.now();$('countAudioActions').hidden=true;$('countLabel').textContent=resumeCountdown?'回到拍点上':'准备好了吗';$('countHint').textContent='方块碰线时，点击方块';}
     const left=countDuration-(performance.now()-countStarted)/1000;
     if(left <= 0) {
       $('countdown').hidden=true; setState('playing'); startClock=performance.now()-elapsed*1000; audio.startSong(elapsed);
@@ -498,7 +524,7 @@ function beginCountdown(seconds,resuming=false) {
   $('countLabel').textContent=resuming?'回到拍点上':'准备好了吗';
   $('countHint').textContent=resuming?'稳住，马上继续':'方块碰线时，点击方块';
   resumeCountdown=resuming;
-  waitingOutput=audio.ctx?.state!=='running';lastCount=-1; countDuration=seconds; countStarted=performance.now(); frame();
+  waitingOutput=false;$('countAudioActions').hidden=true;lastCount=-1; countDuration=seconds; countStarted=performance.now(); frame();
 }
 function resetGame() {
   stopAllSound(); clearPointers(); cancelAnimationFrame(resultFrame);
@@ -521,8 +547,9 @@ function start() {
   if(!roundReady){waitForRound(retry);return;}
   beginRound();
 }
-function beginRound(){
-  clearTimeout(transitionTimer); resetGame(); audio.startTransport();
+function beginRound(silent=false){
+  clearTimeout(transitionTimer);silentRound=silent;
+  resetGame();if(!silentRound)audio.startTransport();
   $('error').hidden=true; const fromHome=!$('home').hidden; setState('transition');
   $('over').hidden=true; $('paused').hidden=true;
   const enter=()=>{
@@ -543,7 +570,7 @@ function pause() {
 }
 function resume() {
   if(state !== 'paused') return;
-  audio.unlock();
+  if(!silentRound)audio.unlock(false,false);
   // Keep the recording and every future tile at its original source time.
   // Rearm only the remaining held tile. It may be picked up during the resume
   // countdown, avoiding an impossible near-tail re-entry with a mouse or finger.
@@ -551,7 +578,8 @@ function resume() {
     n.holdCredit=(n.holdCredit||0)+Math.max(0,elapsed-(n.holdStarted??elapsed));n.holdStarted=null;
     n.dur=Math.max(.015,n.at+n.dur-elapsed);n.at=elapsed;n.held=false;n.rearmed=true;delete n.pointer;
   }
-  audio.startTransport(); $('paused').hidden=true; $('game').inert=false; beginCountdown(2,true);
+  if(!silentRound)audio.startTransport();
+  $('paused').hidden=true; $('game').inert=false; beginCountdown(2,true);
 }
 function home() {
   hideRoundLoading();
@@ -590,7 +618,7 @@ function end(reason='三次失误',completed=false) {
 canvas.addEventListener('pointerdown',e=>{
   const pickup=state==='countdown'&&resumeCountdown;
   if(state!=='playing'&&!pickup)return;e.preventDefault();
-  const t=pickup?elapsed:audio.inputTime(e.timeStamp)??now();audio.unlock();
+  const t=pickup?elapsed:audio.inputTime(e.timeStamp)??now();if(!silentRound)audio.unlock(false,false);
   const r=canvas.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
   // Hit-test the actual rectangle, with only a small touch allowance. No lane-wide taps.
   const n=notes.find(n=>{ if(n.done || n.held || (pickup&&!n.rearmed)) return false; const g=geometry(n,t); return x>=g.x-3 && x<=g.x+g.width+3 && y>=g.y-6 && y<=g.bottom+6; });
@@ -626,6 +654,11 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 for(const type of ['selectstart','dragstart','contextmenu'])$('app').addEventListener(type,e=>{if(!e.target.closest?.('input,textarea'))e.preventDefault();});
 for(const type of ['touchstart','touchmove'])canvas.addEventListener(type,e=>{if(state==='playing'||state==='countdown')e.preventDefault();},{passive:false});
 $('start').onclick=start; $('retry').onclick=()=>{ $('game').inert=false; start(); }; $('pause').onclick=pause; $('resume').onclick=resume; $('quit').onclick=home; $('back').onclick=home;
+$('countAudioRetry').onclick=()=>audio.unlock(false,false);
+$('countSilent').onclick=()=>{
+  if(state!=='countdown'||!waitingOutput)return;
+  silentRound=true;stopAllSound();syncWeatherAudio();
+};
 function soundButtons() {
   const waiting=!audio.muted&&(!audio.outputReady||audio.ctx?.state!=='running');
   document.querySelectorAll('.sound-toggle').forEach(el=>{
@@ -638,7 +671,8 @@ function gestureAudio(event){
   // Do not turn an enable gesture into a mute by unlocking the sound button
   // before its click handler has decided what the player meant.
   if(event.target.closest?.('.sound-toggle')||event.ctrlKey||event.metaKey)return;
-  if(['home','countdown','paused','over'].includes(state)&&!audio.muted){audio.unlock();syncWeatherAudio();}
+  if(event.target.closest?.('#countAudioActions'))return;
+  if(['home','countdown','paused','over'].includes(state)&&!audio.muted&&(state==='home'||!silentRound)){audio.unlock(false,false);syncWeatherAudio();}
 }
 for(const type of ['touchend','pointerup','click','keydown'])document.addEventListener(type,gestureAudio,{capture:true,passive:true});
 document.querySelectorAll('.sound-toggle').forEach(el=>{
@@ -651,17 +685,18 @@ document.querySelectorAll('.sound-toggle').forEach(el=>{
     // Safari can resolve the pending resume between finger-down and click.
     // Honor the intent before that transition, rather than toggling it off.
     const enable=enableIntent??(audio.muted||!audio.outputReady||audio.ctx?.state!=='running');enableIntent=null;
-    if(enable){audio.setMuted(false);audio.unlock();}else audio.setMuted(true);
+    if(enable){audio.setMuted(false);audio.unlock(false,false);}else audio.setMuted(true);
     syncWeatherAudio();soundButtons();
   };
 });
 audio.onActivationChange=soundButtons;
 audio.onError=()=>{clearTimeout(messageTimer);$('error').textContent='音频暂时中断，轻触屏幕可重试';$('error').hidden=false;messageTimer=setTimeout(()=>{$('error').hidden=true;},4000);};
-audio.onReady=()=>{ if(audio.status==='ready')$('error').hidden=true;if(state==='playing'&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
+audio.onReady=()=>{ if(audio.status==='ready')$('error').hidden=true;if(state==='playing'&&!silentRound&&!audio.clock)audio.startSong(now());syncWeatherAudio(); };
 audio.onInterrupted=()=>pause();
 function recoverPageAudio(){
   if(document.hidden||state==='loading'||state==='login')return;
-  audio.recoverOutput();syncWeatherAudio();soundButtons();
+  if(state==='home'||!silentRound)audio.recoverOutput();
+  syncWeatherAudio();soundButtons();
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){pause();audio.backgrounded();}
