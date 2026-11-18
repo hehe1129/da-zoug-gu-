@@ -59,21 +59,19 @@
     }
     return result;
   }
-  function obliqueView(frame, mask, axis, angle) {
+  function obliqueView(frame, mask, yaw, pitch) {
     const {width,height,data}=frame;
     const cx=width/2, cy=height/2, focal=Math.max(width,height)*1.15;
-    const f=Math.cos(angle), s=Math.sin(angle);
+    const a=Math.cos(yaw),b=Math.sin(yaw),c=Math.cos(pitch),d=Math.sin(pitch);
     const mapped=([x,y])=>{
       const dx=x-cx, dy=y-cy;
-      const z=1+(axis==='x'?dx:dy)*s/focal;
-      return [cx+(axis==='x'?f*dx:dx)/z,cy+(axis==='y'?f*dy:dy)/z];
+      const z=1+(b*dx+a*d*dy)/focal;
+      return [cx+(a*dx-b*d*dy)/z,cy+c*dy/z];
     };
-    const unmap=(x,y)=>{
-      const dx=x-cx,dy=y-cy, along=axis==='x'?dx:dy;
-      const original=along/(f-along*s/focal);
-      const z=1+original*s/focal;
-      return [cx+(axis==='x'?original:dx*z),cy+(axis==='y'?original:dy*z)];
-    };
+    const corners=[[0,0],[width,0],[width,height],[0,height]];
+    const inverse=new cv.matrix_t(3,3,cv.F32_t|cv.C1_t);
+    cv.math.perspective_4point_transform(inverse,...corners.flatMap(p=>[...mapped(p),...p]));
+    const unmap=(x,y)=>project(inverse.data,x,y);
     const warped=new Uint8ClampedArray(data.length);
     for(let y=0;y<height;y++) for(let x=0;x<width;x++){
       const [sx,sy]=unmap(x,y);
@@ -103,8 +101,11 @@
   function prepare(targets) {
     return targets.map(({id,kind,frame,mask})=>{
       const tilted=[];
-      for(const axis of ['x','y']) for(const angle of [-1.02,-.67,.67,1.02]){
-        tilted.push(...obliqueView(frame,mask,axis,angle));
+      for(const angle of [-1.02,-.67,.67,1.02]){
+        tilted.push(...obliqueView(frame,mask,angle,0),...obliqueView(frame,mask,0,angle));
+      }
+      for(const yaw of [-.72,.72]) for(const pitch of [-.38,.38]){
+        tilted.push(...obliqueView(frame,mask,yaw,pitch));
       }
       return {id,kind,width:frame.width,height:frame.height,mask,tilted,
         points:features(frame,[1,.79,.62,.49],140,mask)};
@@ -172,9 +173,9 @@
       for(const p of proposals){
         if(!pairs.some(q=>Math.hypot(p.b.x-q.b.x,p.b.y-q.b.y)<5 ||
                           Math.hypot(p.a.x-q.a.x,p.a.y-q.a.y)<5)) pairs.push(p);
-        if(pairs.length>=100) break;
+      if(pairs.length>=100) break;
       }
-      const hit=fit(target,pairs);
+      const hit=fit(target,pairs) || (pairs.length>32 ? fit(target,pairs.slice(0,32)) : null);
       if(hit) candidates.push(hit);
     }
     candidates.sort((a,b)=>b.inliers-a.inliers || a.meanError-b.meanError);

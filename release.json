@@ -1,1 +1,1 @@
-{"version":"V39","baseCommit":"1dcc84a","releaseDate":"2026-11-17","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"拓宽祈福牌首次斜拍识别角度，增加印刷特征连续追踪，固定角色倾角和脚部锚点，首页三个入口等距对齐","status":"release"}
+{"version":"V40","baseCommit":"c05bab7","releaseDate":"2026-11-18","website":"https://hehe1129.github.io/da-zoug-gu-/","changes":"立牌固定垂直于挂件，统一参考图坐标与相机裁切投影；扩充复合斜角识别并缩短追踪恢复；上移鼓气榜和 AR","status":"release"}

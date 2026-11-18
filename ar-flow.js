@@ -95,8 +95,11 @@
            (previous||next).data[0].rows!==frame.height)) previous=next=lock=null;
         if(!lock) return start(frame);
         const hit=track(frame);
-        if(!hit) lock=null; // Next frame performs a fresh image search.
-        return hit;
+        if(hit) return hit;
+        lock=null;
+        // Recover using the current frame, not the last stored pose. This
+        // prevents an unnecessary blank frame after an isolated LK failure.
+        return start(frame);
       }
     };
   }

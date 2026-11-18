@@ -67,6 +67,12 @@ def cutout(crop, box, key):
     crop.putalpha(alpha)
     return crop
 
+manifest = root / 'targets.json'
+# These measured alignments belong to the crops below. Preserve them when
+# regenerating the same assets. Recalibrate if a reference crop is replaced.
+alignments = {view['id']: view['fromCanonical']
+              for view in json.loads(manifest.read_text(encoding='utf-8'))
+              if 'fromCanonical' in view}
 targets = []
 for key, name, box, shoe, target_box, anchor, polygon in placements:
     cutout(sheet.crop(box), box, key).save(root / 'characters' / f'{key}.png', optimize=True)
@@ -83,5 +89,7 @@ for key, name, box, shoe, target_box, anchor, polygon in placements:
                             mask=[[x-left,y-top] for x,y in mask],
                             targetAnchor=[foot[0]-left,foot[1]-top],
                             sprite=dict(image=f'characters/{key}.png',anchor=[shoe[0]-box[0],shoe[1]-box[1]],
-                                        scale=1.38,rotation=0,tilt=55,offset=[0,0],opacity=.87)))
-(root / 'targets.json').write_text(json.dumps(targets, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+                                        scale=1.38,rotation=0,offset=[0,0],opacity=.87)))
+        if view != key:
+            targets[-1]['fromCanonical'] = alignments[view]
+manifest.write_text(json.dumps(targets, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')

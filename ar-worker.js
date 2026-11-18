@@ -1,5 +1,5 @@
 self.window = self; // The vendor's browser export expects a window global.
-importScripts('assets/vendor/jsfeat-0.0.8.js','ar-tracker.js?v=2','ar-flow.js?v=2');
+importScripts('assets/vendor/jsfeat-0.0.8.js','ar-tracker.js?v=3','ar-flow.js?v=3');
 
 let session;
 self.onmessage = ({data}) => {

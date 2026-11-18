@@ -1,6 +1,6 @@
 .cover-utilities {
   position:absolute; z-index:6; top:2%; right:4%;
-  display:grid; justify-items:center; gap:8px;
+  display:grid; justify-items:center; gap:4px;
   grid-auto-rows:52px;
 }
 .cover-utilities #openSettings,
@@ -52,7 +52,7 @@
 .ar-guides i:nth-child(3) { bottom:0; left:0; border-width:0 0 2px 2px; border-radius:0 0 0 9px; }
 .ar-guides i:nth-child(4) { bottom:0; right:0; border-width:0 2px 2px 0; border-radius:0 0 9px 0; }
 @media(max-height:650px) {
-  .cover-utilities { grid-auto-rows:46px; gap:6px; right:calc(4% + 3px); }
+  .cover-utilities { grid-auto-rows:46px; gap:3px; right:calc(4% + 3px); }
   .cover-utilities #openSettings { width:46px; height:46px; }
   .cover-utilities #homeLeaderboard, .cover-utilities #openAr { width:44px; height:44px; }
 }

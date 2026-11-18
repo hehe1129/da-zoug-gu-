@@ -26,11 +26,11 @@
     const abort=new AbortController();
     const timeout=setTimeout(()=>abort.abort(),7500);
     let reply;
-    try {reply=await fetch(new URL('targets.json?v=1',root),{signal:abort.signal});}
+    try {reply=await fetch(new URL('targets.json?v=3',root),{signal:abort.signal});}
     finally {clearTimeout(timeout);}
     if (!reply.ok) throw new Error('targets');
     const manifest=await reply.json();
-    const {spriteQuad,spriteTransform}=await import('./ar-pose.js?v=2');
+    const projection=await import('./ar-pose.js?v=3');
     const entries=await Promise.all(manifest.map(async target=>{
       const [reference,art]=await Promise.all([loadImage(target.image),loadImage(target.sprite.image)]);
       const surface=document.createElement('canvas');
@@ -41,7 +41,8 @@
       const frame=ctx.getImageData(0,0,surface.width,surface.height);
       return {...target,height:surface.height,frame,art};
     }));
-    return {entries,spriteQuad,spriteTransform};
+    for(const entry of entries) entry.canonical=entries.find(item=>item.id===entry.kind);
+    return {entries,...projection};
   }
 
   function stop() {
@@ -66,31 +67,28 @@
   }
 
   function scan(assets,id) {
-    const {entries,spriteQuad,spriteTransform}=assets;
-    const currentWorker=new Worker('ar-worker.js?v=2');
+    const {entries,recoverPose,smoothPose,standeeMatrix}=assets;
+    const currentWorker=new Worker('ar-worker.js?v=3');
     worker=currentWorker;
     let ready=false, waiting=false, deadline=0, lastSeen=-Infinity, pendingId, hits=0;
-    let activeId, displayed, drawQuad, lastVideoTime=-1;
+    let activeId, displayed, lastPose, lastVideoTime=-1;
     currentWorker.onerror=()=> {
       if(id===generation) fail('识别加载失败，请重试');
     };
     function render(hit) {
       const target=entries.find(entry=>entry.id===hit.id);
-      const width=figure.parentElement.clientWidth, height=figure.parentElement.clientHeight;
-      const scale=Math.max(width/sample.width,height/sample.height);
-      const screen=([x,y])=>[x*scale+(width-sample.width*scale)/2,y*scale+(height-sample.height*scale)/2];
-      const quad=spriteQuad(hit,target,sample.width,sample.height,target.art.width,target.art.height)
-        .map(p=>p && screen(p));
-      if(quad.some(p=>!p)) return;
-      if(activeId===hit.id && drawQuad && Math.hypot(...quad[2].map((v,i)=>v-drawQuad[2][i]))<65) {
-        drawQuad=quad.map((p,j)=>p.map((v,k)=>.28*drawQuad[j][k]+.72*v));
-      } else drawQuad=quad;
-      const [x,y]=target.targetAnchor.map((v,i)=>v+target.sprite.offset[i]);
-      const [a,b,c,d,e,f,g,h,i]=hit.h;
-      const z=g*x+h*y+i;
-      const pin={sprite:target.sprite.anchor,screen:screen([(a*x+b*y+c)/z,(d*x+e*y+f)/z])};
-      const transform=spriteTransform(drawQuad,target.art.width,target.art.height,pin);
-      if(!transform) return;
+      const {clientWidth:width,clientHeight:height}=figure.parentElement;
+      const cover=Math.max(width/video.videoWidth,height/video.videoHeight);
+      const viewport={
+        xScale:cover*video.videoWidth/sample.width,yScale:cover*video.videoHeight/sample.height,
+        left:(width-video.videoWidth*cover)/2,top:(height-video.videoHeight*cover)/2
+      };
+      const pose=recoverPose(hit,target,sample.width,sample.height);
+      if(!pose) return;
+      const basis=smoothPose(pose,activeId===hit.kind ? lastPose : null);
+      const matrix=standeeMatrix(basis,target.canonical,viewport);
+      if(!matrix || !matrix.every(Number.isFinite)) return;
+      lastPose=basis;
       if(displayed!==hit.kind){
         figure.src=target.art.src;
         figure.style.width=target.art.width+'px';
@@ -98,9 +96,9 @@
         figure.style.opacity=target.sprite.opacity;
         displayed=hit.kind;
       }
-      figure.style.transform=transform;
+      figure.style.transform='matrix3d('+matrix.join(',')+')';
       figure.hidden=false;
-      activeId=hit.id;
+      activeId=hit.kind;
       lastSeen=performance.now();
     }
     currentWorker.onmessage=({data})=>{
@@ -110,13 +108,13 @@
       if(!data.hit){pendingId=undefined;hits=0;return;}
       if(pendingId===data.hit.kind) hits++;
       else {pendingId=data.hit.kind;hits=1;}
-      if(data.hit.id===activeId || hits>=2) render(data.hit);
+      if(data.hit.kind===activeId || hits>=2) render(data.hit);
     };
     currentWorker.postMessage({targets:entries.map(({id,kind,mask,frame})=>({id,kind,mask,frame}))});
     const readyBy=performance.now()+8000;
     timer=setInterval(()=>{
       const now=performance.now();
-      if(now-lastSeen>lostAfter){figure.hidden=true;activeId=undefined;drawQuad=null;}
+      if(now-lastSeen>lostAfter){figure.hidden=true;activeId=undefined;lastPose=null;}
       if((!ready && now>readyBy) || (waiting && now>deadline)){
         fail('识别超时，请重试');
         return;
@@ -128,7 +126,7 @@
       const width=Math.round(video.videoWidth*ratio),height=Math.round(video.videoHeight*ratio);
       if(sample.width!==width || sample.height!==height){
         sample.width=width;sample.height=height;
-        figure.hidden=true;drawQuad=null;activeId=undefined;
+        figure.hidden=true;lastPose=null;activeId=undefined;
       }
       pen.drawImage(video,0,0,width,height);
       const frame=pen.getImageData(0,0,width,height);
